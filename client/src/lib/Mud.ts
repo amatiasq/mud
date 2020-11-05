@@ -1,14 +1,14 @@
 import { emitter } from '@amatiasq/emitter';
 
+import { initializePlugins, PluginMap } from '../plugins/index';
 import { login } from './login';
 import { PluginContext } from './PluginContext';
-import { initializePlugins, PluginMap } from '../plugins/index';
-import { RemoteTelnet } from './remote/RemoteTelnet';
+import { RemoteTelnet } from './RemoteTelnet';
 import { TriggerCollection } from './triggers/TriggerCollection';
 import { Context } from './workflow/Context';
+import { InvokeOptions } from './workflow/InvokeOptions';
 import { Workflow } from './workflow/Workflow';
 import { WorkflowNotFoundError } from './workflow/WorkflowNotFoundError';
-import { InvokeOptions } from './workflow/InvokeOptions';
 
 export class Mud {
   private readonly triggers = new TriggerCollection();

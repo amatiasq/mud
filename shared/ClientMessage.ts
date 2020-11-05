@@ -1,4 +1,7 @@
-import { Message } from '@amatiasq/socket';
+export interface Message<Type extends string | number, Data = void> {
+  type: Type;
+  data: Data;
+}
 
 export type ClientMessage =
   | Message<'ERROR', string>

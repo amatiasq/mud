@@ -1,7 +1,7 @@
 import { emitter } from '@amatiasq/emitter';
 
 import { Mud } from './lib/Mud';
-import { RemoteTelnet } from './lib/remote/RemoteTelnet';
+import { RemoteTelnet } from './lib/RemoteTelnet';
 import { registerWorkflows } from './registerWorkflows';
 import { socket } from './socket';
 import { renderUserInterface } from './ui';

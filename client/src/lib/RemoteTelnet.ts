@@ -1,8 +1,8 @@
 import { emitter } from '@amatiasq/emitter';
 import { ClientSocket } from '@amatiasq/socket';
 
-import { ServerMessage } from '../../../../server/src/ServerMessage';
-import { ClientMessage } from './ClientMessage';
+import { ClientMessage } from '../../../shared/ClientMessage';
+import { ServerMessage } from '../../../shared/ServerMessage';
 
 export class RemoteTelnet {
   private _isConnected = false;

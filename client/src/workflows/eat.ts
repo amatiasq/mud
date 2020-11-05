@@ -43,6 +43,7 @@ export async function eat({
   }
 
   async function getFood() {
+    debugger;
     if (inventory.hasItem('una bolsa')) {
       write('coger todo bolsa');
       write('examinar bolsa');

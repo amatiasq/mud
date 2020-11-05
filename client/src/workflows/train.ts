@@ -78,7 +78,6 @@ export async function train({
 
   async function fight(prey: string) {
     const isTargetDead = await invokeWorkflow('fight', [prey]);
-    console.log('FIGHT RESULT', isTargetDead);
     return !isTargetDead;
   }
 }

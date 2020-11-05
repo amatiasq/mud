@@ -38,8 +38,15 @@ class Stat {
   }
 }
 
-export async function promptPlugin({ watch, waitFor, write }: PluginContext) {
+export async function promptPlugin({
+  watch,
+  waitFor,
+  write,
+  printLogs,
+}: PluginContext) {
   let isInvisible = false;
+
+  printLogs();
 
   const stats = {
     hp: new Stat(),

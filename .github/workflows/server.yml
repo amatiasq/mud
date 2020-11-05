@@ -10,21 +10,29 @@ jobs:
     name: SSH to server, pull & restart
     runs-on: ubuntu-latest
     steps:
-      - name: Executing remote ssh commands using password
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Docker build
+        uses: docker/build-push-action@v2
+        with:
+            push: true
+            context: .
+            file: server/Dockerfile
+            tags: amatiasq/mud-proxy
+
+      - name: Pull image from server
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST }}
+          port: ${{ secrets.PORT }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.KEY }}
-          port: ${{ secrets.PORT }}
           script: |
-            cd mongus/server
-
-            git fetch --all
-            git reset --hard origin/main
-
-            export NVM_DIR=~/.nvm
-            source ~/.nvm/nvm.sh
-            npm i
-
-            pm2 reload ts-socket
+            docker pull amatiasq/mud-proxy
+            docker stop mud-proxy
+            docker rm mud-proxy
+            docker run --name mud-proxy amatiasq/mud-proxy

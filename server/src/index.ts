@@ -3,9 +3,9 @@ import Telnet from 'telnet-client';
 
 import { MessageData, WebSocketServer } from '@amatiasq/socket';
 
-import { ClientMessage } from '../../client/src/lib/remote/ClientMessage';
-import { DEFAULT_PORT } from '../../config.json';
-import { ServerMessage } from './ServerMessage';
+import { ClientMessage } from '../../shared/ClientMessage';
+import { DEFAULT_PORT } from '../../shared/config.json';
+import { ServerMessage } from '../../shared/ServerMessage';
 
 const port = process.env.PORT || DEFAULT_PORT;
 const server = createServer();
