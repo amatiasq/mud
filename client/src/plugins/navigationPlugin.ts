@@ -4,14 +4,20 @@ import { PluginContext } from '../lib/PluginContext';
 
 export function navigationPlugin({ watch, waitFor, write }: PluginContext) {
   let isNavigating = false;
+  let landingAtRecall = false;
+  let isAtRecall = false;
   let directions: string[] = [];
 
   const roomChanged = emitter<string[]>();
+
+  watch('Plaza de Darkhaven', () => (landingAtRecall = true));
 
   watch(/\nSalidas: ([^\.]+)/, ({ captured }) => {
     directions = captured[1].split(' ');
     roomChanged(directions);
     isNavigating = false;
+    isAtRecall = landingAtRecall;
+    landingAtRecall = false;
   });
 
   return {
@@ -25,14 +31,26 @@ export function navigationPlugin({ watch, waitFor, write }: PluginContext) {
     get isNavigating() {
       return isNavigating;
     },
+
+    get isAtRecall() {
+      return isAtRecall;
+    },
   };
 
   function recall() {
+    if (isAtRecall) {
+      return Promise.resolve();
+    }
+
     write('recall');
     return waitFor('Plaza de Darkhaven').wait(1);
   }
 
   function waitForRecall() {
+    if (isAtRecall) {
+      return Promise.resolve();
+    }
+
     return waitFor('Plaza de Darkhaven');
   }
 

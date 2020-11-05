@@ -8,6 +8,7 @@ import { TriggerCollection } from './triggers/TriggerCollection';
 import { Context } from './workflow/Context';
 import { Workflow } from './workflow/Workflow';
 import { WorkflowNotFoundError } from './workflow/WorkflowNotFoundError';
+import { InvokeOptions } from './workflow/InvokeOptions';
 
 export class Mud {
   private readonly triggers = new TriggerCollection();
@@ -30,6 +31,7 @@ export class Mud {
   async login(user: string, pass: string) {
     const context = new PluginContext('login', 'N/A', this.triggers, this.send);
     await login(context, user, pass);
+    context.dispose();
     this.username = user;
 
     this.plugins = await initializePlugins(
@@ -48,6 +50,19 @@ export class Mud {
     return this.plugins[name];
   }
 
+  runWorkflow<Args extends any[]>(
+    run: (context: Context, ...args: Args) => Promise<any> | void,
+    params?: Args,
+    options?: InvokeOptions,
+  ) {
+    const workflow = new Workflow(run);
+    return this.executeWorkflow(
+      workflow as Workflow<any, any>,
+      params,
+      options,
+    );
+  }
+
   registerWorkflow<Args extends any[]>(
     run: (context: Context, ...args: Args) => Promise<any> | void,
   ) {
@@ -56,13 +71,25 @@ export class Mud {
     return workflow;
   }
 
-  invokeWorkflow(name: string, params: any[] = []) {
+  invokeWorkflow(name: string, params?: any[], options?: InvokeOptions) {
     if (!(name in this.workflows)) {
       throw new WorkflowNotFoundError(`Workflow ${name} is not registered.`);
     }
 
     const workflow = this.workflows[name];
+    return this.executeWorkflow(workflow, params, options);
+  }
+
+  private executeWorkflow(
+    workflow: Workflow,
+    params: any[] = [],
+    { logs }: InvokeOptions = {},
+  ) {
     const context = this.createWorkflowContext(name);
+
+    if (logs) {
+      context.printLogs();
+    }
 
     const promise = workflow.execute(context, ...params).then(result => {
       context.dispose();

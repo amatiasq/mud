@@ -1,3 +1,5 @@
+import { Mud } from './../Mud';
+import { ExecutionAbortedError } from './../ExecutionAbortedError';
 import bindAll from 'lodash.bindall';
 
 import { PluginContext } from '../PluginContext';
@@ -5,9 +7,9 @@ import { PluginMap } from '../../plugins/index';
 import { TriggerCollection } from '../triggers/TriggerCollection';
 import { MissingPluginError } from './MissingPluginError';
 
-type WorkflowRunner = <T>(name: string, params: any[]) => Promise<T>;
-
 export class Context extends PluginContext {
+  private finish: ((reason: any) => void) | null = null;
+
   readonly plugins: PluginMap;
 
   constructor(
@@ -16,18 +18,30 @@ export class Context extends PluginContext {
     triggers: TriggerCollection,
     plugins: PluginMap,
     send: (command: string) => void,
-    private readonly runWorkflow: WorkflowRunner,
+    private readonly runWorkflow: Mud['invokeWorkflow'],
   ) {
     super(`W(${name})`, username, triggers, send);
     this.plugins = createPluginsGetter(plugins, this.log.bind(this));
 
-    bindAll(this, ['invokeWorkflow']);
+    bindAll(this, ['invokeWorkflow', 'runForever']);
   }
 
   invokeWorkflow<T>(name: string, params: any[] = []) {
     this.checkNotAborted();
     this.log(`Invoke workflow ${name} with`, ...params);
-    return this.runWorkflow<T>(name, params);
+    return this.runWorkflow(name, params, { logs: this.isPrintingLogs });
+  }
+
+  runForever() {
+    return new Promise(resolve => (this.finish = resolve));
+  }
+
+  abort() {
+    super.abort();
+
+    if (this.finish) {
+      this.finish(new ExecutionAbortedError());
+    }
   }
 }
 

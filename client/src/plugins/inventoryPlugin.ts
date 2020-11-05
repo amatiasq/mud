@@ -1,13 +1,13 @@
 import { PluginContext } from '../lib/PluginContext';
 
 export function inventoryPlugin({ watch, write, waitFor }: PluginContext) {
-  let isInitialized = true;
+  let isInitialized = false;
   let items: string[] = [];
 
   watch(
     /Estas llevando:(\n.*)+?\n\n/,
     ({ captured }) => {
-      const [_, ...inventory] = captured[1]
+      const [_, ...inventory] = captured[0]
         .split('\n')
         .map(x => x.trim())
         .filter(Boolean);
@@ -18,7 +18,7 @@ export function inventoryPlugin({ watch, write, waitFor }: PluginContext) {
     { captureLength: 1000 },
   );
 
-  return { request, hasItem };
+  return { refresh: request, hasItem };
 
   async function request() {
     write('inventario');

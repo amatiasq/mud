@@ -4,7 +4,11 @@ export async function fight(
   { watch, write, waitFor, plugins: { prompt, navigation } }: Context,
   target: string,
 ) {
-  let isTargetDead = true;
+  let isTargetDead = false;
+
+  watch('Estas demasiado exhausto para huir del combate!', () =>
+    navigation.recall(),
+  );
 
   watch(
     [
@@ -16,11 +20,14 @@ export async function fight(
 
   write(`kill ${target}`);
 
-  await Promise.race([
+  await Promise.any([
     waitFor(`${target} ha MUERTO!!`).then(() => (isTargetDead = true)),
     waitFor('Huyes como un cobarde del combate.'),
+    waitFor('No esta aqui.').timeout(0.5),
     navigation.waitForRecall(),
   ]);
+
+  return isTargetDead;
 
   async function update() {
     if (prompt.isInDanger) {

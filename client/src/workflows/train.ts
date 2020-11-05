@@ -1,30 +1,36 @@
 import { Context } from './../lib/workflow/Context';
 
 export async function train({
+  abort,
   watch,
   invokeWorkflow,
   plugins: { navigation: nav },
 }: Context) {
   const enemies: string[] = [];
-  let isFighting = false;
   let direction = 'sur';
 
   await nav.recall();
   await nav.go('abajo');
 
-  const hunt = (prey: string) => () => enemies.push(prey);
+  const enemySpotted = (prey: string) => () => enemies.push(prey);
+  const enemyGone = (prey: string) => () => {
+    const index = enemies.indexOf(prey);
+    if (index > -1) {
+      enemies.splice(index, 1);
+    }
+  };
 
   watch(
     [
       'Un pequenyo caracol esta aqui haciendo trompos.',
       'El pequenyo caracol llega desde el',
     ],
-    hunt('pequenyo caracol'),
+    enemySpotted('pequenyo caracol'),
   );
 
   watch(
     ['Un buitre carronyero esta aqui.', 'El buitre carronyero llega desde el'],
-    hunt('buitre carronyero'),
+    enemySpotted('buitre carronyero'),
   );
 
   watch(
@@ -32,7 +38,7 @@ export async function train({
       'Un lobo hambriento te esta mirando.',
       'El lobo hambriento llega desde el',
     ],
-    hunt('lobo hambriento'),
+    enemySpotted('lobo hambriento'),
   );
 
   watch(
@@ -40,14 +46,22 @@ export async function train({
       'Una serpiente que parece venenosa te mira fijamente.',
       'La serpiente llega desde el',
     ],
-    hunt('serpiente'),
+    enemySpotted('serpiente'),
   );
+
+  watch('El pequenyo caracol se va hacia el', enemyGone('pequenyo caracol'));
+  watch('El buitre carronyero se va hacia el', enemyGone('buitre carronyero'));
+  watch('El lobo hambriento se va hacia el', enemyGone('lobo hambriento'));
+  watch('La serpiente se va hacia el', enemyGone('serpiente'));
 
   return nextRoom();
 
   async function nextRoom(): Promise<any> {
     while (enemies.length) {
-      await fight(enemies.pop()!);
+      if (await fight(enemies.pop()!)) {
+        console.log('Had to run. Train over.');
+        return;
+      }
     }
 
     if (nav.canGo(direction)) {
@@ -56,17 +70,15 @@ export async function train({
       await nav.go('este');
       direction = direction === 'sur' ? 'norte' : 'sur';
     } else {
-      return;
+      return nav.execute('oooonnnnna');
     }
 
     return nextRoom();
   }
 
   async function fight(prey: string) {
-    console.log('FIGHT STARTS');
-    isFighting = true;
-    await invokeWorkflow('fight', [prey]);
-    isFighting = false;
-    console.log('FIGHT ENDS');
+    const isTargetDead = await invokeWorkflow('fight', [prey]);
+    console.log('FIGHT RESULT', isTargetDead);
+    return !isTargetDead;
   }
 }

@@ -10,7 +10,7 @@ import { wait } from './util/wait';
 
 export class PluginContext {
   protected readonly subscriptions: PatternMatchSubscription[] = [];
-  private _printLogs = false;
+  protected isPrintingLogs = false;
   private isAborted = false;
 
   constructor(
@@ -19,7 +19,15 @@ export class PluginContext {
     protected readonly triggers: TriggerCollection,
     protected readonly send: (command: string) => void,
   ) {
-    bindAll(this, ['write', 'watch', 'waitFor', 'sleep', 'printLogs', 'log']);
+    bindAll(this, [
+      'write',
+      'watch',
+      'waitFor',
+      'sleep',
+      'abort',
+      'printLogs',
+      'log',
+    ]);
   }
 
   write(command: string) {
@@ -31,16 +39,12 @@ export class PluginContext {
   watch(
     pattern: Pattern,
     handler: (result: PatternResult) => void,
-    options?: PatternOptions & { keepAlive?: true },
+    options?: PatternOptions,
   ) {
     this.checkNotAborted();
     this.log('[WATCH]', pattern);
     const subscription = this.triggers.add(pattern, handler, options);
-
-    if (options && options.keepAlive != true) {
-      this.subscriptions.push(subscription);
-    }
-
+    this.subscriptions.push(subscription);
     return subscription;
   }
 
@@ -65,12 +69,12 @@ export class PluginContext {
   }
 
   printLogs() {
-    this._printLogs = true;
+    this.isPrintingLogs = true;
   }
 
   log(...args: Parameters<Console['log']>) {
     this.checkNotAborted();
-    if (this._printLogs) {
+    if (this.isPrintingLogs) {
       console.log(`[${this.name}]`, ...args);
     }
   }

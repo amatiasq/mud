@@ -3,6 +3,7 @@ import { Context } from './../lib/workflow/Context';
 export async function drink({
   watch,
   write,
+  runForever,
   plugins: { inventory, navigation },
 }: Context) {
   let isFontAvailable = false;
@@ -27,7 +28,6 @@ export async function drink({
         }
       }
     },
-    { keepAlive: true },
   );
 
   watch(
@@ -36,6 +36,7 @@ export async function drink({
       'Tienes sed.',
       'Estas realmente sediento.',
       'Estas MUERTO de SED!',
+      'Estas en peligro de deshidratacion.',
     ],
     async () => {
       if (isFontAvailable) {
@@ -50,8 +51,9 @@ export async function drink({
         }
       }
     },
-    { keepAlive: true },
   );
+
+  await runForever();
 
   async function getWaterBottle() {
     if (await inventory.hasItem('un odre de cuero')) {

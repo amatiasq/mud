@@ -1,3 +1,4 @@
+import { ClientStorage } from '@amatiasq/client-storage';
 import './Terminal.css';
 
 import Convert from 'ansi-to-html';
@@ -8,14 +9,15 @@ import { render } from '../render';
 import html from './Terminal.html';
 
 const convert = new Convert();
+const history = new ClientStorage<string[]>('mud:command-history');
 
 export class Terminal {
   private readonly dom = render(html);
   private readonly $log = this.dom.$('.log');
   private readonly $input = this.dom.$<HTMLInputElement>('input');
   private readonly log: string[] = [];
-  private readonly history: string[] = [];
-  private historyPosition = 0;
+  private readonly history: string[] = history.get() || [];
+  private histPos = 0;
 
   private readonly emitSubmit = emitter<string>();
   readonly onSubmit = this.emitSubmit.subscribe;
@@ -30,7 +32,9 @@ export class Terminal {
 
   render(parent: HTMLElement) {
     this.dom.$('.terminal').addEventListener('click', () => {
-      this.$input.focus();
+      if (!userHasSelectedText()) {
+        this.$input.focus();
+      }
     });
 
     // TODO: watch keypress and/or keyup?
@@ -55,7 +59,10 @@ export class Terminal {
 
     this.log.push(last);
     this.$log.innerHTML = asciiToHtml(last);
-    $parent.scrollTop = $parent.scrollHeight;
+
+    if (!userHasSelectedText()) {
+      $parent.scrollTop = $parent.scrollHeight;
+    }
   }
 
   private onKey(event: KeyboardEvent) {
@@ -78,15 +85,23 @@ export class Terminal {
     const { value } = this.$input;
     this.$input.value = '';
 
+    this.history.shift();
     this.history.unshift(value);
-    this.historyPosition = 0;
+    this.history.unshift('');
+    history.set(this.history);
+    this.histPos = 0;
 
     this.emitSubmit(value);
   }
 
   private loadHistory(modifier: 1 | -1) {
-    this.historyPosition += modifier;
-    this.$input.value = this.history[this.historyPosition];
+    if (!this.history.length) {
+      return;
+    }
+
+    this.history[this.histPos] = this.$input.value;
+    this.histPos = clamp(this.histPos + modifier, 0, this.history.length - 1);
+    this.$input.value = this.history[this.histPos];
   }
 }
 
@@ -108,4 +123,13 @@ function escapeHtml(unsafe: string) {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;')
     .replace(/  +/g, x => '&nbsp;'.repeat(x.length));
+}
+
+function userHasSelectedText() {
+  const selection = getSelection();
+  return selection && selection.type === 'Range';
+}
+
+function clamp(value: number, min: number, max: number) {
+  return value < min ? min : value > max ? max : value;
 }
