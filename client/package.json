@@ -33,7 +33,6 @@
     "@amatiasq/emitter": "^4.1.1",
     "@amatiasq/socket": "^0.2.4",
     "@types/lodash.bindall": "^4.4.6",
-    "ansi-to-html": "^0.6.14",
-    "lodash.bindall": "^4.4.0"
+    "ansi-to-html": "^0.6.14"
   }
 }

@@ -13,15 +13,15 @@ interface Message {
 
 type History = ClientStorage<Record<string, Message[]>>;
 
-export function chatPlugin({ watch }: PluginContext) {
+export function chatPlugin({ when }: PluginContext) {
   // const say = new ClientStorage<Record<string, Message[]>>('chat:say');
   const tell = new ClientStorage<Record<string, Message[]>>('chat:tell');
   const whisper = new ClientStorage<Record<string, Message[]>>('chat:whisper');
 
-  watch(/(?<name>.+) te susurra '(?<message>[^']+)'/, receive(whisper));
-  watch(/Susurras a (?<name>.+) '(?<message>[^']+)'/, sent(whisper));
+  when(/(?<name>.+) te susurra '(?<message>[^']+)'/, receive(whisper));
+  when(/Susurras a (?<name>.+) '(?<message>[^']+)'/, sent(whisper));
 
-  watch(
+  when(
     [
       /(?<name>.+) te cuenta '(?<message>[^']+)'/,
       /(?<name>.+) te responde '(?<message>[^']+)'/,
@@ -29,7 +29,7 @@ export function chatPlugin({ watch }: PluginContext) {
     receive(tell),
   );
 
-  watch(
+  when(
     [
       /Cuentas a (?<name>.+) '(?<message>[^']+)'/,
       /Respondes a (?<name>.+) '(?<message>[^']+)'/,

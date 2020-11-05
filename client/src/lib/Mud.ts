@@ -1,7 +1,7 @@
 import { emitter } from '@amatiasq/emitter';
 
 import { initializePlugins, PluginMap } from '../plugins/index';
-import { login } from './login';
+import { login } from '../plugins/login';
 import { PluginContext } from './PluginContext';
 import { RemoteTelnet } from './RemoteTelnet';
 import { TriggerCollection } from './triggers/TriggerCollection';
@@ -30,14 +30,15 @@ export class Mud {
 
   async login(user: string, pass: string) {
     const context = new PluginContext('login', 'N/A', this.triggers, this.send);
-    await login(context, user, pass);
+
+    await login(context, user, pass, async () => {
+      this.plugins = await initializePlugins(
+        name => new PluginContext(name, user, this.triggers, this.send),
+      );
+    });
+
     context.dispose();
     this.username = user;
-
-    this.plugins = await initializePlugins(
-      name => new PluginContext(name, user, this.triggers, this.send),
-    );
-
     this.emitLoggedIn(user);
   }
 
@@ -85,10 +86,10 @@ export class Mud {
     params: any[] = [],
     { logs }: InvokeOptions = {},
   ) {
-    const context = this.createWorkflowContext(name);
+    const context = this.createWorkflowContext(workflow.name);
 
     if (logs) {
-      context.printLogs();
+      context.printLogs;
     }
 
     const promise = workflow.execute(context, ...params).then(result => {

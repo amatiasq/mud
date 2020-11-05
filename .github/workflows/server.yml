@@ -27,10 +27,10 @@ jobs:
       - name: Pull image from server
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.HOST }}
-          port: ${{ secrets.PORT }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.KEY }}
+          host: ${{ secrets.SSH_HOST }}
+          port: ${{ secrets.SSH_PORT }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
           script: |
             docker pull amatiasq/mud-proxy
             docker stop mud-proxy

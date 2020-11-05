@@ -1,11 +1,15 @@
 import { PluginContext } from '../lib/PluginContext';
 
-export function inventoryPlugin({ watch, write, waitFor }: PluginContext) {
+export function inventoryPlugin({ when, write }: PluginContext) {
+  const INVENTORY_DETECTOR = /Estas llevando:(\n.*)+?\n\n/;
+
   let isInitialized = false;
   let items: string[] = [];
 
-  watch(
-    /Estas llevando:(\n.*)+?\n\n/,
+  when('No tienes ese objeto.', refresh);
+
+  when(
+    INVENTORY_DETECTOR,
     ({ captured }) => {
       const [_, ...inventory] = captured[0]
         .split('\n')
@@ -13,21 +17,22 @@ export function inventoryPlugin({ watch, write, waitFor }: PluginContext) {
         .filter(Boolean);
 
       isInitialized = true;
+      console.log(inventory);
       items = inventory;
     },
     { captureLength: 1000 },
   );
 
-  return { refresh: request, hasItem };
+  return { refresh, hasItem };
 
-  async function request() {
+  async function refresh() {
     write('inventario');
-    await waitFor('Estas llevando');
+    await when(INVENTORY_DETECTOR);
   }
 
   async function hasItem(item: string) {
     if (!isInitialized) {
-      await request();
+      await refresh();
     }
 
     return items.some(x => x === item);

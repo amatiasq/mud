@@ -1,10 +1,9 @@
-import { Mud } from './../Mud';
-import { ExecutionAbortedError } from './../ExecutionAbortedError';
-import bindAll from 'lodash.bindall';
-
-import { PluginContext } from '../PluginContext';
 import { PluginMap } from '../../plugins/index';
+import { ExecutionAbortedError } from '../ExecutionAbortedError';
+import { Mud } from '../Mud';
+import { PluginContext } from '../PluginContext';
 import { TriggerCollection } from '../triggers/TriggerCollection';
+import { bindAll } from '../util/bindAll';
 import { MissingPluginError } from './MissingPluginError';
 
 export class Context extends PluginContext {
@@ -23,7 +22,7 @@ export class Context extends PluginContext {
     super(`W(${name})`, username, triggers, send);
     this.plugins = createPluginsGetter(plugins, this.log.bind(this));
 
-    bindAll(this, ['invokeWorkflow', 'runForever']);
+    bindAll(this, Context);
   }
 
   invokeWorkflow<T>(name: string, params: any[] = []) {

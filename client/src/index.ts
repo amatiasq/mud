@@ -21,7 +21,10 @@ telnet.onData(data => terminal.write(data));
 
 socket.onConnected(() => {
   telnet.connect({ host, port: parseInt(port) });
-  terminal.onSubmit(value => telnet.send(value));
+  terminal.onSubmit(value => {
+    terminal.write(`${value}\n`);
+    telnet.send(value);
+  });
 
   window.onbeforeunload = () => {
     if (telnet.isConnected) {

@@ -16,7 +16,7 @@ const PROMPT = [
 
 const FPROMPT = PROMPT.replace('&W>', ' &R%E&W>');
 
-const PROMPT_DETECTOR = new RegExp(
+export const PROMPT_DETECTOR = new RegExp(
   [
     '<',
     '(?<hpCurr>\\d+)/(?<hpTotal>\\d+)hp ',
@@ -38,15 +38,8 @@ class Stat {
   }
 }
 
-export async function promptPlugin({
-  watch,
-  waitFor,
-  write,
-  printLogs,
-}: PluginContext) {
+export async function promptPlugin({ when, write }: PluginContext) {
   let isInvisible = false;
-
-  printLogs();
 
   const stats = {
     hp: new Stat(),
@@ -59,21 +52,24 @@ export async function promptPlugin({
 
   const update = emitter<typeof stats>();
 
-  await waitFor(PROMPT_DETECTOR).timeout(1).catch(setPrompt);
-
-  watch(PROMPT_DETECTOR, ({ groups: g }) => {
-    stats.hp.current = toInt(g.hpCurr);
-    stats.hp.total = toInt(g.hpTotal);
-    stats.mana.current = toInt(g.mCurr);
-    stats.mana.total = toInt(g.mTotal);
-    stats.mv.current = toInt(g.mvCurr);
-    stats.mv.total = toInt(g.mvTotal);
-    stats.exp = toInt(g.exp);
-    stats.gold = toInt(g.gold);
-    stats.enemy = g.enemy ? toInt(g.enemy) : null;
-    isInvisible = Boolean(g.invis);
-    update(stats);
-  });
+  when(PROMPT_DETECTOR)
+    .timeout(1)
+    .catch(setPrompt)
+    .finally(() => {
+      when(PROMPT_DETECTOR, ({ groups: g }) => {
+        stats.hp.current = toInt(g.hpCurr);
+        stats.hp.total = toInt(g.hpTotal);
+        stats.mana.current = toInt(g.mCurr);
+        stats.mana.total = toInt(g.mTotal);
+        stats.mv.current = toInt(g.mvCurr);
+        stats.mv.total = toInt(g.mvTotal);
+        stats.exp = toInt(g.exp);
+        stats.gold = toInt(g.gold);
+        stats.enemy = g.enemy ? toInt(g.enemy) : null;
+        isInvisible = Boolean(g.invis);
+        update(stats);
+      });
+    });
 
   return {
     waitForPrompt,
@@ -107,7 +103,7 @@ export async function promptPlugin({
   }
 
   function waitForPrompt() {
-    return waitFor(PROMPT_DETECTOR);
+    return when(PROMPT_DETECTOR);
   }
 
   function getPercent(stat: 'hp' | 'mana' | 'mv') {

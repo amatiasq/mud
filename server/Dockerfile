@@ -12,4 +12,6 @@ RUN npm ci
 COPY server .
 COPY shared ../shared
 
+EXPOSE 53472
+
 ENTRYPOINT [ "npm", "run", "prod" ]

@@ -1,7 +1,7 @@
 import { Context } from './../lib/workflow/Context';
 
 export async function drink({
-  watch,
+  when,
   write,
   runForever,
   plugins: { inventory, navigation },
@@ -11,7 +11,7 @@ export async function drink({
 
   navigation.onRoomChange(() => (isFontAvailable = false));
 
-  watch(
+  when(
     [
       'Un manantial magico esta aqui.',
       'Una hermosa fuente de marmol blanco esta aqui.',
@@ -22,6 +22,8 @@ export async function drink({
       if (!isBottleFull) {
         const bottle = await getWaterBottle();
 
+        console.log({ bottle });
+
         if (bottle) {
           write(`llenar ${bottle}`);
           isBottleFull = true;
@@ -30,7 +32,7 @@ export async function drink({
     },
   );
 
-  watch(
+  when(
     [
       'Te apetece dar un sorbo a algo refrescante.',
       'Tienes sed.',

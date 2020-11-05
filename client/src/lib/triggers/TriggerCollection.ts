@@ -5,42 +5,98 @@ import { PatternOptions } from './PatternOptions';
 import { PatternPromise } from './PatternPromise';
 import { PatternResult } from './PatternResult';
 
+type Handler = (result: PatternResult) => void;
+
 export class TriggerCollection {
   private readonly patterns = new Set<PatternMatcher>();
+  private readonly queue: string[] = [];
+  private isProcessing = false;
 
+  add(pattern: Pattern, options?: PatternOptions): PatternPromise;
   add(
     pattern: Pattern,
     handler: (result: PatternResult) => void,
     options?: PatternOptions,
-  ): PatternMatchSubscription {
-    const entry = new PatternMatcher(pattern, handler, options);
-    this.patterns.add(entry);
+  ): PatternMatchSubscription;
+  add(
+    pattern: Pattern,
+    handler?: Handler | PatternOptions,
+    options?: PatternOptions,
+  ): any {
+    if (arguments.length === 1) return this.once(pattern);
 
-    return {
-      unsubscribe: () => this.patterns.delete(entry),
-    };
+    if (arguments.length === 3)
+      return this.watch(pattern, handler as Handler, options);
+
+    if (typeof handler === 'function')
+      return this.watch(pattern, handler as Handler);
+
+    return this.once(pattern, handler as PatternOptions);
   }
 
-  once(pattern: Pattern, options?: PatternOptions) {
-    return new PatternPromise<PatternResult>(resolve => {
-      const subscription = this.add(pattern, onTrigger, options);
+  private watch(pattern: Pattern, handler: Handler, options?: PatternOptions) {
+    const entry = new PatternMatcher(pattern, x => handler(x), options);
 
-      function onTrigger(result: PatternResult) {
-        subscription.unsubscribe();
+    this.patterns.add(entry);
+
+    const unsubscribe = () => this.patterns.delete(entry);
+
+    const once = () =>
+      new PatternPromise(resolve => {
+        const original = handler;
+
+        handler = async x => {
+          unsubscribe();
+
+          if (original) {
+            if (options && options.await) {
+              await original(x);
+            } else {
+              original(x);
+            }
+          }
+
+          resolve(x);
+        };
+      });
+
+    return { unsubscribe, once } as PatternMatchSubscription;
+  }
+
+  private once(pattern: Pattern, options?: PatternOptions) {
+    return new PatternPromise(resolve => {
+      const sub = this.add(pattern, handler, options);
+
+      function handler(result: PatternResult) {
+        sub.unsubscribe();
         resolve(result);
       }
     });
   }
 
-  process(text: string) {
+  async process(text: string): Promise<void> {
+    if (this.isProcessing) {
+      this.queue.push(text);
+      return;
+    }
+
+    this.isProcessing = true;
+
     const splitted = text.split('\n');
     const last = splitted.pop() as string;
     const lines = [...splitted.map(x => `${x}\n`), last];
 
     for (const line of lines) {
+      console.log('PROCESS', line);
       for (const pattern of this.patterns) {
-        pattern.process(line);
+        await pattern.process(line);
       }
+    }
+
+    this.isProcessing = false;
+
+    if (this.queue.length) {
+      return this.process(this.queue.pop()!);
     }
   }
 }

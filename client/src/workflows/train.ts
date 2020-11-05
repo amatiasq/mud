@@ -1,18 +1,22 @@
 import { Context } from './../lib/workflow/Context';
 
 export async function train({
-  abort,
-  watch,
+  printLogs,
+  log,
+  when,
   invokeWorkflow,
   plugins: { navigation: nav },
 }: Context) {
   const enemies: string[] = [];
   let direction = 'sur';
 
-  await nav.recall();
-  await nav.go('abajo');
+  // await nav.recall();
+  // await nav.go('abajo');
 
-  const enemySpotted = (prey: string) => () => enemies.push(prey);
+  const enemySpotted = (prey: string) => () => {
+    log('SAW', prey);
+    enemies.push(prey);
+  };
   const enemyGone = (prey: string) => () => {
     const index = enemies.indexOf(prey);
     if (index > -1) {
@@ -20,7 +24,7 @@ export async function train({
     }
   };
 
-  watch(
+  when(
     [
       'Un pequenyo caracol esta aqui haciendo trompos.',
       'El pequenyo caracol llega desde el',
@@ -28,12 +32,12 @@ export async function train({
     enemySpotted('pequenyo caracol'),
   );
 
-  watch(
+  when(
     ['Un buitre carronyero esta aqui.', 'El buitre carronyero llega desde el'],
     enemySpotted('buitre carronyero'),
   );
 
-  watch(
+  when(
     [
       'Un lobo hambriento te esta mirando.',
       'El lobo hambriento llega desde el',
@@ -41,7 +45,7 @@ export async function train({
     enemySpotted('lobo hambriento'),
   );
 
-  watch(
+  when(
     [
       'Una serpiente que parece venenosa te mira fijamente.',
       'La serpiente llega desde el',
@@ -49,24 +53,28 @@ export async function train({
     enemySpotted('serpiente'),
   );
 
-  watch('El pequenyo caracol se va hacia el', enemyGone('pequenyo caracol'));
-  watch('El buitre carronyero se va hacia el', enemyGone('buitre carronyero'));
-  watch('El lobo hambriento se va hacia el', enemyGone('lobo hambriento'));
-  watch('La serpiente se va hacia el', enemyGone('serpiente'));
+  when('El pequenyo caracol se va hacia el', enemyGone('pequenyo caracol'));
+  when('El buitre carronyero se va hacia el', enemyGone('buitre carronyero'));
+  when('El lobo hambriento se va hacia el', enemyGone('lobo hambriento'));
+  when('La serpiente se va hacia el', enemyGone('serpiente'));
 
   return nextRoom();
 
   async function nextRoom(): Promise<any> {
     while (enemies.length) {
-      if (await fight(enemies.pop()!)) {
+      const result = await invokeWorkflow('fight', [enemies.pop()!]);
+
+      if (result === 'flee') {
         console.log('Had to run. Train over.');
         return;
       }
     }
 
     if (nav.canGo(direction)) {
+      console.log('GO', direction);
       await nav.go(direction);
     } else if (nav.canGo('este')) {
+      console.log('GO este');
       await nav.go('este');
       direction = direction === 'sur' ? 'norte' : 'sur';
     } else {
@@ -74,10 +82,5 @@ export async function train({
     }
 
     return nextRoom();
-  }
-
-  async function fight(prey: string) {
-    const isTargetDead = await invokeWorkflow('fight', [prey]);
-    return !isTargetDead;
   }
 }

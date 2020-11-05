@@ -1,11 +1,8 @@
-import { SingleEntryPlugin } from 'webpack';
 import { Context } from './../lib/workflow/Context';
 
 export async function eat({
-  sleep,
-  watch,
+  when,
   write,
-  waitFor,
   runForever,
   plugins: { inventory, navigation: nav },
 }: Context) {
@@ -13,9 +10,11 @@ export async function eat({
   const DEFAULT_FOOD_NAME = 'chuleta';
   let foodInInventory = 0;
 
-  watch(['Tienes hambre.', 'Estas realmente hambriento.'], eatSomething);
+  when(['Tienes hambre.', 'Estas realmente hambriento.'], eatSomething);
 
-  watch(['Estas terriblemente hambriento.', 'Estas HAMBRIENTO!'], async () => {
+  when(['Estas terriblemente hambriento.', 'Estas HAMBRIENTO!'], async () => {
+    console.log('hungry');
+
     if (await eatSomething()) {
       return;
     }
@@ -27,6 +26,8 @@ export async function eat({
   await runForever();
 
   async function eatSomething() {
+    console.log('eatSomething');
+
     const food = await getFood();
     if (!food) return false;
 
@@ -43,12 +44,11 @@ export async function eat({
   }
 
   async function getFood() {
-    debugger;
-    if (inventory.hasItem('una bolsa')) {
+    if (await inventory.hasItem('una bolsa')) {
       write('coger todo bolsa');
       write('examinar bolsa');
 
-      const { captured } = await waitFor(/Una bolsa contiene:\n\s+(Nada)?/);
+      const { captured } = await when(/Una bolsa contiene:\n\s+(Nada)?/);
       if (captured[1]) {
         write('tirar bolsa');
       }

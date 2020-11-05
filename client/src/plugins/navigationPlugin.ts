@@ -1,8 +1,10 @@
 import { emitter } from '@amatiasq/emitter';
 
 import { PluginContext } from '../lib/PluginContext';
+import { PatternPromise } from '../lib/triggers/PatternPromise';
+import { PROMPT_DETECTOR } from './promptPlugin';
 
-export function navigationPlugin({ watch, waitFor, write }: PluginContext) {
+export function navigationPlugin({ when, write }: PluginContext) {
   let isNavigating = false;
   let landingAtRecall = false;
   let isAtRecall = false;
@@ -10,14 +12,16 @@ export function navigationPlugin({ watch, waitFor, write }: PluginContext) {
 
   const roomChanged = emitter<string[]>();
 
-  watch('Plaza de Darkhaven', () => (landingAtRecall = true));
+  when('Plaza de Darkhaven', () => (landingAtRecall = true));
 
-  watch(/\nSalidas: ([^\.]+)/, ({ captured }) => {
+  when(/\nSalidas: ([^\.]+)/, async ({ captured }) => {
     directions = captured[1].split(' ');
-    roomChanged(directions);
     isNavigating = false;
     isAtRecall = landingAtRecall;
     landingAtRecall = false;
+
+    await when(PROMPT_DETECTOR);
+    roomChanged(directions);
   });
 
   return {
@@ -43,15 +47,15 @@ export function navigationPlugin({ watch, waitFor, write }: PluginContext) {
     }
 
     write('recall');
-    return waitFor('Plaza de Darkhaven').wait(1);
+    return when('Plaza de Darkhaven').wait(1);
   }
 
   function waitForRecall() {
     if (isAtRecall) {
-      return Promise.resolve();
+      return new PatternPromise(resolve => resolve());
     }
 
-    return waitFor('Plaza de Darkhaven');
+    return when('Plaza de Darkhaven');
   }
 
   function canGo(direction: string) {
@@ -78,12 +82,12 @@ export function navigationPlugin({ watch, waitFor, write }: PluginContext) {
 
     if (isClosed(direction)) {
       write(`abrir ${direction}`);
-      await waitFor('Abres la puerta.');
+      await when('Abres la puerta.');
     }
 
     write(direction);
     isNavigating = true;
-    await waitFor('\nSalidas: ');
+    await when('\nSalidas: ');
   }
 
   function get(direction: string) {

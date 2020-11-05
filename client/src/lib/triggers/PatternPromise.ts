@@ -1,15 +1,16 @@
 import { wait } from '../util/wait';
 import { PatternMatchSubscription } from './PatternMatchSubscription';
 import { PatternPromiseTimeoutError } from './PatternPromiseTimeoutError';
+import { PatternResult } from './PatternResult';
 
-export class PatternPromise<T>
-  extends Promise<T>
+export class PatternPromise
+  extends Promise<PatternResult>
   implements PatternMatchSubscription {
   private forceReject!: (reason?: any) => void;
 
   constructor(
     executor: (
-      resolve: (value?: T | PromiseLike<T>) => void,
+      resolve: (value?: PatternResult | PromiseLike<PatternResult>) => void,
       reject: (reason?: any) => void,
     ) => void,
   ) {
@@ -28,7 +29,7 @@ export class PatternPromise<T>
       this.forceReject(new PatternPromiseTimeoutError()),
     );
 
-    return this as Promise<T>;
+    return this as Promise<PatternResult>;
   }
 
   wait(seconds: number) {
@@ -37,5 +38,9 @@ export class PatternPromise<T>
 
   unsubscribe(): void {
     this.forceReject('aborted');
+  }
+
+  once() {
+    return this;
   }
 }

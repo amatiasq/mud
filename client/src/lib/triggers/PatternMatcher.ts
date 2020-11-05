@@ -11,7 +11,7 @@ export class PatternMatcher {
   constructor(
     pattern: Pattern,
     private readonly handler: (result: PatternResult) => void,
-    options: PatternOptions = {},
+    private readonly options: PatternOptions = {},
   ) {
     this.patterns = Array.isArray(pattern) ? pattern : [pattern];
     this.length =
@@ -33,7 +33,8 @@ export class PatternMatcher {
 
     this.buffer.clear();
     const result = new PatternResult(matching, value);
-    this.handler(result);
+    const output = this.handler(result);
+    return this.options.await ? output : null;
   }
 
   private testPattern(text: string, pattern: SinglePattern) {

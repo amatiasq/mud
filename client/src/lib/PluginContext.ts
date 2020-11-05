@@ -1,11 +1,11 @@
-import bindAll from 'lodash.bindall';
 import { ExecutionAbortedError } from './ExecutionAbortedError';
-
 import { Pattern } from './triggers/Pattern';
 import { PatternMatchSubscription } from './triggers/PatternMatchSubscription';
 import { PatternOptions } from './triggers/PatternOptions';
+import { PatternPromise } from './triggers/PatternPromise';
 import { PatternResult } from './triggers/PatternResult';
 import { TriggerCollection } from './triggers/TriggerCollection';
+import { bindAll } from './util/bindAll';
 import { wait } from './util/wait';
 
 export class PluginContext {
@@ -13,21 +13,18 @@ export class PluginContext {
   protected isPrintingLogs = false;
   private isAborted = false;
 
+  get printLogs() {
+    this.isPrintingLogs = true;
+    return null;
+  }
+
   constructor(
     readonly name: string,
     readonly username: string,
     protected readonly triggers: TriggerCollection,
     protected readonly send: (command: string) => void,
   ) {
-    bindAll(this, [
-      'write',
-      'watch',
-      'waitFor',
-      'sleep',
-      'abort',
-      'printLogs',
-      'log',
-    ]);
+    bindAll(this, PluginContext);
   }
 
   write(command: string) {
@@ -36,22 +33,25 @@ export class PluginContext {
     this.send(command);
   }
 
-  watch(
+  when(pattern: Pattern, options?: PatternOptions): PatternPromise;
+  when(
     pattern: Pattern,
     handler: (result: PatternResult) => void,
+    options?: PatternOptions,
+  ): PatternMatchSubscription;
+  when(
+    pattern: Pattern,
+    handler?: ((result: PatternResult) => void) | PatternOptions,
     options?: PatternOptions,
   ) {
     this.checkNotAborted();
     this.log('[WATCH]', pattern);
-    const subscription = this.triggers.add(pattern, handler, options);
-    this.subscriptions.push(subscription);
-    return subscription;
-  }
 
-  waitFor(pattern: Pattern, options?: PatternOptions) {
-    this.checkNotAborted();
-    this.log('[WAIT]', pattern);
-    return this.triggers.once(pattern, options);
+    if (typeof handler === 'function') {
+      return this.triggers.add(pattern, handler, options);
+    } else {
+      return this.triggers.add(pattern, handler);
+    }
   }
 
   sleep(seconds: number) {
@@ -65,15 +65,13 @@ export class PluginContext {
   }
 
   dispose() {
+    this.log('DISPOSE');
     this.subscriptions.forEach(x => x.unsubscribe());
-  }
-
-  printLogs() {
-    this.isPrintingLogs = true;
   }
 
   log(...args: Parameters<Console['log']>) {
     this.checkNotAborted();
+
     if (this.isPrintingLogs) {
       console.log(`[${this.name}]`, ...args);
     }
