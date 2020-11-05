@@ -17,7 +17,6 @@ export function inventoryPlugin({ when, write }: PluginContext) {
         .filter(Boolean);
 
       isInitialized = true;
-      console.log(inventory);
       items = inventory;
     },
     { captureLength: 1000 },

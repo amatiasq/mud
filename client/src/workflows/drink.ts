@@ -22,8 +22,6 @@ export async function drink({
       if (!isBottleFull) {
         const bottle = await getWaterBottle();
 
-        console.log({ bottle });
-
         if (bottle) {
           write(`llenar ${bottle}`);
           isBottleFull = true;

@@ -9,14 +9,10 @@ export async function train({
   const enemies: string[] = [];
   let direction = 'sur';
 
-  // await nav.recall();
-  // await nav.go('abajo');
+  await nav.recall();
+  await nav.go('abajo');
 
-  const enemySpotted = (prey: string) => () => {
-    log('SAW', prey);
-    enemies.push(prey);
-  };
-
+  const enemySpotted = (prey: string) => () => enemies.push(prey);
   const enemyGone = (prey: string) => () => {
     const index = enemies.indexOf(prey);
     if (index > -1) {
