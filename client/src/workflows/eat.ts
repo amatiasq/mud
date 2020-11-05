@@ -44,7 +44,7 @@ export async function eat({
   }
 
   async function getFood() {
-    if (await inventory.hasItem('una bolsa')) {
+    if (await inventory.has('una bolsa')) {
       write('coger todo bolsa');
       write('examinar bolsa');
 
@@ -54,11 +54,13 @@ export async function eat({
       }
     }
 
-    if (inventory.hasItem('un chorizo')) return 'chorizo';
-    if (inventory.hasItem('pavo cocinado')) return 'pavo';
-    if (inventory.hasItem('chuleta de cordero')) return 'chuleta';
-    if (inventory.hasItem('loncha de salami')) return 'salami';
-    if (inventory.hasItem('pierna de cordero')) return 'pierna';
-    if (inventory.hasItem('ricas longanizas')) return 'longanizas';
+    return await inventory.has({
+      'un chorizo': 'chorizo',
+      'pavo cocinado': 'pavo',
+      'chuleta de cordero': 'chuleta',
+      'loncha de salami': 'salami',
+      'pierna de cordero': 'pierna',
+      'ricas longanizas': 'longanizas',
+    });
   }
 }

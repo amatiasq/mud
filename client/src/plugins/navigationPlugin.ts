@@ -10,6 +10,7 @@ export function navigationPlugin({ when, write }: PluginContext) {
   let isAtRecall = false;
   let directions: string[] = [];
 
+  const prompt = () => when(PROMPT_DETECTOR);
   const roomChanged = emitter<string[]>();
 
   when('Plaza de Darkhaven', () => (landingAtRecall = true));
@@ -20,7 +21,7 @@ export function navigationPlugin({ when, write }: PluginContext) {
     isAtRecall = landingAtRecall;
     landingAtRecall = false;
 
-    await when(PROMPT_DETECTOR);
+    await prompt();
     roomChanged(directions);
   });
 
@@ -74,6 +75,10 @@ export function navigationPlugin({ when, write }: PluginContext) {
   }
 
   async function go(direction: string) {
+    if (isNavigating) {
+      throw new Error('WTF DUDE');
+    }
+
     const dir = get(direction);
 
     if (!dir) {
@@ -87,7 +92,9 @@ export function navigationPlugin({ when, write }: PluginContext) {
 
     write(direction);
     isNavigating = true;
-    await when('\nSalidas: ');
+
+    await when('\nSalidas:');
+    await prompt();
   }
 
   function get(direction: string) {

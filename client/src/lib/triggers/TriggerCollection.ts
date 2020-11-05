@@ -87,7 +87,7 @@ export class TriggerCollection {
     const lines = [...splitted.map(x => `${x}\n`), last];
 
     for (const line of lines) {
-      console.log('PROCESS', line);
+      // console.log('PROCESS', line);
       for (const pattern of this.patterns) {
         await pattern.process(line);
       }

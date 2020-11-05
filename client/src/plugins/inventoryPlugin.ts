@@ -23,18 +23,27 @@ export function inventoryPlugin({ when, write }: PluginContext) {
     { captureLength: 1000 },
   );
 
-  return { refresh, hasItem };
+  return { refresh, has };
 
   async function refresh() {
     write('inventario');
     await when(INVENTORY_DETECTOR);
   }
 
-  async function hasItem(item: string) {
+  async function has(search: string | string[] | Record<string, string>) {
     if (!isInitialized) {
       await refresh();
     }
 
-    return items.some(x => x === item);
+    if (typeof search === 'string') {
+      return items.find(x => x === search);
+    }
+
+    if (Array.isArray(search)) {
+      return items.find(x => search.includes(x));
+    }
+
+    const found = items.find(x => x in search);
+    return found && search[found];
   }
 }

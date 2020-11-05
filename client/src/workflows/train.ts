@@ -1,7 +1,6 @@
 import { Context } from './../lib/workflow/Context';
 
 export async function train({
-  printLogs,
   log,
   when,
   invokeWorkflow,
@@ -17,6 +16,7 @@ export async function train({
     log('SAW', prey);
     enemies.push(prey);
   };
+
   const enemyGone = (prey: string) => () => {
     const index = enemies.indexOf(prey);
     if (index > -1) {
@@ -71,10 +71,8 @@ export async function train({
     }
 
     if (nav.canGo(direction)) {
-      console.log('GO', direction);
       await nav.go(direction);
     } else if (nav.canGo('este')) {
-      console.log('GO este');
       await nav.go('este');
       direction = direction === 'sur' ? 'norte' : 'sur';
     } else {

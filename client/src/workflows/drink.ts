@@ -58,8 +58,8 @@ export async function drink({
   await runForever();
 
   async function getWaterBottle() {
-    if (await inventory.hasItem('un odre de cuero')) {
-      return 'odre';
-    }
+    return inventory.has({
+      'un odre de cuero': 'odre',
+    });
   }
 }
