@@ -48,6 +48,10 @@ export async function promptPlugin({ when, write }: PluginContext) {
     exp: 0,
     gold: 0,
     enemy: null as number | null,
+
+    get isFighting() {
+      return stats.enemy !== null;
+    },
   };
 
   const update = emitter<typeof stats>();

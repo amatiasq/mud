@@ -1,3 +1,4 @@
+import { wait } from '../lib/util/wait';
 import { Context } from './../lib/workflow/Context';
 
 export async function eat({
@@ -38,20 +39,18 @@ export async function eat({
 
   async function buyFood() {
     await nav.recall();
-    await nav.execute('ssen');
+    await nav.execute('2sen');
 
     write(`comprar ${EXPECTED_FOOD - foodInInventory} ${DEFAULT_FOOD_NAME}`);
+    await when('El carnicero pone todo en una bolsa y te la da.');
+    await getFoodFromBag();
+
+    await nav.execute('sw2n');
   }
 
   async function getFood() {
     if (await inventory.has('una bolsa')) {
-      write('coger todo bolsa');
-      write('examinar bolsa');
-
-      const { captured } = await when(/Una bolsa contiene:\n\s+(Nada)?/);
-      if (captured[1]) {
-        write('tirar bolsa');
-      }
+      await getFoodFromBag();
     }
 
     return await inventory.has({
@@ -62,5 +61,15 @@ export async function eat({
       'pierna de cordero': 'pierna',
       'ricas longanizas': 'longanizas',
     });
+  }
+
+  async function getFoodFromBag() {
+    write('coger todo bolsa');
+    write('examinar bolsa');
+
+    const { captured } = await when(/Una bolsa contiene:\n\s+(Nada)?/);
+    if (captured[1]) {
+      write('tirar bolsa');
+    }
   }
 }

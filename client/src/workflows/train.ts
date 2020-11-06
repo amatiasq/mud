@@ -72,7 +72,7 @@ export async function train({
       await nav.go('este');
       direction = direction === 'sur' ? 'norte' : 'sur';
     } else {
-      return nav.execute('oooonnnnna');
+      return nav.execute('4w5nu');
     }
 
     return nextRoom();

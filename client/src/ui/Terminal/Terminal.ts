@@ -37,9 +37,7 @@ export class Terminal {
       }
     });
 
-    // TODO: watch keypress and/or keyup?
     this.$input.addEventListener('keydown', this.onKey);
-
     parent.appendChild(this.dom);
   }
 

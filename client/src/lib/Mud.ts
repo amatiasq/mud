@@ -47,6 +47,8 @@ export class Mud {
     this.telnet.send(text);
   }
 
+  userInput(command: string): void {}
+
   getPlugin<Name extends keyof PluginMap>(name: Name): PluginMap[Name] {
     return this.plugins[name];
   }

@@ -4,6 +4,16 @@ import { PluginContext } from '../lib/PluginContext';
 import { PatternPromise } from '../lib/triggers/PatternPromise';
 import { PROMPT_DETECTOR } from './promptPlugin';
 
+const aliases = {
+  n: 'norte',
+  s: 'sur',
+  w: 'oeste',
+  o: 'oeste',
+  e: 'este',
+  u: 'arriba',
+  d: 'abajo',
+};
+
 export function navigationPlugin({ when, write }: PluginContext) {
   let isNavigating = false;
   let landingAtRecall = false;
@@ -20,7 +30,6 @@ export function navigationPlugin({ when, write }: PluginContext) {
     isNavigating = false;
     isAtRecall = landingAtRecall;
     landingAtRecall = false;
-
     await prompt();
     roomChanged(directions);
   });
@@ -42,13 +51,14 @@ export function navigationPlugin({ when, write }: PluginContext) {
     },
   };
 
-  function recall() {
+  async function recall() {
     if (isAtRecall) {
       return Promise.resolve();
     }
 
     write('recall');
-    return when('Plaza de Darkhaven').wait(1);
+    await when('Plaza de Darkhaven');
+    await prompt();
   }
 
   function waitForRecall() {
@@ -69,7 +79,7 @@ export function navigationPlugin({ when, write }: PluginContext) {
   }
 
   async function execute(pattern: string) {
-    for (const step of pattern) {
+    for (const step of parsePath(pattern)) {
       await go(step);
     }
   }
@@ -77,6 +87,10 @@ export function navigationPlugin({ when, write }: PluginContext) {
   async function go(direction: string) {
     if (isNavigating) {
       throw new Error('WTF DUDE');
+    }
+
+    if (direction in aliases) {
+      direction = aliases[direction as keyof typeof aliases];
     }
 
     const dir = get(direction);
@@ -100,4 +114,8 @@ export function navigationPlugin({ when, write }: PluginContext) {
   function get(direction: string) {
     return directions.find(x => x.startsWith(direction));
   }
+}
+
+function parsePath(path: string) {
+  return path.replace(/(\d+)(\w)/g, (_, times, dir) => dir.repeat(times));
 }

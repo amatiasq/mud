@@ -39,6 +39,8 @@ async function initializeMud() {
   const mud = new Mud(telnet);
   mud.onCommand(x => terminal.write(`${x}\n`));
 
+  terminal.onSubmit(command => mud.userInput(command));
+
   await mud.login(user, pass);
   registerWorkflows(mud);
   await connectStats();
