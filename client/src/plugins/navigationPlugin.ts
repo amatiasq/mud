@@ -5,13 +5,17 @@ import { PatternPromise } from '../lib/triggers/PatternPromise';
 import { PROMPT_DETECTOR } from './promptPlugin';
 
 const aliases = {
-  n: 'norte',
   s: 'sur',
+  n: 'norte',
+  e: 'este',
   w: 'oeste',
   o: 'oeste',
-  e: 'este',
   u: 'arriba',
   d: 'abajo',
+  l: 'sureste',
+  k: 'suroeste',
+  j: 'noreste',
+  h: 'noroeste',
 };
 
 export function navigationPlugin({ when, write }: PluginContext) {
@@ -79,6 +83,11 @@ export function navigationPlugin({ when, write }: PluginContext) {
   }
 
   async function execute(pattern: string) {
+    if (pattern[0] === 'r') {
+      await recall();
+      pattern = pattern.substr(1);
+    }
+
     for (const step of parsePath(pattern)) {
       await go(step);
     }

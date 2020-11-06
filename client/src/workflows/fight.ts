@@ -16,6 +16,8 @@ export async function fight(
     update,
   );
 
+  // if causar graves
+  // if causar leves
   write(`kill ${target}`);
 
   return Promise.any([
@@ -23,7 +25,7 @@ export async function fight(
     when(`${target} ha MUERTO!!`).then(() => 'win'),
     when('Huyes como un cobarde del combate.').then(() => 'flee'),
     when('No esta aqui.')
-      .timeout(0.5)
+      .timeout(3)
       .then(() => 'missing'),
   ]);
 

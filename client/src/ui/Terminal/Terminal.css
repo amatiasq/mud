@@ -1,4 +1,14 @@
-/* .terminal .log {} */
+.terminal {
+  grid-area: terminal;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.terminal::-webkit-scrollbar {
+  display: none;
+}
 
 .terminal p {
   margin: 1em 0;

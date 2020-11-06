@@ -1,8 +1,8 @@
 import { PluginContext } from '../lib/PluginContext';
 
-export function inventoryPlugin({ when, write }: PluginContext) {
-  const INVENTORY_DETECTOR = /Estas llevando:(\n.*)+?\n\n/;
+const INVENTORY_DETECTOR = /Estas llevando:(\n.*)+?\n\n/;
 
+export function inventoryPlugin({ when, write }: PluginContext) {
   let isInitialized = false;
   let items: string[] = [];
 

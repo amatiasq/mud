@@ -1,7 +1,6 @@
 import { Context } from './../lib/workflow/Context';
 
 export async function train({
-  log,
   when,
   invokeWorkflow,
   plugins: { navigation: nav },
@@ -62,7 +61,7 @@ export async function train({
 
       if (result === 'flee') {
         console.log('Had to run. Train over.');
-        return;
+        return nav.recall();
       }
     }
 

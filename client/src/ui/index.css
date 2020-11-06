@@ -21,8 +21,6 @@ body {
 
 .terminal {
   grid-area: terminal;
-  overflow-x: hidden;
-  overflow-y: auto;
 }
 
 .sidebar {

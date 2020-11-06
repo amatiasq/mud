@@ -4,7 +4,7 @@ export async function drink({
   when,
   write,
   runForever,
-  plugins: { inventory, navigation },
+  plugins: { inventory, navigation, skills },
 }: Context) {
   let isFontAvailable = false;
   let isBottleFull = false;
@@ -34,6 +34,7 @@ export async function drink({
     [
       'Te apetece dar un sorbo a algo refrescante.',
       'Tienes sed.',
+      // 'Estas sediento.',
       'Estas realmente sediento.',
       'Estas MUERTO de SED!',
       'Estas en peligro de deshidratacion.',
@@ -41,14 +42,20 @@ export async function drink({
     async () => {
       if (isFontAvailable) {
         write('beber');
-      } else {
-        const bottle = await getWaterBottle();
+        return;
+      }
 
-        if (bottle) {
-          write(`beber ${bottle}`);
-        } else {
-          console.log('No hay fuente de agua');
-        }
+      const bottle = await getWaterBottle();
+
+      if (!bottle) {
+        console.log('No hay fuente de agua');
+        return;
+      }
+
+      write(`beber ${bottle}`);
+
+      if (await skills.has('crear agua')) {
+        write(`c "crear agua" ${bottle}`);
       }
     },
   );
@@ -58,6 +65,7 @@ export async function drink({
   async function getWaterBottle() {
     return inventory.has({
       'un odre de cuero': 'odre',
+      'una cantimplora': 'cantimplora',
     });
   }
 }

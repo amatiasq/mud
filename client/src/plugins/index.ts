@@ -3,12 +3,14 @@ import { chatPlugin } from './chatPlugin';
 import { inventoryPlugin } from './inventoryPlugin';
 import { navigationPlugin } from './navigationPlugin';
 import { promptPlugin } from './promptPlugin';
+import { skillsPlugin } from './skillsPlugin';
 
 const plugins = {
   chat: chatPlugin,
   inventory: inventoryPlugin,
   navigation: navigationPlugin,
   prompt: promptPlugin,
+  skills: skillsPlugin,
 };
 
 // -- Dirty implementation

@@ -8,8 +8,7 @@
     "start": "npm run webpack-dev-server",
     "build": "npm run webpack -- --env.mode production",
     "webpack": "webpack --config config/webpack.config.js",
-    "webpack-dev-server": "webpack-dev-server --config config/webpack.config.js --env.mode development --open",
-    "pre-commit": "npm test"
+    "webpack-dev-server": "webpack-dev-server --config config/webpack.config.js --env.mode development --open"
   },
   "devDependencies": {
     "clean-webpack-plugin": "^3.0.0",
