@@ -15,3 +15,10 @@ const serverUri =
 export const socket = new ClientSocket<ClientMessage, ServerMessage>(serverUri);
 
 socket.onMessage(x => console.debug('MESSAGE', x));
+socket.onMessageType('ERROR', x => {
+  console.error(x);
+
+  if (x.startsWith("Can't open connection to")) {
+    location.reload();
+  }
+});
