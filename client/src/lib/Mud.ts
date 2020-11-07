@@ -54,11 +54,12 @@ export class Mud {
   }
 
   runWorkflow<Args extends any[]>(
+    name: string,
     run: (context: Context, ...args: Args) => Promise<any> | void,
     params?: Args,
     options?: InvokeOptions,
   ) {
-    const workflow = new Workflow(run);
+    const workflow = new Workflow(name, run);
     return this.executeWorkflow(
       workflow as Workflow<any, any>,
       params,
@@ -67,9 +68,10 @@ export class Mud {
   }
 
   registerWorkflow<Args extends any[]>(
+    name: string,
     run: (context: Context, ...args: Args) => Promise<any> | void,
   ) {
-    const workflow = new Workflow(run);
+    const workflow = new Workflow(name, run);
     this.workflows[workflow.name] = workflow as Workflow<any, any>;
     return workflow;
   }

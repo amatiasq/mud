@@ -12,11 +12,8 @@ export class Workflow<Args extends any[] = any[], Return = any> {
     return this.executionCount;
   }
 
-  get name() {
-    return this.run.name;
-  }
-
   constructor(
+    readonly name: string,
     private readonly run: (
       context: Context,
       ...args: Args

@@ -8,12 +8,12 @@ import { rest } from './workflows/rest';
 import { train } from './workflows/train';
 
 export function registerWorkflows(mud: Mud) {
-  mud.registerWorkflow(fight);
-  mud.registerWorkflow(train);
+  mud.registerWorkflow('fight', fight);
+  mud.registerWorkflow('train', train);
 
-  mud.runWorkflow(dope);
-  mud.runWorkflow(drink);
-  mud.runWorkflow(eat);
-  mud.runWorkflow(idle);
-  mud.runWorkflow(rest);
+  mud.runWorkflow('dope', dope);
+  mud.runWorkflow('drink', drink);
+  mud.runWorkflow('eat', eat);
+  mud.runWorkflow('idle', idle);
+  mud.runWorkflow('rest', rest);
 }
