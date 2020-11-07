@@ -7,13 +7,13 @@
 
 ### Fight
 - luchar con causar graves
-- train se quedaba colgado ~~(fixed?)~~
-  - ampliar fight `No esta aqui`
+- ~~train se quedaba colgado ~(fixed?)~~
+  - ~~ampliar fight `No esta aqui`~~
 
 ### Dope
 - no conjurar cuando aturdido
-- poner limite a refrescar
-- detectar invisible
+- ~~poner limite a refrescar~~
+- ~~detectar invisible~~
 
 ### Drink
-- Crear agua
+- ~~Crear agua~~

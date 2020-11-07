@@ -39,4 +39,4 @@ jobs:
             docker pull amatiasq/mud-proxy
             docker stop mud-proxy
             docker rm mud-proxy
-            docker run --name mud-proxy amatiasq/mud-proxy:latest
+            docker run -d --name mud-proxy amatiasq/mud-proxy:latest

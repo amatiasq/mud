@@ -44,6 +44,7 @@ type msg = { message: string };
 
 function receive(log: History) {
   return ({ groups: { name, message } }: PatternResult) => {
+    console.log(`[MESSAGE(${name})]:`, message);
     addMessage(log, { from: name, message });
     notify(name, message);
   };

@@ -9,7 +9,7 @@ let FORCE_PROD_SERVER = false;
 
 const serverUri =
   location.origin === 'https://amatiasq.github.io' || FORCE_PROD_SERVER
-    ? 'wss://ts-socket.amatiasq.com'
+    ? 'wss://mudOS.amatiasq.com'
     : `ws://localhost:${DEFAULT_PORT}`;
 
 export const socket = new ClientSocket<ClientMessage, ServerMessage>(serverUri);

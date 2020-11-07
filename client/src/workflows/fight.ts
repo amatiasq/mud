@@ -37,6 +37,8 @@ export async function fight(
       await navigation.recall();
     } else if (prompt.isExhausted || prompt.needsHospital) {
       write('huir');
+    } else {
+      await skills.castSpell(['causar graves', 'causar leves']);
     }
   }
 

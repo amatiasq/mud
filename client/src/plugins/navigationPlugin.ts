@@ -4,6 +4,7 @@ import { PluginContext } from '../lib/PluginContext';
 import { PatternPromise } from '../lib/triggers/PatternPromise';
 import { PROMPT_DETECTOR } from './promptPlugin';
 
+const CLOSED = '(cerrada)';
 const aliases = {
   s: 'sur',
   n: 'norte',
@@ -28,6 +29,16 @@ export function navigationPlugin({ when, write }: PluginContext) {
   const roomChanged = emitter<string[]>();
 
   when('Plaza de Darkhaven', () => (landingAtRecall = true));
+
+  when('Puerta esta cerrada.', () => {
+    const closed = directions.find(x => x.includes(CLOSED));
+
+    if (closed) {
+      const dir = closed.replace(CLOSED, '');
+      write(`abrir ${dir}`);
+      write(dir);
+    }
+  });
 
   when(/\nSalidas: ([^\.]+)/, async ({ captured }) => {
     directions = captured[1].split(' ');
@@ -79,7 +90,7 @@ export function navigationPlugin({ when, write }: PluginContext) {
 
   function isClosed(direction: string) {
     const dir = get(direction);
-    return dir && dir.includes('(cerrada)');
+    return dir && dir.includes(CLOSED);
   }
 
   async function execute(pattern: string) {
