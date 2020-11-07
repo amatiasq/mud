@@ -1,5 +1,5 @@
 ### practicar
-- Detectar practicas
+- ~~Detectar practicas~~
 
 ### Navigation
 - ~~Process southwest, northeast...~~

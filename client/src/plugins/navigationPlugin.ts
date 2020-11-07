@@ -118,6 +118,8 @@ export function navigationPlugin({ when, write }: PluginContext) {
 
     await when('\nSalidas:');
     await prompt();
+
+    isNavigating = false;
   }
 
   function get(direction: string) {

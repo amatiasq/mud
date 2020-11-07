@@ -54,6 +54,8 @@ export async function promptPlugin({ when, write }: PluginContext) {
     },
   };
 
+  type Stats = typeof stats;
+
   const update = emitter<typeof stats>();
 
   when(PROMPT_DETECTOR)
@@ -78,6 +80,7 @@ export async function promptPlugin({ when, write }: PluginContext) {
   return {
     waitForPrompt,
     getPercent,
+    until,
     onUpdate: update.subscribe,
 
     get isExhausted() {
@@ -96,6 +99,10 @@ export async function promptPlugin({ when, write }: PluginContext) {
       return stats.hp.percent < 0.1;
     },
 
+    get isFighting() {
+      return stats.isFighting;
+    },
+
     get isInvisible() {
       return isInvisible;
     },
@@ -112,6 +119,21 @@ export async function promptPlugin({ when, write }: PluginContext) {
 
   function getPercent(stat: 'hp' | 'mana' | 'mv') {
     return stats[stat].percent;
+  }
+
+  function until(predicate: (stats: Stats) => boolean) {
+    if (predicate(stats)) {
+      return true;
+    }
+
+    return new Promise(resolve => {
+      const unsubscribe = update.subscribe((stats: Stats) => {
+        if (predicate(stats)) {
+          unsubscribe();
+          resolve(stats);
+        }
+      });
+    });
   }
 }
 

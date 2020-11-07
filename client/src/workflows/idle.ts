@@ -9,6 +9,7 @@ export async function idle({
 }: Context) {
   when('Desapareces en la nada.', () => {
     console.log('IDLE');
+
     if (navigation.isAtRecall) {
       invokeWorkflow('train');
     } else {

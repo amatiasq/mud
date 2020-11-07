@@ -53,10 +53,7 @@ export async function drink({
       }
 
       write(`beber ${bottle}`);
-
-      if (await skills.has('crear agua')) {
-        write(`c "crear agua" ${bottle}`);
-      }
+      await skills.castSpell('crear agua', bottle);
     },
   );
 

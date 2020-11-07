@@ -1,22 +1,18 @@
-import { wait } from '../lib/util/wait';
 import { Context } from './../lib/workflow/Context';
 
 export async function eat({
   when,
   write,
   runForever,
-  plugins: { inventory, navigation: nav },
+  plugins: { inventory, navigation: nav, skills, prompt },
 }: Context) {
   const EXPECTED_FOOD = 1;
   const DEFAULT_FOOD_NAME = 'chuleta';
-  let foodInInventory = 0;
 
   when(['Tienes hambre.', 'Estas realmente hambriento.'], eatSomething);
 
   when(['Estas terriblemente hambriento.', 'Estas HAMBRIENTO!'], async () => {
-    console.log('hungry');
-
-    if (await eatSomething()) {
+    if ((await eatSomething()) || (await createFood())) {
       return;
     }
 
@@ -27,27 +23,43 @@ export async function eat({
   await runForever();
 
   async function eatSomething() {
-    console.log('eatSomething');
+    const food = await getFoodFromInventory();
 
-    const food = await getFood();
-    if (!food) return false;
+    if (food) {
+      write(`comer ${food}`);
+      inventory.refresh();
+    }
 
-    write(`comer ${food}`);
-    inventory.refresh();
     return true;
+  }
+
+  async function createFood() {
+    if (!(await skills.castSpell('crear comida'))) {
+      return false;
+    }
+
+    write('coger seta');
+
+    try {
+      await when('Coges una seta magica.').timeout(3);
+      write('comer seta');
+      return true;
+    } catch (err) {
+      return false;
+    }
   }
 
   async function buyFood() {
     await nav.recall();
     await nav.execute('2sen');
 
-    write(`comprar ${EXPECTED_FOOD - foodInInventory} ${DEFAULT_FOOD_NAME}`);
+    write(`comprar ${EXPECTED_FOOD} ${DEFAULT_FOOD_NAME}`);
     await when('El carnicero pone todo en una bolsa y te la da.');
     await getFoodFromBag();
     await nav.execute('sw2n');
   }
 
-  async function getFood() {
+  async function getFoodFromInventory() {
     await getFoodFromBag();
 
     return await inventory.has({

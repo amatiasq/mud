@@ -3,7 +3,7 @@ import { Context } from './../lib/workflow/Context';
 export async function train({
   when,
   invokeWorkflow,
-  plugins: { navigation: nav },
+  plugins: { navigation: nav, prompt },
 }: Context) {
   const enemies: string[] = [];
   let direction = 'sur';
@@ -56,6 +56,8 @@ export async function train({
   return nextRoom();
 
   async function nextRoom(): Promise<any> {
+    await prompt.until(({ mv: { current: mv } }) => mv > 50);
+
     while (enemies.length) {
       const result = await invokeWorkflow('fight', [enemies.pop()!]);
 

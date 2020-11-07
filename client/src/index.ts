@@ -14,6 +14,7 @@ const pass = getPassword(user);
 
 const { terminal, controls } = renderUserInterface(document.body);
 const telnet = new RemoteTelnet(socket);
+const reload = setTimeout(() => location.reload(), 5000);
 
 terminal.write(`Connecting to ${host}:${port} as ${user}\n`);
 telnet.onConnected(initializeMud);
@@ -36,6 +37,8 @@ socket.onConnected(() => {
 });
 
 async function initializeMud() {
+  clearTimeout(reload);
+
   const mud = new Mud(telnet);
   mud.onCommand(x => terminal.write(`${x}\n`));
 

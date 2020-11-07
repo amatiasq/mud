@@ -18,6 +18,8 @@ export function chatPlugin({ when }: PluginContext) {
   const tell = new ClientStorage<Record<string, Message[]>>('chat:tell');
   const whisper = new ClientStorage<Record<string, Message[]>>('chat:whisper');
 
+  (window as any).chat = () => tell.get();
+
   when(/(?<name>.+) te susurra '(?<message>[^']+)'/, receive(whisper));
   when(/Susurras a (?<name>.+) '(?<message>[^']+)'/, sent(whisper));
 

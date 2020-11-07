@@ -1,7 +1,7 @@
 import { Context } from '../lib/workflow/Context';
 
 export async function fight(
-  { when, write, plugins: { prompt, navigation } }: Context,
+  { when, write, plugins: { prompt, navigation, skills } }: Context,
   target: string,
 ) {
   when('Estas demasiado exhausto para huir del combate!', () =>
@@ -16,11 +16,14 @@ export async function fight(
     update,
   );
 
-  // if causar graves
-  // if causar leves
-  write(`kill ${target}`);
+  const attackSpells = ['ceguera', 'causar graves', 'causar leves'];
+  const cast = () => skills.castSpell(attackSpells, target);
 
-  return Promise.any([
+  if (!(await tryNTimes(3, cast))) {
+    write(`matar ${target}`);
+  }
+
+  await Promise.any([
     navigation.waitForRecall().then(() => 'flee'),
     when(`${target} ha MUERTO!!`).then(() => 'win'),
     when('Huyes como un cobarde del combate.').then(() => 'flee'),
@@ -35,5 +38,15 @@ export async function fight(
     } else if (prompt.isExhausted || prompt.needsHospital) {
       write('huir');
     }
+  }
+
+  async function tryNTimes(times: number, action: () => Promise<boolean>) {
+    for (let i = 0; i < times; i++) {
+      if (await action()) {
+        return true;
+      }
+    }
+
+    return false;
   }
 }
