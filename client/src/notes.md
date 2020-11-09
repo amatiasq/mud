@@ -1,19 +1,17 @@
-### practicar
-- ~~Detectar practicas~~
+## Tech
+- Google "Cloudflare websocket disconnects"
+
+## Code
+- Use new `spells.ts` for spells info
+
+## Plugins & workflows
 
 ### Navigation
-- ~~Process southwest, northeast...~~
-  - ~~http://balzhur.org/index.php?option=com_content&view=article&id=92&Itemid=122~~
+- nav.execute() to accept callback to run on every room
 
-### Fight
+### Kill
 - luchar con causar graves
-- ~~train se quedaba colgado ~(fixed?)~~
-  - ~~ampliar fight `No esta aqui`~~
+- ~~sacrificar cuerpo~~
 
 ### Dope
 - no conjurar cuando aturdido
-- ~~poner limite a refrescar~~
-- ~~detectar invisible~~
-
-### Drink
-- ~~Crear agua~~

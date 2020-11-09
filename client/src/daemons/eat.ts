@@ -12,7 +12,7 @@ export async function eat({
   when(['Tienes hambre.', 'Estas realmente hambriento.'], eatSomething);
 
   when(['Estas terriblemente hambriento.', 'Estas HAMBRIENTO!'], async () => {
-    if ((await eatSomething()) || (await createFood())) {
+    if (await eatSomething()) {
       return;
     }
 
@@ -28,9 +28,10 @@ export async function eat({
     if (food) {
       write(`comer ${food}`);
       inventory.refresh();
+      return true;
     }
 
-    return true;
+    return await createFood();
   }
 
   async function createFood() {
@@ -54,8 +55,14 @@ export async function eat({
     await nav.execute('2sen');
 
     write(`comprar ${EXPECTED_FOOD} ${DEFAULT_FOOD_NAME}`);
-    await when('El carnicero pone todo en una bolsa y te la da.');
-    await getFoodFromBag();
+
+    await Promise.any([
+      when('Compras una chuleta de cordero.'),
+      when('El carnicero pone todo en una bolsa y te la da.').then(
+        getFoodFromBag,
+      ),
+    ]);
+
     await nav.execute('sw2n');
   }
 

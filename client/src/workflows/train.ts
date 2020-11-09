@@ -2,7 +2,7 @@ import { Context } from './../lib/workflow/Context';
 
 export async function train({
   when,
-  invokeWorkflow,
+  run: invokeWorkflow,
   plugins: { navigation: nav, prompt },
 }: Context) {
   const enemies: string[] = [];
@@ -59,7 +59,7 @@ export async function train({
     await prompt.until(({ mv: { current: mv } }) => mv > 50);
 
     while (enemies.length) {
-      const result = await invokeWorkflow('fight', [enemies.pop()!]);
+      const result = await invokeWorkflow('kill', [enemies.pop()!]);
 
       if (result === 'flee') {
         console.log('Had to run. Train over.');

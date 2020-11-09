@@ -34,7 +34,8 @@ class Stat {
   current = 0;
 
   get percent() {
-    return this.total ? (1 / this.total) * this.current : 0;
+    const result = this.total ? (1 / this.total) * this.current : 0;
+    return Math.round(result * 100) / 100;
   }
 }
 
@@ -87,9 +88,9 @@ export async function promptPlugin({ when, write }: PluginContext) {
       return stats.mv.current <= 15;
     },
 
-    get isInjured() {
-      return stats.hp.percent !== 1;
-    },
+    // get isInjured() {
+    //   return stats.hp.percent !== 1;
+    // },
 
     get needsHospital() {
       return stats.hp.percent < 0.3;

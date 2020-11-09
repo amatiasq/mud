@@ -1,6 +1,6 @@
 import { Context } from '../lib/workflow/Context';
 
-export async function fight(
+export async function kill(
   { when, write, plugins: { prompt, navigation, skills } }: Context,
   target: string,
 ) {
@@ -16,14 +16,21 @@ export async function fight(
     update,
   );
 
-  const attackSpells = ['ceguera', 'causar graves', 'causar leves'];
+  const attackSpells = [
+    'ceguera',
+    'causar fatales',
+    'causar critica',
+    'causar graves',
+    'causar leves',
+  ];
+
   const cast = () => skills.castSpell(attackSpells, target);
 
   if (!(await tryNTimes(3, cast))) {
     write(`matar ${target}`);
   }
 
-  await Promise.any([
+  const result = await Promise.any([
     navigation.waitForRecall().then(() => 'flee'),
     when(`${target} ha MUERTO!!`).then(() => 'win'),
     when('Huyes como un cobarde del combate.').then(() => 'flee'),
@@ -31,6 +38,13 @@ export async function fight(
       .timeout(3)
       .then(() => 'missing'),
   ]);
+
+  if (result === 'win') {
+    write('sacrificar cuerpo');
+    await when('te da una moneda de oro por tu sacrificio.');
+  }
+
+  return result;
 
   async function update() {
     if (prompt.isInDanger) {

@@ -83,10 +83,13 @@ export class Terminal {
     const { value } = this.$input;
     this.$input.value = '';
 
-    this.history.shift();
-    this.history.unshift(value);
-    this.history.unshift('');
-    history.set(this.history);
+    if (value) {
+      this.history.shift();
+      this.history.unshift(value);
+      this.history.unshift('');
+      history.set(this.history);
+    }
+
     this.histPos = 0;
 
     this.emitSubmit(value);

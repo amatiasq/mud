@@ -1,19 +1,27 @@
+import { dope } from './daemons/dope';
+import { drink } from './daemons/drink';
+import { eat } from './daemons/eat';
+import { idle } from './daemons/idle';
+import { rest } from './daemons/rest';
 import { Mud } from './lib/Mud';
-import { dope } from './workflows/dope';
-import { drink } from './workflows/drink';
-import { eat } from './workflows/eat';
-import { fight } from './workflows/fight';
-import { idle } from './workflows/idle';
-import { rest } from './workflows/rest';
+import { afk } from './workflows/afk';
+import { bank } from './workflows/bank';
+import { donations } from './workflows/donations';
+import { kill } from './workflows/kill';
+import { go } from './workflows/go';
 import { train } from './workflows/train';
 
 export function registerWorkflows(mud: Mud) {
-  mud.registerWorkflow('fight', fight);
-  mud.registerWorkflow('train', train);
+  mud.workflow('afk', afk);
+  mud.workflow('bank', bank);
+  mud.workflow('donations', donations);
+  mud.workflow('kill', kill);
+  mud.workflow('go', go);
+  mud.workflow('train', train);
 
-  mud.runWorkflow('dope', dope);
-  mud.runWorkflow('drink', drink);
-  mud.runWorkflow('eat', eat);
-  mud.runWorkflow('idle', idle);
-  mud.runWorkflow('rest', rest);
+  mud.daemon('dope', dope);
+  mud.daemon('drink', drink);
+  mud.daemon('eat', eat);
+  mud.daemon('idle', idle);
+  mud.daemon('rest', rest);
 }

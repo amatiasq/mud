@@ -21,10 +21,6 @@ telnet.onData(data => terminal.write(data));
 
 socket.onConnected(() => {
   telnet.connect({ host, port: parseInt(port) });
-  terminal.onSubmit(value => {
-    terminal.write(`${value}\n`);
-    telnet.send(value);
-  });
 
   window.onbeforeunload = () => {
     if (telnet.isConnected) {
@@ -39,7 +35,18 @@ async function initializeMud() {
   const mud = new Mud(telnet);
   mud.onCommand(x => terminal.write(`${x}\n`));
 
-  terminal.onSubmit(command => mud.userInput(command));
+  terminal.onSubmit(command => {
+    terminal.write(`${command}\n`);
+
+    if (command.startsWith('!')) {
+      const [workflow, ...args] = command.substr(1).split(/\s+/);
+      +runWorkflow(workflow, args);
+      return;
+    }
+
+    telnet.send(command);
+    mud.userInput(command);
+  });
 
   await mud.login(user, pass);
   registerWorkflows(mud);
@@ -66,6 +73,16 @@ async function initializeMud() {
   }
 
   function connectButtons() {
-    controls.addButton('Entrenar', () => mud.invokeWorkflow('train'));
+    controls.addButton('Entrenar', () => mud.run('train'));
+  }
+
+  function runWorkflow(name: string, args: string[]) {
+    const cmd = `"${name}" with "${args.join(' ')}"`;
+    terminal.write(`-> Running ${cmd}\n`);
+
+    mud.run(name, args).then(
+      x => terminal.write(`\n<- Done ${cmd}\n`),
+      x => terminal.write(`\n\n<! FAILED ${cmd}: ${x.message}\n\n`),
+    );
   }
 }

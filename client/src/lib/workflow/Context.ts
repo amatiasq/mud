@@ -17,7 +17,7 @@ export class Context extends PluginContext {
     triggers: TriggerCollection,
     plugins: PluginMap,
     send: (command: string) => void,
-    private readonly runWorkflow: Mud['invokeWorkflow'],
+    private readonly runWorkflow: Mud['run'],
   ) {
     super(`W(${name})`, username, triggers, send);
     this.plugins = createPluginsGetter(plugins, this.log.bind(this));
@@ -25,7 +25,7 @@ export class Context extends PluginContext {
     bindAll(this, Context);
   }
 
-  invokeWorkflow<T>(name: string, params: any[] = []) {
+  run<T>(name: string, params: any[] = []) {
     this.checkNotAborted();
     this.log(`Invoke workflow ${name} with`, ...params);
     return this.runWorkflow(name, params, { logs: this.isPrintingLogs });

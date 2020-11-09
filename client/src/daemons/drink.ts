@@ -15,6 +15,7 @@ export async function drink({
     [
       'Un manantial magico esta aqui.',
       'Una hermosa fuente de marmol blanco esta aqui.',
+      'Trazas un circulo delante tuyo del cual emerge un manantial de agua cristalina.',
     ],
     async () => {
       isFontAvailable = true;
@@ -40,7 +41,7 @@ export async function drink({
       'Estas en peligro de deshidratacion.',
     ],
     async () => {
-      if (isFontAvailable) {
+      if (isFontAvailable || (await skills.castSpell('crear manantial'))) {
         write('beber');
         return;
       }

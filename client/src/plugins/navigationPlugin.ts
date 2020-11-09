@@ -28,7 +28,7 @@ export function navigationPlugin({ when, write }: PluginContext) {
   const prompt = () => when(PROMPT_DETECTOR);
   const roomChanged = emitter<string[]>();
 
-  when('Plaza de Darkhaven', () => (landingAtRecall = true));
+  when(/Plaza de Darkhaven\s+/, () => (landingAtRecall = true));
 
   when('Puerta esta cerrada.', () => {
     const closed = directions.find(x => x.includes(CLOSED));
@@ -99,8 +99,24 @@ export function navigationPlugin({ when, write }: PluginContext) {
       pattern = pattern.substr(1);
     }
 
+    let untilEnd = false;
+
     for (const step of parsePath(pattern)) {
-      await go(step);
+      if (step.toUpperCase() === 'X') {
+        untilEnd = true;
+        continue;
+      }
+
+      if (!untilEnd) {
+        await go(step);
+        continue;
+      }
+
+      while (canGo(step)) {
+        await go(step);
+      }
+
+      untilEnd = false;
     }
   }
 

@@ -3,7 +3,7 @@ import { Context } from './../lib/workflow/Context';
 export async function idle({
   when,
   write,
-  invokeWorkflow,
+  run: invokeWorkflow,
   runForever,
   plugins: { navigation },
 }: Context) {

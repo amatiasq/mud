@@ -24,7 +24,7 @@ export class Mud {
 
   constructor(private readonly telnet: RemoteTelnet) {
     this.send = this.send.bind(this);
-    this.invokeWorkflow = this.invokeWorkflow.bind(this);
+    this.run = this.run.bind(this);
     this.telnet.onData(x => this.triggers.process(removeNoise(x)));
   }
 
@@ -53,7 +53,7 @@ export class Mud {
     return this.plugins[name];
   }
 
-  runWorkflow<Args extends any[]>(
+  daemon<Args extends any[]>(
     name: string,
     run: (context: Context, ...args: Args) => Promise<any> | void,
     params?: Args,
@@ -67,7 +67,7 @@ export class Mud {
     );
   }
 
-  registerWorkflow<Args extends any[]>(
+  workflow<Args extends any[]>(
     name: string,
     run: (context: Context, ...args: Args) => Promise<any> | void,
   ) {
@@ -76,7 +76,7 @@ export class Mud {
     return workflow;
   }
 
-  invokeWorkflow(name: string, params?: any[], options?: InvokeOptions) {
+  run(name: string, params?: any[], options?: InvokeOptions) {
     if (!(name in this.workflows)) {
       throw new WorkflowNotFoundError(`Workflow ${name} is not registered.`);
     }
@@ -115,7 +115,7 @@ export class Mud {
       this.triggers,
       this.plugins,
       this.send,
-      this.invokeWorkflow,
+      this.run,
     );
   }
 }

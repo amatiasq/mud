@@ -26,6 +26,10 @@ export function inventoryPlugin({ when, write }: PluginContext) {
       items = {};
 
       for (const item of inventory) {
+        if (item === 'Nada.') {
+          return;
+        }
+
         const match = item.match(/(.*) \((\d+)\)$/);
 
         if (match) {
