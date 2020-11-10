@@ -7,6 +7,7 @@ import { PatternResult } from './triggers/PatternResult';
 import { TriggerCollection } from './triggers/TriggerCollection';
 import { bindAll } from './util/bindAll';
 import { wait } from './util/wait';
+import { WriteOptions } from './WriteOptions';
 
 export class PluginContext {
   protected readonly subscriptions: PatternMatchSubscription[] = [];
@@ -22,15 +23,15 @@ export class PluginContext {
     readonly name: string,
     readonly username: string,
     protected readonly triggers: TriggerCollection,
-    protected readonly send: (command: string) => void,
+    protected readonly send: (command: string, options?: WriteOptions) => void,
   ) {
     bindAll(this, PluginContext);
   }
 
-  write(command: string) {
+  write(command: string, options?: WriteOptions) {
     this.checkNotAborted();
     this.log(`[WRITE]`, command);
-    this.send(command);
+    this.send(command, options);
   }
 
   when(pattern: Pattern, options?: PatternOptions): PatternPromise;

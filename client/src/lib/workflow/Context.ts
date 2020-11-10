@@ -4,6 +4,7 @@ import { Mud } from '../Mud';
 import { PluginContext } from '../PluginContext';
 import { TriggerCollection } from '../triggers/TriggerCollection';
 import { bindAll } from '../util/bindAll';
+import { WriteOptions } from '../WriteOptions';
 import { MissingPluginError } from './MissingPluginError';
 
 export class Context extends PluginContext {
@@ -16,7 +17,7 @@ export class Context extends PluginContext {
     username: string,
     triggers: TriggerCollection,
     plugins: PluginMap,
-    send: (command: string) => void,
+    send: (command: string, options?: WriteOptions) => void,
     private readonly runWorkflow: Mud['run'],
   ) {
     super(`W(${name})`, username, triggers, send);

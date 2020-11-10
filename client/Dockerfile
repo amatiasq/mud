@@ -10,7 +10,7 @@ COPY client/package-lock.json .
 RUN npm ci
 
 COPY client .
-COPY shared ../shared
+COPY config.json ../config.json
 
 RUN npm run build
 

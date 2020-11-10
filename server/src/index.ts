@@ -1,61 +1,71 @@
 import { createServer } from 'http';
-import Telnet from 'telnet-client';
+import { Server } from 'ws';
 
-import { MessageData, WebSocketServer } from '@amatiasq/socket';
-
-import { ClientMessage } from '../../shared/ClientMessage';
-import { DEFAULT_PORT } from '../../shared/config.json';
-import { ServerMessage } from '../../shared/ServerMessage';
+import { DEFAULT_PORT } from '../../config.json';
+import { Telnet } from './Telnet';
 
 const port = process.env.PORT || DEFAULT_PORT;
 const server = createServer();
-const wss = new WebSocketServer<ServerMessage, ClientMessage>(server);
+const wss = new Server({ server });
+let clients = 0;
 
 server.listen(port, () => console.log(`Websocket server ready at ${port}`));
 
-wss.onConnection(ws => {
+wss.on('connection', ws => {
   const telnet = new Telnet();
+  let id = clients++;
 
-  let isConnected = true;
+  console.log(`CONNECTION(${id})`);
 
-  ws.onDestroy(() => {
-    isConnected = false;
+  ws.on('close', () => {
     telnet.end();
-    console.log('DISCONNECTED');
+    log('Disconnected');
   });
 
-  console.log('CONNECTION');
-
-  telnet.on('close', () => send('DISCONNECTED', undefined));
-  telnet.on('data', buffer => send('OUTPUT', buffer.toString()));
-
-  telnet.on('error', () => {
-    telnet.end();
-    send('DISCONNECTED', undefined);
+  telnet.on('close', () => {
+    log('Telnet closed');
+    ws.close();
   });
 
-  ws.onMessageType('OPEN', async ({ host, port }) => {
-    try {
-      console.log(`Connecting to ${host}:${port}`);
-      await telnet.connect({ host: host, port });
-      console.log('Success');
-      send('CONNECTED', undefined);
-    } catch (error) {
-      send(
-        'ERROR',
-        `Can't open connection to "${host}:${port}": ${error.message}`,
-      );
+  telnet.on('error', error => {
+    log(`Telnet error: ${error.message}`);
+    ws.close();
+  });
+
+  telnet.on('data', x => ws.send(x));
+
+  ws.on('message', event => {
+    const { type, payload } = parseJson(String(event));
+
+    switch (type) {
+      case 'INPUT':
+        telnet.send(payload);
+        break;
+      case 'OPEN':
+        connect(payload);
+        break;
     }
   });
 
-  ws.onMessageType('INPUT', value => telnet.send(value));
-
-  function send<T extends ServerMessage['type']>(
-    type: T,
-    data: MessageData<ServerMessage, T>,
-  ) {
-    if (isConnected) {
-      ws.send(type, data);
+  async function connect({ host, port }: { host: string; port: number }) {
+    try {
+      log(`Connecting to ${host}:${port}`);
+      await telnet.connect({ host, port });
+      log('Success');
+    } catch (error) {
+      log(`Can't open connection to "${host}:${port}": ${error.message}`);
     }
   }
+
+  function log(...args: Parameters<Console['log']>) {
+    console.log(`[${id}]>`, ...args);
+  }
 });
+
+function parseJson(data: string) {
+  try {
+    return JSON.parse(data);
+  } catch (error) {
+    throw new Error(`Invalid JSON "${data}": ${error.message}`);
+  }
+}

@@ -9,6 +9,7 @@ import { Context } from './workflow/Context';
 import { InvokeOptions } from './workflow/InvokeOptions';
 import { Workflow } from './workflow/Workflow';
 import { WorkflowNotFoundError } from './workflow/WorkflowNotFoundError';
+import { WriteOptions } from './WriteOptions';
 
 export class Mud {
   private readonly triggers = new TriggerCollection();
@@ -42,8 +43,8 @@ export class Mud {
     this.emitLoggedIn(user);
   }
 
-  send(text: string) {
-    this.emitCommand(text);
+  send(text: string, options: WriteOptions = {}) {
+    this.emitCommand(options.password ? '*'.repeat(text.length) : text);
     this.telnet.send(text);
   }
 

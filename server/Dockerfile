@@ -10,8 +10,7 @@ COPY server/package-lock.json .
 RUN npm ci
 
 COPY server .
-COPY shared ../shared
+COPY config.json ../config.json
 
 EXPOSE 53472
-
 ENTRYPOINT [ "npm", "run", "prod" ]

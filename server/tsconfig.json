@@ -5,8 +5,8 @@
     "outDir": "./dist/",
     "resolveJsonModule": true,
     "sourceMap": true,
-    "strict": true,
-    "strictNullChecks": true,
+    "strict": false,
+    "strictNullChecks": false,
     "target": "ES2019"
   }
 }

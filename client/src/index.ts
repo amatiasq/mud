@@ -3,24 +3,39 @@ import { emitter } from '@amatiasq/emitter';
 import { Mud } from './lib/Mud';
 import { RemoteTelnet } from './lib/RemoteTelnet';
 import { registerWorkflows } from './registerWorkflows';
-import { socket } from './socket';
 import { renderUserInterface } from './ui';
 import { getPassword } from './util/getPassword';
 import { getQueryParams } from './util/getQueryParams';
+import { DEFAULT_PORT } from '../../config.json';
 
-const { user, server } = getQueryParams();
-const [host, port] = server.split(':');
-const pass = getPassword(user);
+let FORCE_PROD_SERVER = false;
+// FORCE_PROD_SERVER = true;
 
+const serverUri = getSocketUri();
+const { host, port, user, pass } = getParams();
 const { terminal, controls } = renderUserInterface(document.body);
-const telnet = new RemoteTelnet(socket);
 
-terminal.write(`Connecting to ${host}:${port} as ${user}\n`);
-telnet.onConnected(initializeMud);
-telnet.onData(data => terminal.write(data));
+openSocket();
 
-socket.onConnected(() => {
-  telnet.connect({ host, port: parseInt(port) });
+function openSocket() {
+  const socket = new WebSocket(serverUri);
+
+  // socket.addEventListener('close', openSocket);
+  socket.addEventListener('open', () => {
+    const telnet = new RemoteTelnet(socket);
+
+    telnet.connect(host, port);
+    terminal.write(`Connecting to ${host}:${port} as ${user}\n`);
+
+    initializeMud(telnet);
+  });
+}
+
+async function initializeMud(telnet: RemoteTelnet) {
+  const mud = new Mud(telnet);
+
+  mud.onCommand(x => terminal.write(`${x}\n`));
+  telnet.onData(data => terminal.write(data));
 
   window.onbeforeunload = () => {
     if (telnet.isConnected) {
@@ -29,18 +44,13 @@ socket.onConnected(() => {
 
     telnet.close();
   };
-});
-
-async function initializeMud() {
-  const mud = new Mud(telnet);
-  mud.onCommand(x => terminal.write(`${x}\n`));
 
   terminal.onSubmit(command => {
     terminal.write(`${command}\n`);
 
     if (command.startsWith('!')) {
       const [workflow, ...args] = command.substr(1).split(/\s+/);
-      +runWorkflow(workflow, args);
+      runWorkflow(workflow, args);
       return;
     }
 
@@ -85,4 +95,17 @@ async function initializeMud() {
       x => terminal.write(`\n\n<! FAILED ${cmd}: ${x.message}\n\n`),
     );
   }
+}
+
+function getSocketUri() {
+  return location.origin === 'https://amatiasq.github.io' || FORCE_PROD_SERVER
+    ? 'wss://mudOS.amatiasq.com'
+    : `ws://localhost:${DEFAULT_PORT}`;
+}
+
+function getParams() {
+  const { user, server } = getQueryParams();
+  const [host, port] = server.split(':');
+  const pass = getPassword(user);
+  return { host, port: parseInt(port, 10), user, pass };
 }

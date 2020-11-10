@@ -1,8 +1,4 @@
 import { emitter } from '@amatiasq/emitter';
-import { ClientSocket } from '@amatiasq/socket';
-
-import { ClientMessage } from '../../../shared/ClientMessage';
-import { ServerMessage } from '../../../shared/ServerMessage';
 
 export class RemoteTelnet {
   private _isConnected = false;
@@ -11,35 +7,45 @@ export class RemoteTelnet {
     return this._isConnected;
   }
 
-  private readonly emitConnected = emitter();
-  readonly onConnected = this.emitConnected.subscribe;
-
   private readonly emitClose = emitter();
   readonly onClose = this.emitClose.subscribe;
 
   private readonly emitData = emitter<string>();
   readonly onData = this.emitData.subscribe;
 
-  constructor(
-    private readonly socket: ClientSocket<ClientMessage, ServerMessage>,
-  ) {
-    socket.onMessageType('CONNECTED', this.emitConnected);
-    socket.onMessageType('DISCONNECTED', this.emitClose);
-    socket.onMessageType('OUTPUT', this.emitData);
+  constructor(private readonly socket: WebSocket) {
+    socket.addEventListener('close', this.emitClose);
+    socket.addEventListener('message', this.onMessage.bind(this));
 
-    this.onConnected(() => (this._isConnected = true));
+    this.onData(() => (this._isConnected = true));
     this.onClose(() => (this._isConnected = false));
   }
 
-  connect(options: { host: string; port: number }) {
-    this.socket.send('OPEN', options);
+  connect(host: string, port: number) {
+    this.proxy('OPEN', { host, port });
   }
 
   send(value: string) {
-    this.socket.send('INPUT', value);
+    this.proxy('INPUT', value);
   }
 
   close() {
     this.socket.close();
+  }
+
+  private proxy(type: string, payload: any) {
+    this.socket.send(JSON.stringify({ type, payload }));
+  }
+
+  private async onMessage(event: MessageEvent<Blob>) {
+    const escaped = await event.data.text();
+    const text = escaped
+      // .replace(/z<Ex>/g, '')
+      // .replace(/\[1z<\/Ex>/g, '')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&amp;/g, '&');
+
+    this.emitData(text);
   }
 }

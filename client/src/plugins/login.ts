@@ -6,25 +6,25 @@ export async function login(
   password: string,
   initialize: () => Promise<any>,
 ) {
+  await when('Entra el nombre de tu personaje o escribe Nuevo:');
   write(username);
   log('Username sent, waiting for password request');
 
-  // TODO: "Reconectando..." no triggerea esto nunca
-
   await when('Password:');
-  write(password);
+  write(password, { password: true });
   log(`Logged in as ${username}`);
 
   await Promise.any([
-    when('Reconectando.'),
+    (async () => {
+      await when('Reconectando.');
+      await initialize();
+    })(),
     (async () => {
       await when('Pulsa [ENTER]');
       write('');
       await when('Pulsa [ENTER]');
       write('');
+      await when('Bienvenido a Balzhur...', initialize, { await: true }).once();
     })(),
   ]);
-
-  // Kids don't do this at home
-  await when('Bienvenido a Balzhur...', initialize, { await: true }).once();
 }
