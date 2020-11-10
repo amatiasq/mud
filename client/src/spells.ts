@@ -1,10 +1,10 @@
 export type SpellName = keyof typeof SPELLS;
 export type Spell = SpellName | SpellName[];
 
-const UNKNOWN = 'UNKNOWN_STRING_THAT_SHOULD_NEVER_MATCH';
+export const UNKNOWN = null;
+export type UNKNOWN = typeof UNKNOWN;
 
 export const SPELL_FAILED = [
-  'Has fallado.',
   'Algo te distrae y pierdes la concentracion.',
   'Has perdido la concentracion.',
   'Has tenido una laguna mental mientras invocabas el hechizo.',
@@ -15,6 +15,7 @@ export const SPELL_FAILED = [
 ];
 
 export const SPELL_NOT_POSSIBLE = [
+  'Has fallado.',
   'No tienes suficiente mana.',
   'Este estilo de lucha pide demasiado atencion para hacer eso!',
   'Este asalto del combate es demasiado febril para concentrarte adecuadamente.',
@@ -24,7 +25,7 @@ export const SPELLS_BY_TYPE: Record<string, Spell> = {
   food: ['crear baya', 'crear comida'],
   water: ['crear manantial', 'crear agua'],
   levitate: ['volar', 'flotar'],
-  heal: ['curar grave', 'curar leves'],
+  heal: ['curar criticas', 'curar grave', 'curar leves'],
   attack: ['causar critica', 'causar grave', 'causar leve'],
   dedope: ['ceguera', 'veneno'],
 };
@@ -58,7 +59,23 @@ export const SPELL_LEARN_ORDER: Spell[] = [
   'crear fuego',
 ];
 
-export const SPELLS = {
+export interface SpellDescription {
+  name: SpellName;
+  success: string | RegExp;
+  endEffect?: string | UNKNOWN;
+  dope?: boolean | SpellName[];
+}
+
+export function getSpells(): SpellDescription[] {
+  return Object.entries(SPELLS)
+    .filter(([name, desc]) => desc)
+    .map(([name, desc]) => ({
+      ...((desc as any) as Omit<SpellDescription, 'name'>),
+      name: name as SpellName,
+    }));
+}
+
+const SPELLS = {
   armadura: {
     success: 'Tu armadura brilla suavemente al ser mejorada por un conjuro.',
     endEffect: 'Tu armadura vuelve a su valor normal.',
@@ -82,6 +99,8 @@ export const SPELLS = {
     success: /Lanzas un conjuro de ceguera contra ([^.]+)./,
   },
 
+  'conocer alineamiento': UNKNOWN,
+
   'crear agua': {
     success: ' esta lleno.\n',
   },
@@ -104,7 +123,7 @@ export const SPELLS = {
   },
 
   'curar ceguera': UNKNOWN,
-
+  'curar criticas': UNKNOWN,
   'curar grave': UNKNOWN,
 
   'curar leves': {
@@ -130,11 +149,17 @@ export const SPELLS = {
     dope: true,
   },
 
+  'detectar maldad': UNKNOWN,
+  'detectar trampas': UNKNOWN,
+  'disipar maldad': UNKNOWN,
+
   flotar: {
     success: 'Empiezas a flotar a unos centimetros del suelo...',
     endEffect: 'Tus pies aterrizan suavemente en el suelo.',
     dope: ['volar', 'flotar'],
   },
+
+  'fuego espectral': UNKNOWN,
 
   invisibilidad: {
     success: 'Te desvaneces en el aire.',
@@ -149,15 +174,23 @@ export const SPELLS = {
     dope: true,
   },
 
+  'llamar rayo': UNKNOWN,
+
   'luz eterna': {
     success:
       'Rayos de luz iridiscente colisionan para formar una bola de luz eterna...',
   },
 
+  maldecir: UNKNOWN,
+  'misil magico': UNKNOWN,
+  'niebla espectral': UNKNOWN,
+  proteccion: UNKNOWN,
+
   refrescar: {
     success: 'Nueva vitalidad fluye hacia ti.',
   },
 
+  terremoto: UNKNOWN,
   veneno: UNKNOWN,
 
   volar: {

@@ -1,5 +1,6 @@
 import { ClientStorage } from '@amatiasq/client-storage';
 import { wait } from '../lib/util/wait';
+import { getSpells } from '../spells';
 import { Context } from './../lib/workflow/Context';
 
 const memory = new ClientStorage<(string | string[])[]>('dope:casting');
@@ -12,22 +13,30 @@ export async function dope({
   const shouldHeal = defineShould(0.2);
   const shouldRefresh = defineShould(0.1, 0.8);
   const casting = new Set(memory.get());
+  const spells = getSpells().filter(x => x.dope);
 
-  ensureAlways('armadura', 'Tu armadura vuelve a su valor normal.');
-  ensureAlways('detectar invisible', 'Ya no ves objetos invisibles.');
-  ensureAlways('detectar magia', 'Las lineas azules desaparecen de tu vision.');
-  ensureAlways('invisibilidad', 'Ya no eres invisible.');
-  ensureAlways(
-    ['volar', 'flotar'],
-    'Tus pies aterrizan suavemente en el suelo.',
-  );
-  ensureAlways(['volar', 'flotar'], 'Aterrizas suavemente en el suelo.');
+  for (const { name: spell, endEffect, dope } of spells) {
+    if (!endEffect) {
+      console.warn(`Waiting for end effect for ${spell}`);
+      continue;
+    }
 
-  repeatUntilCasted('armadura');
-  repeatUntilCasted('detectar invisible');
-  repeatUntilCasted('detectar magia');
-  repeatUntilCasted('invisibilidad');
-  repeatUntilCasted(['volar', 'flotar']);
+    const invoke = Array.isArray(dope) ? dope : spell;
+
+    when(endEffect, async () => {
+      casting.add(invoke);
+      memory.set([...casting]);
+
+      const success = await repeatUntilCasted(invoke);
+
+      if (success) {
+        casting.delete(invoke);
+        memory.set([...casting]);
+      }
+    });
+
+    repeatUntilCasted(invoke);
+  }
 
   prompt.onUpdate(
     async ({
@@ -51,20 +60,6 @@ export async function dope({
   );
 
   await runForever();
-
-  function ensureAlways(spell: string | string[], trigger: string) {
-    when(trigger, async () => {
-      casting.add(spell);
-      memory.set([...casting]);
-
-      const success = await repeatUntilCasted(spell);
-
-      if (success) {
-        casting.delete(spell);
-        memory.set([...casting]);
-      }
-    });
-  }
 
   async function repeatUntilCasted(
     spell: string | string[],
