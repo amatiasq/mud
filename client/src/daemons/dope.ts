@@ -1,42 +1,27 @@
+import { SpellDescription, SPELLS_BY_TYPE } from './../spells';
 import { ClientStorage } from '@amatiasq/client-storage';
-import { wait } from '../lib/util/wait';
 import { getSpells } from '../spells';
 import { Context } from './../lib/workflow/Context';
+import { uniq } from '../util/uniq';
 
 const memory = new ClientStorage<(string | string[])[]>('dope:casting');
 
 export async function dope({
   when,
-  runForever,
+  write,
+  register,
+  run,
   plugins: { prompt, skills },
 }: Context) {
   const shouldHeal = defineShould(0.2);
   const shouldRefresh = defineShould(0.1, 0.8);
+  const repeatUntilCasted = (name: string | string[]) =>
+    run('cast', [name]).catch(() => null);
+
   const casting = new Set(memory.get());
-  const spells = getSpells().filter(x => x.dope);
+  const spells = getSpells();
 
-  for (const { name: spell, endEffect, dope } of spells) {
-    if (!endEffect) {
-      console.warn(`Waiting for end effect for ${spell}`);
-      continue;
-    }
-
-    const invoke = Array.isArray(dope) ? dope : spell;
-
-    when(endEffect, async () => {
-      casting.add(invoke);
-      memory.set([...casting]);
-
-      const success = await repeatUntilCasted(invoke);
-
-      if (success) {
-        casting.delete(invoke);
-        memory.set([...casting]);
-      }
-    });
-
-    repeatUntilCasted(invoke);
-  }
+  spells.filter(x => x.endEffect).forEach(watchDope);
 
   prompt.onUpdate(
     async ({
@@ -50,7 +35,7 @@ export async function dope({
       }
 
       if (shouldHeal(mana, hp)) {
-        return skills.castSpell('curar leves');
+        return skills.castSpell(SPELLS_BY_TYPE.heal);
       }
 
       if (shouldRefresh(mana, mv)) {
@@ -59,28 +44,38 @@ export async function dope({
     },
   );
 
-  await runForever();
+  register('dope', async (x: Context) => {
+    const list = spells
+      .filter(x => x.dope)
+      .map(x => (Array.isArray(x.dope) ? x.dope.join('|') : x.name));
 
-  async function repeatUntilCasted(
-    spell: string | string[],
-    args = '',
-  ): Promise<boolean> {
-    if (prompt.isFighting) {
-      await prompt.until(x => !x.isFighting);
+    for (const spell of uniq(list)) {
+      await repeatUntilCasted(spell.split('|'));
     }
+  });
 
-    switch (await skills.castSpell(spell, args)) {
-      case skills.CASTED:
-        return true;
-      case skills.NOT_AVAILABLE:
-        return false;
-      case skills.BUSY:
-        await wait(3);
-      case skills.FAILED:
-        return repeatUntilCasted(spell, args);
-    }
+  async function watchDope(spell: SpellDescription) {
+    const invoke = Array.isArray(spell.dope) ? spell.dope : spell.name;
 
-    throw new Error('WTF DUDE');
+    when(spell.endEffect!, async () => {
+      casting.add(invoke);
+      memory.set([...casting]);
+
+      const success = await repeatUntilCasted(invoke);
+
+      if (success) {
+        casting.delete(invoke);
+        memory.set([...casting]);
+
+        const after = spell.afterDope;
+
+        if (Array.isArray(after)) {
+          after.forEach(x => write(x));
+        } else if (after) {
+          write(after);
+        }
+      }
+    });
   }
 
   function defineShould(min: number, max = 1) {

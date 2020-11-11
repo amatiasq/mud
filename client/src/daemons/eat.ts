@@ -3,8 +3,7 @@ import { Context } from './../lib/workflow/Context';
 export async function eat({
   when,
   write,
-  runForever,
-  plugins: { inventory, navigation: nav, skills, prompt },
+  plugins: { inventory, navigation: nav, skills },
 }: Context) {
   const EXPECTED_FOOD = 1;
   const DEFAULT_FOOD_NAME = 'chuleta';
@@ -19,8 +18,6 @@ export async function eat({
     await buyFood();
     await eatSomething();
   });
-
-  await runForever();
 
   async function eatSomething() {
     const food = await getFoodFromInventory();

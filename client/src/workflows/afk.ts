@@ -1,15 +1,10 @@
 import { Context } from './../lib/workflow/Context';
 
-export async function afk({ run, runForever, plugins: { prompt } }: Context) {
+export async function afk({ run, plugins: { prompt } }: Context) {
   await action();
 
   async function action(): Promise<void> {
-    await prompt.until(
-      stats =>
-        stats.hp.percent === 1 &&
-        stats.mana.percent === 1 &&
-        stats.mv.percent === 1,
-    );
+    await prompt.whenFresh();
 
     console.log('Stats 100%. Start train...');
 
@@ -21,7 +16,6 @@ export async function afk({ run, runForever, plugins: { prompt } }: Context) {
     }
 
     await run('bank');
-
     return action();
   }
 }

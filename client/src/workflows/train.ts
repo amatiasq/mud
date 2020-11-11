@@ -53,9 +53,10 @@ export async function train({
   when('El lobo hambriento se va hacia el', enemyGone('lobo hambriento'));
   when('La serpiente se va hacia el', enemyGone('serpiente'));
 
-  return nextRoom();
+  await nav.execute('xsexnexsexnexs', checkRoom);
+  return nav.execute('4w5nu');
 
-  async function nextRoom(): Promise<any> {
+  async function checkRoom() {
     await prompt.until(({ mv: { current: mv } }) => mv > 50);
 
     while (enemies.length) {
@@ -66,16 +67,5 @@ export async function train({
         return nav.recall();
       }
     }
-
-    if (nav.canGo(direction)) {
-      await nav.go(direction);
-    } else if (nav.canGo('este')) {
-      await nav.go('este');
-      direction = direction === 'sur' ? 'norte' : 'sur';
-    } else {
-      return nav.execute('4w5nu');
-    }
-
-    return nextRoom();
   }
 }

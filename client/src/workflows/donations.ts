@@ -69,7 +69,7 @@ const EQUIPMENT: Record<string, ItemName[]> = {
     'pulsera',
   ],
   feet: ['botas', 'grebas', 'mocasines', 'perneras', 'polainas', 'tobillera'],
-  head: ['anteojos', 'casco', 'somprero', 'visera', 'yelmo'],
+  head: ['anteojos', 'casco', 'somprero', 'visera' /*, 'yelmo'*/],
   complements: ['anillo', 'colgante', 'collar', 'pendiente'],
   shield: ['escudo'],
 };
@@ -113,7 +113,9 @@ export async function donations({
 
   for (const items of Object.values(EQUIPMENT)) {
     for (const item of items) {
-      if (list.some(x => x.includes(item)) && (await wear(item))) {
+      const found = list.some(x => x.includes(item) && !x.includes('mallas'));
+
+      if (found && (await wear(item))) {
         break;
       }
     }

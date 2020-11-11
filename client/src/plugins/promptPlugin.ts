@@ -82,23 +82,8 @@ export async function promptPlugin({ when, write }: PluginContext) {
     waitForPrompt,
     getPercent,
     until,
+    whenFresh,
     onUpdate: update.subscribe,
-
-    get isExhausted() {
-      return stats.mv.current <= 15;
-    },
-
-    // get isInjured() {
-    //   return stats.hp.percent !== 1;
-    // },
-
-    get needsHospital() {
-      return stats.hp.percent < 0.3;
-    },
-
-    get isInDanger() {
-      return stats.hp.percent < 0.1;
-    },
 
     get isFighting() {
       return stats.isFighting;
@@ -108,6 +93,15 @@ export async function promptPlugin({ when, write }: PluginContext) {
       return isInvisible;
     },
   };
+
+  function whenFresh() {
+    return until(
+      stats =>
+        stats.hp.percent === 1 &&
+        stats.mana.percent === 1 &&
+        stats.mv.percent === 1,
+    );
+  }
 
   function setPrompt() {
     write(`prompt ${PROMPT}`);

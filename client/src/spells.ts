@@ -14,18 +14,23 @@ export const SPELL_FAILED = [
   'Una mota de polvo en el ojo rompe tu concentracion por un momento.',
 ];
 
-export const SPELL_NOT_POSSIBLE = [
+export const SPELL_ALREADY_APPLIED = [
   'Has fallado.',
+  'Eso no parece tener ningun efecto.',
+];
+
+export const SPELL_NOT_POSSIBLE = [
   'No tienes suficiente mana.',
   'Este estilo de lucha pide demasiado atencion para hacer eso!',
   'Este asalto del combate es demasiado febril para concentrarte adecuadamente.',
+  'No has tenido suficiente tiempo en este asalto para completar el conjuro.',
 ];
 
 export const SPELLS_BY_TYPE: Record<string, Spell> = {
   food: ['crear baya', 'crear comida'],
   water: ['crear manantial', 'crear agua'],
   levitate: ['volar', 'flotar'],
-  heal: ['curar criticas', 'curar grave', 'curar leves'],
+  heal: ['curar criticas', 'curar graves', 'curar leves'],
   attack: ['causar critica', 'causar grave', 'causar leve'],
   dedope: ['ceguera', 'veneno'],
 };
@@ -64,6 +69,7 @@ export interface SpellDescription {
   success: string | RegExp;
   endEffect?: string | UNKNOWN;
   dope?: boolean | SpellName[];
+  afterDope?: string;
 }
 
 export function getSpells(): SpellDescription[] {
@@ -119,20 +125,21 @@ const SPELLS = {
     success:
       'Trazas un circulo delante tuyo del cual emerge un manantial de agua cristalina.',
     endEffect: 'Un manantial magico se seca.',
-    dope: true,
   },
 
   'curar ceguera': UNKNOWN,
   'curar criticas': UNKNOWN,
-  'curar grave': UNKNOWN,
+  'curar graves': UNKNOWN,
 
   'curar leves': {
     success: 'Tus heridas leves se cierran y el dolor desaparece.',
   },
 
+  'curar veneno': UNKNOWN,
+
   'detectar escondido': {
     success: 'Tus sentidos cobran la viveza de los del mejor predador.',
-    endEffect: UNKNOWN,
+    endEffect: 'Te sientes menos consciente de lo que te rodea.',
     dope: true,
   },
 
@@ -149,8 +156,19 @@ const SPELLS = {
     dope: true,
   },
 
-  'detectar maldad': UNKNOWN,
-  'detectar trampas': UNKNOWN,
+  'detectar maldad': {
+    success:
+      'Delgadas lineas rojas reseguiran las siluetas de los seres malvados que te encuentres.',
+    endEffect: UNKNOWN,
+    dope: true,
+  },
+
+  'detectar trampas': {
+    success: 'De repente te sientes mas alerta de los peligros que te rodean.',
+    endEffect: 'Te sientes menos alerta de los peligros que te rodean.',
+    dope: true,
+  },
+
   'disipar maldad': UNKNOWN,
 
   flotar: {
@@ -171,7 +189,6 @@ const SPELLS = {
     success:
       'Agitas tus brazos a la vez que te concentras para invocar un pequenyo armadillo.',
     endEffect: UNKNOWN,
-    dope: true,
   },
 
   'llamar rayo': UNKNOWN,
@@ -179,6 +196,8 @@ const SPELLS = {
   'luz eterna': {
     success:
       'Rayos de luz iridiscente colisionan para formar una bola de luz eterna...',
+    endEffect: 'Esta completamente oscuro ...',
+    afterDope: ['vestir luz', 'mirar'],
   },
 
   maldecir: UNKNOWN,

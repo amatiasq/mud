@@ -1,6 +1,6 @@
 import { Context } from './../lib/workflow/Context';
 
-export async function rest({ when, write, runForever }: Context) {
+export async function rest({ when, write }: Context) {
   when(
     [
       'Nah... Estas demasiado relajado...',
@@ -9,6 +9,4 @@ export async function rest({ when, write, runForever }: Context) {
     ],
     () => write('despertar'),
   );
-
-  await runForever();
 }

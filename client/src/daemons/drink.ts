@@ -3,7 +3,6 @@ import { Context } from './../lib/workflow/Context';
 export async function drink({
   when,
   write,
-  runForever,
   plugins: { inventory, navigation, skills },
 }: Context) {
   let isFontAvailable = false;
@@ -57,8 +56,6 @@ export async function drink({
       await skills.castSpell('crear agua', bottle);
     },
   );
-
-  await runForever();
 
   async function getWaterBottle() {
     return inventory.has({

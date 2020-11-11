@@ -1,7 +1,12 @@
 import { PluginContext } from '../lib/PluginContext';
 import { concatRegexes } from '../lib/util/concatRegexes';
 import { singleExecution } from '../lib/util/singleExecution';
-import { getSpells, SPELL_FAILED, SPELL_NOT_POSSIBLE } from '../spells';
+import {
+  getSpells,
+  SPELL_ALREADY_APPLIED,
+  SPELL_FAILED,
+  SPELL_NOT_POSSIBLE,
+} from '../spells';
 
 // Skill cast results
 // const TIMEOUT = 0;
@@ -9,6 +14,7 @@ const NOT_AVAILABLE = undefined;
 const BUSY = null;
 const FAILED = false;
 const CASTED = true;
+const ALREADY_APPLIED = 1;
 
 const SUCCESS = Object.fromEntries(getSpells().map(x => [x.name, x.success]));
 
@@ -46,7 +52,16 @@ export function skillsPlugin({ when, write }: PluginContext) {
     { captureLength: 3000 },
   );
 
-  return { has, canLearn, castSpell, NOT_AVAILABLE, BUSY, FAILED, CASTED };
+  return {
+    has,
+    canLearn,
+    castSpell,
+    NOT_AVAILABLE,
+    BUSY,
+    FAILED,
+    CASTED,
+    ALREADY_APPLIED,
+  };
 
   async function has(search: string | string[]) {
     await ensureInitiated();
@@ -96,8 +111,9 @@ export function skillsPlugin({ when, write }: PluginContext) {
     const result = await Promise.any([
       when(success).then(() => CASTED),
       when(SPELL_NOT_POSSIBLE).then(() => NOT_AVAILABLE),
+      when(SPELL_ALREADY_APPLIED).then(() => ALREADY_APPLIED),
       when(SPELL_FAILED)
-        .wait(8)
+        .wait(4)
         .then(() => FAILED),
     ]);
 

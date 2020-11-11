@@ -1,35 +1,18 @@
+import { SPELLS_BY_TYPE } from './../spells';
 import { Context } from '../lib/workflow/Context';
 
 export async function kill(
-  { when, write, plugins: { prompt, navigation, skills } }: Context,
+  { when, write, plugins: { navigation, skills } }: Context,
   target: string,
 ) {
-  when('Estas demasiado exhausto para huir del combate!', () =>
-    navigation.recall(),
-  );
-
-  when(
-    [
-      new RegExp(`Tu (?<attack>\\w+) (?<effect>\\w+) a( |\\w)+ ${target}.`),
-      new RegExp(`El ataque de( |\\w)+ ${target} te (?<effect>\w+).`),
-    ],
-    update,
-  );
-
-  const attackSpells = [
-    'ceguera',
-    'causar fatales',
-    'causar critica',
-    'causar graves',
-    'causar leves',
-  ];
-
+  const attackSpells = [...SPELLS_BY_TYPE.dedope, ...SPELLS_BY_TYPE.attack];
   const cast = () => skills.castSpell(attackSpells, target);
 
   if (!(await tryNTimes(3, cast))) {
     write(`matar ${target}`);
   }
 
+  // wile result == null cast attack!!!!
   const result = await Promise.any([
     navigation.waitForRecall().then(() => 'flee'),
     when(`${target} ha MUERTO!!`).then(() => 'win'),
@@ -45,16 +28,6 @@ export async function kill(
   }
 
   return result;
-
-  async function update() {
-    if (prompt.isInDanger) {
-      await navigation.recall();
-    } else if (prompt.isExhausted || prompt.needsHospital) {
-      write('huir');
-    } else {
-      await skills.castSpell(['causar graves', 'causar leves']);
-    }
-  }
 
   async function tryNTimes(times: number, action: () => Promise<boolean>) {
     for (let i = 0; i < times; i++) {

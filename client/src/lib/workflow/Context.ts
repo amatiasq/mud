@@ -1,3 +1,4 @@
+import { WorkflowFn } from './WorkflowFn';
 import { PluginMap } from '../../plugins/index';
 import { ExecutionAbortedError } from '../ExecutionAbortedError';
 import { Mud } from '../Mud';
@@ -18,6 +19,10 @@ export class Context extends PluginContext {
     triggers: TriggerCollection,
     plugins: PluginMap,
     send: (command: string, options?: WriteOptions) => void,
+    readonly register: <Args extends any[]>(
+      name: string,
+      action: WorkflowFn<Args>,
+    ) => void,
     private readonly runWorkflow: Mud['run'],
   ) {
     super(`W(${name})`, username, triggers, send);

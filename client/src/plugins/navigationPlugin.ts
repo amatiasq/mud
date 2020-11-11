@@ -19,7 +19,7 @@ const aliases = {
   h: 'noroeste',
 };
 
-export function navigationPlugin({ when, write }: PluginContext) {
+export function navigationPlugin({ log, when, write }: PluginContext) {
   let isNavigating = false;
   let landingAtRecall = false;
   let isAtRecall = false;
@@ -93,7 +93,10 @@ export function navigationPlugin({ when, write }: PluginContext) {
     return dir && dir.includes(CLOSED);
   }
 
-  async function execute(pattern: string) {
+  async function execute(
+    pattern: string,
+    callback: () => Promise<any> | void = () => {},
+  ) {
     if (pattern[0] === 'r') {
       await recall();
       pattern = pattern.substr(1);
@@ -108,25 +111,31 @@ export function navigationPlugin({ when, write }: PluginContext) {
       }
 
       if (!untilEnd) {
-        await go(step);
-        continue;
+        if (await go(step)) {
+          await callback();
+          continue;
+        } else {
+          return false;
+        }
       }
 
       while (canGo(step)) {
-        await go(step);
+        if (!(await go(step))) {
+          return false;
+        }
+
+        await callback();
       }
 
       untilEnd = false;
     }
+
+    return true;
   }
 
   async function go(direction: string) {
     if (isNavigating) {
       throw new Error('WTF DUDE');
-    }
-
-    if (direction in aliases) {
-      direction = aliases[direction as keyof typeof aliases];
     }
 
     const dir = get(direction);
@@ -137,19 +146,33 @@ export function navigationPlugin({ when, write }: PluginContext) {
 
     if (isClosed(direction)) {
       write(`abrir ${direction}`);
-      await when('Abres la puerta.');
+
+      const success = await Promise.any([
+        when('Abres la puerta.').then(() => true),
+        when('Esta cerrada con llave.').then(() => false),
+      ]);
+
+      if (!success) {
+        log('Can\t open door');
+        return false;
+      }
     }
 
-    write(direction);
+    write(dir.replace(CLOSED, '').trim());
     isNavigating = true;
 
     await when('\nSalidas:');
     await prompt();
 
     isNavigating = false;
+    return true;
   }
 
   function get(direction: string) {
+    if (direction in aliases) {
+      direction = aliases[direction as keyof typeof aliases];
+    }
+
     return directions.find(x => x.startsWith(direction));
   }
 }

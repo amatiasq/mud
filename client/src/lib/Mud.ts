@@ -8,6 +8,7 @@ import { TriggerCollection } from './triggers/TriggerCollection';
 import { Context } from './workflow/Context';
 import { InvokeOptions } from './workflow/InvokeOptions';
 import { Workflow } from './workflow/Workflow';
+import { WorkflowFn } from './workflow/WorkflowFn';
 import { WorkflowNotFoundError } from './workflow/WorkflowNotFoundError';
 import { WriteOptions } from './WriteOptions';
 
@@ -24,6 +25,7 @@ export class Mud {
   readonly whenLoggedIn = new Promise(resolve => (this.emitLoggedIn = resolve));
 
   constructor(private readonly telnet: RemoteTelnet) {
+    this.workflow = this.workflow.bind(this);
     this.send = this.send.bind(this);
     this.run = this.run.bind(this);
     this.telnet.onData(x => this.triggers.process(removeNoise(x)));
@@ -56,11 +58,15 @@ export class Mud {
 
   daemon<Args extends any[]>(
     name: string,
-    run: (context: Context, ...args: Args) => Promise<any> | void,
+    run: WorkflowFn<[]>,
     params?: Args,
     options?: InvokeOptions,
   ) {
-    const workflow = new Workflow(name, run);
+    const workflow = new Workflow(name, async (context: Context) => {
+      await run(context);
+      return context.runForever();
+    });
+
     return this.executeWorkflow(
       workflow as Workflow<any, any>,
       params,
@@ -68,10 +74,7 @@ export class Mud {
     );
   }
 
-  workflow<Args extends any[]>(
-    name: string,
-    run: (context: Context, ...args: Args) => Promise<any> | void,
-  ) {
+  workflow<Args extends any[]>(name: string, run: WorkflowFn<Args>) {
     const workflow = new Workflow(name, run);
     this.workflows[workflow.name] = workflow as Workflow<any, any>;
     return workflow;
@@ -116,6 +119,7 @@ export class Mud {
       this.triggers,
       this.plugins,
       this.send,
+      this.workflow,
       this.run,
     );
   }
