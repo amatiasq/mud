@@ -1,3 +1,4 @@
+import { Pattern } from './../lib/triggers/Pattern';
 export type SpellName = keyof typeof SPELLS;
 export type Spell = SpellName | SpellName[];
 
@@ -68,14 +69,6 @@ export const SPELL_LEARN_ORDER: Spell[] = [
   'crear fuego',
 ];
 
-export interface SpellDescription {
-  name: SpellName;
-  success: string | RegExp;
-  endEffect?: string | UNKNOWN;
-  dope?: boolean | SpellName[];
-  afterDope?: string;
-}
-
 export function getSpells(): SpellDescription[] {
   return Object.entries(SPELLS)
     .filter(([name, desc]) => desc)
@@ -85,9 +78,15 @@ export function getSpells(): SpellDescription[] {
     }));
 }
 
+export function getSpell(name: string) {
+  const lower = name.toLowerCase();
+  return getSpells().find(x => x.name.toLowerCase().startsWith(lower));
+}
+
 const SPELLS = {
   armadura: {
     success: 'Tu armadura brilla suavemente al ser mejorada por un conjuro.',
+    target: /La armadura de (?<target>(?:\w+ )+)brilla suavemente al ser mejorada por un conjuro\./,
     endEffect: 'Tu armadura vuelve a su valor normal.',
     dope: true,
   },
@@ -147,12 +146,14 @@ const SPELLS = {
 
   'detectar escondido': {
     success: 'Tus sentidos cobran la viveza de los del mejor predador.',
+    target: false,
     endEffect: 'Te sientes menos consciente de lo que te rodea.',
     dope: true,
   },
 
   'detectar invisible': {
     success: 'Tus ojos brillan, siendo capaces ahora de ver lo invisible.',
+    target: false,
     endEffect: 'Ya no ves objetos invisibles.',
     dope: true,
   },
@@ -160,6 +161,7 @@ const SPELLS = {
   'detectar magia': {
     success:
       'Delgadas lineas azules reseguiran las siluetas de los objetos magicos que te encuentres.',
+    target: false,
     endEffect: 'Las lineas azules desaparecen de tu vision',
     dope: true,
   },
@@ -167,12 +169,14 @@ const SPELLS = {
   'detectar maldad': {
     success:
       'Delgadas lineas rojas reseguiran las siluetas de los seres malvados que te encuentres.',
+    target: false,
     endEffect: 'Las lineas rojas desaparecen de tu vision.',
     dope: true,
   },
 
   'detectar trampas': {
     success: 'De repente te sientes mas alerta de los peligros que te rodean.',
+    target: false,
     endEffect: 'Te sientes menos alerta de los peligros que te rodean.',
     dope: true,
   },
@@ -195,6 +199,7 @@ const SPELLS = {
 
   invisibilidad: {
     success: 'Te desvaneces en el aire.',
+    target: /(?<target>(?:\w+ )+)se desvanece en el aire./,
     endEffect: 'Ya no eres invisible.',
     dope: true,
   },
@@ -221,6 +226,7 @@ const SPELLS = {
 
   'piel robliza': {
     success: 'Tu piel se oscurece a la vez que adquiere la dureza del roble.',
+    target: false,
     endEffect: 'Tu piel vuelve a su estado normal...',
     dope: true,
   },
@@ -238,7 +244,19 @@ const SPELLS = {
 
   volar: {
     success: 'Te elevas entre las corrientes de aire...',
+    target: /(?<target>(?:\w+ )+)se eleva entre las corrientes de aire.../,
     endEffect: 'Aterrizas suavemente en el suelo.',
     dope: ['volar', 'flotar'],
   },
-};
+} as const;
+
+SPELLS as Record<string, UNKNOWN | Omit<SpellDescription, 'name'>>;
+
+export interface SpellDescription {
+  readonly name: SpellName;
+  readonly success: Pattern;
+  readonly target?: Pattern | false;
+  readonly endEffect?: Pattern | UNKNOWN;
+  readonly dope?: true | readonly SpellName[];
+  readonly afterDope?: string | readonly string[];
+}

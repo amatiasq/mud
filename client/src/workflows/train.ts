@@ -1,13 +1,16 @@
-import { getAreasForLevel } from '../data/areas';
+import { getAreaMetadata, getAreasForLevel } from '../data/areas';
 import { getMobIn, MOB_ARRIVES, MOB_LEAVES, MOB_PRESENT } from '../data/mobs';
 import { Context } from '../lib/workflow/Context';
 
-export async function train({
-  when,
-  run: invokeWorkflow,
-  plugins: { navigation: nav, prompt, stats },
-}: Context) {
-  const arena = await getArena();
+export async function train(
+  {
+    when,
+    run: invokeWorkflow,
+    plugins: { navigation: nav, prompt, stats },
+  }: Context,
+  area?: string,
+) {
+  const arena = await getArena(area);
   const enemies: string[] = [];
 
   await nav.execute(arena.path);
@@ -65,7 +68,20 @@ export async function train({
     return true;
   }
 
-  async function getArena() {
+  async function getArena(areaName?: string) {
+    const area = areaName ? getAreaMetadata(areaName) : await getBestArea();
+
+    if (!area) {
+      throw new Error(`NO AREA "${areaName}"`);
+    }
+
+    const path = area.path!.split('');
+    const last = path.pop();
+
+    return { path: path.join(''), arena: `${last}${area.arena}` };
+  }
+
+  async function getBestArea() {
     const level = await stats.getLevel();
     const areas = getAreasForLevel(level);
     const [first, ...others] = areas.filter(x => x.arena);
@@ -74,9 +90,6 @@ export async function train({
       console.warn('Multiple arenas available');
     }
 
-    const path = first.path!.split('');
-    const last = path.pop();
-
-    return { path: path.join(''), arena: `${last}${first.arena}` };
+    return first;
   }
 }

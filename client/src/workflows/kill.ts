@@ -1,5 +1,6 @@
 import { SPELLS_BY_TYPE } from '../data/spells';
 import { Context } from '../lib/workflow/Context';
+import { CastSpellResult } from '../plugins/skillsPlugin';
 
 export async function kill(
   { when, write, plugins: { navigation, skills } }: Context,
@@ -33,7 +34,10 @@ export async function kill(
 
   return result;
 
-  async function tryNTimes(times: number, action: () => Promise<boolean>) {
+  async function tryNTimes(
+    times: number,
+    action: () => Promise<CastSpellResult>,
+  ) {
     for (let i = 0; i < times; i++) {
       if (await action()) {
         return true;

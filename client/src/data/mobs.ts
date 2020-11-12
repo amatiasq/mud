@@ -56,4 +56,8 @@ export const MOB_PRESENT = [
   'Un lobo hambriento te esta mirando', //: 1,
   'Una serpiente que parece venenosa te mira fijamente.', //: 1,
   /Un Guardia Real est. aqu. velando por la seguridad del estadio/, //: 14,
+  'Un corpulento orco esta aqui de guardia.',
+  'Un sargento orco mantiene vigilada la chusma a la que comanda.',
+  'Un orco fuera de servicio esta sentado aqui jugando a las cartas.',
+  'Un pequenyo orco se sienta en una de las sillas roncando.',
 ];

@@ -78,6 +78,7 @@ function addMessage(
     partial.to || 'me',
     partial.message,
   ];
+
   log.set([...(log.get() || []), message]);
   return message;
 }

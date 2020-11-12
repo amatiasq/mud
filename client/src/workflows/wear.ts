@@ -1,4 +1,10 @@
-import { ITEM_ARTICLE, ITEM_SUSTANTIVES } from '../data/items';
+import {
+  getItemSustantive,
+  ITEM_ARTICLE,
+  ITEM_SUSTANTIVES,
+  UNWEAR,
+  WEAR,
+} from '../data/items';
 import { concatRegexes } from '../lib/util/concatRegexes';
 import { Context } from '../lib/workflow/Context';
 
@@ -47,16 +53,12 @@ export async function wear({ run, when, write }: Context, ...args: string[]) {
     write(`vestir "${item}"`);
 
     const result = await Promise.any([
+      when(WEAR).then(() => true),
+      when(UNWEAR).then(({ groups }) => groups.item),
       when([
         /Debes ser nivel \w+ para usar este objeto./,
         'No puedes vestir eso, necesita repararse.',
       ]).then(() => false),
-      when(['Te colocas ', 'Te pones ', 'Metes las piernas ', 'Vistes ']).then(
-        () => true,
-      ),
-      when(
-        concatRegexes(/Dejas de usar/, ITEM_ARTICLE, / (?<item>[^.]+?)\./),
-      ).then(({ groups }) => groups.item),
     ]);
 
     if (result === false) {
@@ -65,7 +67,7 @@ export async function wear({ run, when, write }: Context, ...args: string[]) {
     }
 
     if (typeof result === 'string') {
-      const other = ITEM_SUSTANTIVES.find(x => result.includes(x));
+      const other = getItemSustantive(result);
 
       if (other) {
         await run('cast', ['identificar', other]);

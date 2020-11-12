@@ -80,9 +80,9 @@ export class Mud {
     return workflow;
   }
 
-  run(name: string, params?: any[], options?: InvokeOptions) {
+  async run(name: string, params?: any[], options?: InvokeOptions) {
     if (!(name in this.workflows)) {
-      throw new WorkflowNotFoundError(`Workflow ${name} is not registered.`);
+      throw new WorkflowNotFoundError(`Workflow "${name}" is not registered.`);
     }
 
     const workflow = this.workflows[name];

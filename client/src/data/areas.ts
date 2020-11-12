@@ -15,15 +15,48 @@ export type Area = AreaBase & Partial<AreaMetadata>;
 const METADATA: Partial<Record<AreaName, AreaMetadata>> = {
   // cadaver: { path: 'ru2sw'},
   'Academia de Darkhaven': {
-    path: 'rds',
+    path: 'rd',
     arena: 'XseXneXseXneXse',
   },
-  'El Cementerio': { path: 'r4wXs' },
+  'Bosque de las Hadas': { path: 'r6w2nwk2wh' },
+  'Catacumbas de la Capilla': { path: 'r6w8se7s' },
+  'Cementerio Oscuro': { path: 'r4s4ws' },
+  'Ciudad Imperial': { path: 'r8e2n4el3e2sj' },
+  DarkHaven: { path: 'r' },
+  'El Campamento Goblin': { path: 'r10s4en3e2n' },
+  'El Cementerio': { path: 'r6w8ses' },
+  'El Centinela': { path: 'r7ws' },
   'El Gran Estadio': {
     path: 'r8e2n4el3e2s2jn',
     arena: 'j',
   },
-  'El Campamento Goblin': { path: 'r10s4en3e2n' },
+  'El Imperio Orco': {
+    path: 'r13s2wn',
+    arena: [
+      'Xnu',
+      'Xsu',
+      'ne2wene2weXsu',
+      'ne2wenXsnu',
+      '3ne2wennu',
+      's', // hogoblin
+    ].join(''),
+  },
+  'El Jardin de los Heroes': { path: 'r8e2n4el3e2s2j8l8e5j4els' },
+  'El Pantano Orco': { path: 'r13s2en' },
+  'El Refugio Destruido': { path: 'r8e2ne' },
+  'Exportaciones de Dragones': { path: 'r4sen' },
+  'Foire de Reves': { path: 'r8n3ene' },
+  'Galeria de arte': { path: 'r4swn' },
+  'Guarderia Enana': { path: 'r8ejs' },
+  'Haon Dor': { path: 'r7w' },
+  'Holy Grove': { path: 'r9e' },
+  'La Fortaleza de Valor': { path: 'r11n2en' },
+  'La Mansion de Marmol': { path: 'r9w3s' },
+  'La Mansion de Tullfuhrzky': { path: 'r6w2nwk2wh4nj' },
+  'La Torre del Brujo': { path: 'r9w2sese2s' },
+  'Las Alcantarillas': { path: 'r4sd' },
+  'Las Llanuras del Norte': { path: 'r7n' },
+  "Miden'nir": { path: 'r7s' },
 };
 
 // export function getAreaName(name: string) {
@@ -41,8 +74,9 @@ function avg(area: AreaBase, level: number) {
 }
 
 export function getAreaMetadata(areaName: string) {
+  const lower = areaName.toLowerCase();
   const [first, ...candidates] = ALL_AREAS.filter(x =>
-    x.name.includes(areaName),
+    x.name.toLocaleLowerCase().includes(lower),
   );
 
   if (candidates.length) {

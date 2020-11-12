@@ -1,6 +1,20 @@
+import { concatRegexes } from '../lib/util/concatRegexes';
+
 export type ItemName = typeof ITEM_SUSTANTIVES[number];
 
 export const ITEM_ARTICLE = /(?: (?:un|una|el|la|los|las|unos|unas))?/;
+
+export const WEAR = [
+  'Te colocas ',
+  'Te pones ',
+  'Metes las piernas ',
+  'Vistes ',
+];
+export const UNWEAR = concatRegexes(
+  /Dejas de usar/,
+  ITEM_ARTICLE,
+  / (?<item>[^.]+?)\./,
+);
 
 export const ITEM_SUSTANTIVES = [
   'amuleto',
@@ -59,3 +73,8 @@ export const ITEM_SUSTANTIVES = [
   'visera',
   'yelmo',
 ] as const;
+
+export function getItemSustantive(item: string): ItemName | null {
+  const lower = item.toLowerCase();
+  return ITEM_SUSTANTIVES.find(x => lower.includes(x)) || null;
+}

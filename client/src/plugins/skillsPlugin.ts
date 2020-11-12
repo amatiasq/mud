@@ -1,5 +1,6 @@
+import { SpellDescription } from './../data/spells';
 import {
-  getSpells,
+  getSpell,
   SPELL_ALREADY_APPLIED,
   SPELL_FAILED,
   SPELL_NOT_POSSIBLE,
@@ -16,7 +17,12 @@ const FAILED = false;
 const CASTED = true;
 const ALREADY_APPLIED = 1;
 
-const SUCCESS = Object.fromEntries(getSpells().map(x => [x.name, x.success]));
+export type CastSpellResult =
+  | typeof NOT_AVAILABLE
+  | typeof BUSY
+  | typeof FAILED
+  | typeof CASTED
+  | typeof ALREADY_APPLIED;
 
 const SKILL = /((?:\w+ )+)\s+(\d+)%/g;
 const SKILLS_DETECTOR = concatRegexes(
@@ -89,14 +95,21 @@ export function skillsPlugin({ when, write }: PluginContext) {
   }
 
   async function castSpell(name: string | string[], args = '') {
-    const validName = await has(name);
+    debugger;
+    const aliases = Array.isArray(name) ? name : [name];
+    const candidates = aliases
+      .map(getSpell)
+      .filter(Boolean) as SpellDescription[];
+    const learnt = await has(candidates.map(x => x.name));
 
-    if (!validName) {
+    if (!learnt) {
       return NOT_AVAILABLE;
     }
 
-    if (!(validName in SUCCESS)) {
-      throw new Error(`Unknown response for spell "${name}".`);
+    const spell = candidates.find(x => x.name === learnt)!;
+
+    if (!spell.success) {
+      throw new Error(`Unknown response for spell "${name}" (${spell.name}).`);
     }
 
     if (isSpellRunning) {
@@ -104,18 +117,22 @@ export function skillsPlugin({ when, write }: PluginContext) {
     }
 
     isSpellRunning = true;
-    write(`conjurar "${validName}" ${args}`);
+    write(`conjurar "${spell.name}" ${args}`);
 
-    const success = SUCCESS[validName as keyof typeof SUCCESS];
-
-    const result = await Promise.any([
-      when(success).then(() => CASTED),
+    const promises: Promise<CastSpellResult>[] = [
+      when(spell.success).then(() => CASTED),
       when(SPELL_NOT_POSSIBLE).then(() => NOT_AVAILABLE),
       when(SPELL_ALREADY_APPLIED).then(() => ALREADY_APPLIED),
       when(SPELL_FAILED)
         .wait(4)
         .then(() => FAILED),
-    ]);
+    ];
+
+    if (spell.target) {
+      promises.push(when(spell.target).then(() => CASTED));
+    }
+
+    const result: CastSpellResult = await Promise.any(promises);
 
     isSpellRunning = false;
     return result;

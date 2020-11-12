@@ -15,8 +15,10 @@ export async function dope({
 }: Context) {
   const shouldHeal = defineShould(0.2);
   const shouldRefresh = defineShould(0.1, 0.8);
-  const repeatUntilCasted = (name: string | string[]) =>
-    run('cast', [name]).catch(() => null);
+  const repeatUntilCasted = (
+    name: string | string[],
+    ...args: (string | undefined)[]
+  ) => run('cast', [name, ...args]).catch(() => null);
 
   const casting = new Set(memory.get());
   const spells = getSpells();
@@ -34,23 +36,23 @@ export async function dope({
         return;
       }
 
-      if (shouldHeal(mana, hp)) {
+      if (hp > 0 && shouldHeal(mana, hp)) {
         return skills.castSpell(SPELLS_BY_TYPE.heal);
       }
 
-      if (shouldRefresh(mana, mv)) {
+      if (hp > 0 && shouldRefresh(mana, mv)) {
         return skills.castSpell('refrescar');
       }
     },
   );
 
-  register('dope', async (x: Context) => {
+  register('dope', async (x: Context, name?: string) => {
     const list = spells
-      .filter(x => x.dope)
+      .filter(x => x.dope && (name ? x.target : true))
       .map(x => (Array.isArray(x.dope) ? x.dope.join('|') : x.name));
 
     for (const spell of uniq(list)) {
-      await repeatUntilCasted(spell.split('|'));
+      await repeatUntilCasted(spell.split('|'), name);
     }
   });
 
@@ -72,7 +74,7 @@ export async function dope({
         if (Array.isArray(after)) {
           after.forEach(x => write(x));
         } else if (after) {
-          write(after);
+          write(after as string);
         }
       }
     });
