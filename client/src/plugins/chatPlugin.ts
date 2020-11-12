@@ -2,24 +2,36 @@ import { ClientStorage } from '@amatiasq/client-storage';
 
 import { PluginContext } from '../lib/PluginContext';
 import { PatternResult } from '../lib/triggers/PatternResult';
+import { datetime, DateTime } from '../lib/util/dateTime';
 import { requestNotificationPermission } from '../lib/util/requestNotificationPermission';
 
-interface Message {
-  time: number;
-  from: string;
-  to: string;
-  message: string;
-}
+type Message = [DateTime, string, string, string];
+type History = ClientStorage<Message[]>;
 
-type History = ClientStorage<Record<string, Message[]>>;
+const version = { version: 2 };
+
+const receive = (log: History) => ({
+  groups: { name, message },
+}: PatternResult) => {
+  console.log(`[MESSAGE(${name})]:`, message);
+  addMessage(log, { from: name, message });
+  notify(name, message);
+};
+
+const sent = (log: History) => ({ groups: { name, message } }: PatternResult) =>
+  addMessage(log, { to: name, message });
 
 export function chatPlugin({ when }: PluginContext) {
   // const say = new ClientStorage<Record<string, Message[]>>('chat:say');
-  const order = new ClientStorage<Record<string, Message[]>>('chat:order');
-  const tell = new ClientStorage<Record<string, Message[]>>('chat:tell');
-  const whisper = new ClientStorage<Record<string, Message[]>>('chat:whisper');
+  const order = new ClientStorage<Message[]>('chat:order', version);
+  const tell = new ClientStorage<Message[]>('chat:tell', version);
+  const whisper = new ClientStorage<Message[]>('chat:whisper', version);
 
-  (window as any).chat = () => tell.get();
+  (window as any).chat = () => ({
+    tell: tell.get(),
+    order: order.get(),
+    whisper: whisper.get(),
+  });
 
   when(/(?<name>\[Orden: [^\]]+\]): '(?<message>[^']+)'/, receive(order));
   when(/(?<name>\[Orden\]): '(?<message>[^']+)'/, sent(order));
@@ -46,19 +58,6 @@ export function chatPlugin({ when }: PluginContext) {
 
 type msg = { message: string };
 
-function receive(log: History) {
-  return ({ groups: { name, message } }: PatternResult) => {
-    console.log(`[MESSAGE(${name})]:`, message);
-    addMessage(log, { from: name, message });
-    notify(name, message);
-  };
-}
-
-function sent(log: History) {
-  return ({ groups: { name, message } }: PatternResult) =>
-    addMessage(log, { to: name, message });
-}
-
 async function notify(from: string, message: string) {
   await requestNotificationPermission();
 
@@ -73,18 +72,12 @@ function addMessage(
   log: History,
   partial: { from?: string; to?: string } & msg,
 ): Message {
-  const message: Message = {
-    time: Date.now(),
-    from: 'me',
-    to: 'me',
-    ...partial,
-  };
-
-  const data = log.get() || {};
-  const other = (partial.from || partial.to)!;
-  const history = data[other] || [];
-
-  history.push(message);
-  log.set({ ...data, [other]: history });
+  const message: Message = [
+    datetime(new Date()),
+    partial.from || 'me',
+    partial.to || 'me',
+    partial.message,
+  ];
+  log.set([...(log.get() || []), message]);
   return message;
 }

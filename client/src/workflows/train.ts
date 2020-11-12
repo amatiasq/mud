@@ -17,7 +17,7 @@ export async function train({
   );
 
   when(MOB_ARRIVES, ({ groups }) => enemySpotted(groups.mob));
-  when(MOB_LEAVES, ({ groups }) => enemyGone(groups.mob));
+  when(MOB_LEAVES, x => enemyGone(x.groups.mob));
 
   return nav.execute(arena.arena, async () => {
     await prompt.until(({ mv: { current: mv } }) => mv > 50);

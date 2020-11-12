@@ -2,7 +2,7 @@ import { emitter } from '@amatiasq/emitter';
 
 import { PluginContext } from '../lib/PluginContext';
 import { concatRegexes } from '../lib/util/concatRegexes';
-import { toInt } from '../util/toInt';
+import { int, toInt } from '../lib/util/int';
 
 const PROMPT = [
   '&W<',
@@ -18,13 +18,17 @@ const PROMPT = [
 
 const FPROMPT = PROMPT.replace('&W>', ' &R%E&W>');
 
+const captureProgress = (name: string) =>
+  concatRegexes(int(`${name}Curr`), '/', int(`${name}Total`), `${name} `);
+
+// prettier-ignore
 export const PROMPT_DETECTOR = concatRegexes(
   /</,
-  /(?<hpCurr>\d+)\/(?<hpTotal>\d+)hp /,
-  /(?<mCurr>\d+)\/(?<mTotal>\d+)m /,
-  /(?<mvCurr>\d+)\/(?<mvTotal>\d+)mv /,
-  /(?<exp>(\d|,)+)xp /,
-  /(?<gold>(\d|,)+)g/,
+  captureProgress('hp'),
+  captureProgress('m'),
+  captureProgress('mv'),
+  int('exp'), /xp /,
+  int('gold'), /g/,
   /( \((?<enemy>\d+)%\))?/,
   /> (?<invis>I)?/,
 );

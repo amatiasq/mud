@@ -76,7 +76,7 @@ export function navigationPlugin({ log, when, write }: PluginContext) {
 
   async function recall() {
     if (isAtRecall) {
-      return Promise.resolve();
+      return true;
     }
 
     write('recall');

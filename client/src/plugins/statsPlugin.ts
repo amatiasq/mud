@@ -1,18 +1,19 @@
 import { PluginContext } from '../lib/PluginContext';
 import { concatRegexes } from '../lib/util/concatRegexes';
-import { toInt } from '../util/toInt';
+import { int, toInt } from '../lib/util/int';
 
 const HEADER =
   '  ------------------------------------------------------------------------------\n/                                                                              \\n||  Ficha de';
 const FOOTER =
   ' ||\n \\                                                                              /\n  ------------------------------------------------------------------------------';
 
+// prettier-ignore
 const STATE_DETECTOR = concatRegexes(
   // HEADER,
   // /(?<name>\w+)(?<principal> \(Personaje Principal\))\.\s+\|\|\n/,
   // /\|\|\s+FUE\s+:\s+(?<fue>\d+)\((?<fueBase>\d+)\)\s+DES\s+:\s+(?<des>\d+)\((?<desBase>\d+)\)\s+\|\s+Vida\s+:\s+(?<vida>\d+)\s+\/(?<vidaBase>\d+)\s+\(\s+(?<regen>\d+)%\)\s+Regen\s+\|\|/,
   // /(.|�|\n)+/,
-  /\|\| Nivel\s+: (?<level>\d+)\s+/,
+  /\|\| Nivel\s+: /, int('level'), /\s+/,
   // /(.|�|\n)+/,
   // FOOTER,
 );
@@ -30,7 +31,7 @@ export function statsPlugin({ when, write }: PluginContext) {
       console.log(stats.level);
       isInitiated = true;
     },
-    // { captureLength: 3001 },
+    // { captureLength: 3000 },
   );
 
   return {
