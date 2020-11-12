@@ -1,9 +1,11 @@
 import { Context } from './../lib/workflow/Context';
 
 export async function afk(
-  { run, plugins: { prompt, navigation } }: Context,
-  area?: string,
+  { abort, run, when, plugins: { prompt, navigation } }: Context,
+  ...areas: string[]
 ) {
+  when('.. Todo empieza a volverse negro.\n', abort);
+
   await action();
 
   async function action(): Promise<void> {
@@ -14,7 +16,7 @@ export async function afk(
     console.log('Stats 100%. Start train...');
 
     try {
-      await run('train', [area]);
+      await run('train', [rand(areas || [])]);
       console.log('workflow completed');
     } catch (error) {
       console.log('workflow failed');
@@ -26,4 +28,8 @@ export async function afk(
 
     return action();
   }
+}
+
+function rand<T>(list: T[]) {
+  return list[Math.floor(Math.random() * list.length)];
 }

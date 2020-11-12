@@ -98,12 +98,21 @@ export async function promptPlugin({ when, write }: PluginContext) {
   };
 
   function whenFresh() {
-    return until(
-      stats =>
+    return until(stats => {
+      console.log(
+        stats.hp.percent,
+        stats.mana.percent,
+        stats.mv.percent,
+        stats.hp.percent === 1 &&
+          stats.mana.percent === 1 &&
+          stats.mv.percent === 1,
+      );
+      return (
         stats.hp.percent === 1 &&
         stats.mana.percent === 1 &&
-        stats.mv.percent === 1,
-    );
+        stats.mv.percent === 1
+      );
+    });
   }
 
   function setPrompt() {

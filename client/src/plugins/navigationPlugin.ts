@@ -30,7 +30,7 @@ export function navigationPlugin({ log, when, write }: PluginContext) {
 
   when(/Plaza de Darkhaven\s+/, () => (landingAtRecall = true));
 
-  when('Puerta esta cerrada.', async () => {
+  when('Puertas? esta cerrada.', async () => {
     const closed = directions.find(x => x.includes(CLOSED));
 
     if (closed) {
@@ -101,10 +101,7 @@ export function navigationPlugin({ log, when, write }: PluginContext) {
     return dir && dir.includes(CLOSED);
   }
 
-  async function execute(
-    pattern: string,
-    callback: () => Promise<any> | void = () => {},
-  ) {
+  async function execute(pattern: string, callback?: () => Promise<any>) {
     if (pattern[0] === 'r') {
       await recall();
       pattern = pattern.substr(1);
@@ -120,22 +117,35 @@ export function navigationPlugin({ log, when, write }: PluginContext) {
 
       if (untilEnd) {
         while (canGo(step)) {
-          if (!(await go(step)) || (await callback()) === false) {
+          if (await move(step)) {
             return false;
           }
-
-          await callback();
         }
 
         untilEnd = false;
       } else {
-        if (!(await go(step)) || (await callback()) === false) {
+        if (await move(step)) {
           return false;
         }
       }
     }
 
     return true;
+
+    async function move(step: string) {
+      try {
+        if (!(await go(step))) {
+          return true;
+        }
+      } catch (error) {
+        throw new Error(`${error.message} - on ${pattern}`);
+      }
+
+      if (typeof callback === 'function') {
+        const result = await callback();
+        return result === false;
+      }
+    }
   }
 
   async function go(direction: string) {
@@ -153,7 +163,7 @@ export function navigationPlugin({ log, when, write }: PluginContext) {
       write(`abrir ${direction}`);
 
       const success = await Promise.any([
-        when('Abres la puerta.').then(() => true),
+        when(/Abres la puertas?\./).then(() => true),
         when('Esta cerrada con llave.').then(() => false),
       ]);
 

@@ -31,10 +31,19 @@ export class Context extends PluginContext {
     bindAll(this, Context);
   }
 
-  run<T>(name: string, params: any[] = []) {
+  async run(name: string, params: any[] = []) {
     this.checkNotAborted();
-    this.log(`Invoke workflow ${name} with`, ...params);
-    return this.runWorkflow(name, params, { logs: this.isPrintingLogs });
+    this.log(`Invoke workflow "${name}" with`, ...params);
+
+    try {
+      const result = await this.runWorkflow(name, params, {
+        logs: this.isPrintingLogs,
+      });
+      this.log(`Invocation "${name}" returned `, result);
+      return result;
+    } catch (error) {
+      this.log(`Invocation "${name}" failed `, error);
+    }
   }
 
   runForever() {

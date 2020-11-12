@@ -7,7 +7,7 @@ export type AreaName = AreaBase['name'];
 
 export interface AreaMetadata {
   path: string;
-  arena?: string;
+  arena?: string | string[];
 }
 
 export type Area = AreaBase & Partial<AreaMetadata>;
@@ -16,7 +16,7 @@ const METADATA: Partial<Record<AreaName, AreaMetadata>> = {
   // cadaver: { path: 'ru2sw'},
   'Academia de Darkhaven': {
     path: 'rd',
-    arena: 'XseXneXseXneXse',
+    arena: ['Xse', 'Xne', 'Xse', 'Xne', 'Xse'],
   },
   'Bosque de las Hadas': { path: 'r6w2nwk2wh' },
   'Catacumbas de la Capilla': { path: 'r6w8se7s' },
@@ -37,9 +37,9 @@ const METADATA: Partial<Record<AreaName, AreaMetadata>> = {
       'Xsu',
       'ne2wene2weXsu',
       'ne2wenXsnu',
-      '3ne2wennu',
-      's', // hogoblin
-    ].join(''),
+      '3ne2we2nu',
+      // 's', // hogoblin
+    ],
   },
   'El Jardin de los Heroes': { path: 'r8e2n4el3e2s2j8l8e5j4els' },
   'El Pantano Orco': { path: 'r13s2en' },
@@ -51,7 +51,21 @@ const METADATA: Partial<Record<AreaName, AreaMetadata>> = {
   'Haon Dor': { path: 'r7w' },
   'Holy Grove': { path: 'r9e' },
   'La Fortaleza de Valor': { path: 'r11n2en' },
-  'La Mansion de Marmol': { path: 'r9w3s' },
+  'La Mansion de Marmol': {
+    path: 'r9w3s',
+    arena: [
+      'e2n', // entrada
+      'n2d', // sotano
+      '3n3s',
+      '3e3w', // prisionera
+      // '3w3e', engendro
+      '3s3n',
+      '2us', // salir sotano
+      '2e2w',
+      '4w4e',
+      // '2un', // Kivon & Nejane
+    ],
+  },
   'La Mansion de Tullfuhrzky': { path: 'r6w2nwk2wh4nj' },
   'La Torre del Brujo': { path: 'r9w2sese2s' },
   'Las Alcantarillas': { path: 'r4sd' },
@@ -81,7 +95,7 @@ export function getAreaMetadata(areaName: string) {
 
   if (candidates.length) {
     console.warn(
-      `Many areas detected for ${areaName}:\n- ${candidates
+      `Many areas detected for ${areaName}:\n- ${[first, ...candidates]
         .map(x => x.name)
         .join('\n- ')}`,
     );

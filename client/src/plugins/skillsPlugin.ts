@@ -95,7 +95,6 @@ export function skillsPlugin({ when, write }: PluginContext) {
   }
 
   async function castSpell(name: string | string[], args = '') {
-    debugger;
     const aliases = Array.isArray(name) ? name : [name];
     const candidates = aliases
       .map(getSpell)

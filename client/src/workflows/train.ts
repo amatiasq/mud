@@ -4,8 +4,11 @@ import { Context } from '../lib/workflow/Context';
 
 export async function train(
   {
+    log,
+    run,
     when,
-    run: invokeWorkflow,
+    write,
+    printLogs,
     plugins: { navigation: nav, prompt, stats },
   }: Context,
   area?: string,
@@ -13,27 +16,45 @@ export async function train(
   const arena = await getArena(area);
   const enemies: string[] = [];
 
-  await nav.execute(arena.path);
-
   when(MOB_PRESENT, ({ captured, fullMatch }) =>
     enemySpotted(fullMatch || captured[0]),
   );
 
   when(MOB_ARRIVES, ({ groups }) => enemySpotted(groups.mob));
-  when(MOB_LEAVES, x => enemyGone(x.groups.mob));
+  when(MOB_LEAVES, x => {
+    const { mob } = x.groups;
+    if (mob) {
+      enemyGone(x.groups.mob);
+    } else {
+      console.warn(`No MOB detected in`, x.captured);
+    }
+  });
 
-  return nav.execute(arena.arena, async () => {
+  const route = `${arena.path}${arena.arena}`;
+
+  write('visible');
+
+  await nav.execute(route, enterRoom);
+  return nav.recall();
+
+  async function enterRoom() {
     await prompt.until(({ mv: { current: mv } }) => mv > 50);
 
-    if ((await checkEnemies()) === false) {
-      return false;
-    }
+    while (enemies.length) {
+      if (await checkEnemies()) {
+        return false;
+      }
 
-    await prompt.until(
+      await Promise.any([when(MOB_ARRIVES), readyToFight()]);
+    }
+  }
+
+  async function readyToFight() {
+    return prompt.until(
       ({ hp: { percent: hp }, mana: { percent: mana } }) =>
-        hp > 0.6 && mana > 0.3,
+        hp > 0.7 && mana > 0.5,
     );
-  });
+  }
 
   function enemySpotted(text: string) {
     const mob = getMobIn(text);
@@ -56,16 +77,16 @@ export async function train(
 
   async function checkEnemies() {
     while (enemies.length) {
-      const result = await invokeWorkflow('kill', [enemies.pop()!]);
+      const result = await run('kill', [enemies.pop()!]);
 
       if (result === 'flee') {
         console.log('Had to run. Train over.');
         await nav.recall();
-        return false;
+        return true;
       }
-    }
 
-    return true;
+      log(`Fight result: ${result}`);
+    }
   }
 
   async function getArena(areaName?: string) {
@@ -75,10 +96,15 @@ export async function train(
       throw new Error(`NO AREA "${areaName}"`);
     }
 
+    if (!area.arena) {
+      throw new Error(`"${area.name}" is unknown`);
+    }
+
     const path = area.path!.split('');
     const last = path.pop();
+    const arena = Array.isArray(area.arena) ? area.arena.join('') : area.arena;
 
-    return { path: path.join(''), arena: `${last}${area.arena}` };
+    return { path: path.join(''), arena: `${last}${arena}` };
   }
 
   async function getBestArea() {

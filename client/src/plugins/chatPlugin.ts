@@ -62,7 +62,7 @@ async function notify(from: string, message: string) {
   await requestNotificationPermission();
 
   if (!from.startsWith('[Orden')) {
-    return new Notification(`${from} =>\n${message}`);
+    return new Notification(`${from}=>${message}`);
   }
 }
 

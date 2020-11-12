@@ -1,4 +1,5 @@
 import { SPELLS_BY_TYPE } from '../data/spells';
+import { concatRegexes } from '../lib/util/concatRegexes';
 import { Context } from '../lib/workflow/Context';
 import { CastSpellResult } from '../plugins/skillsPlugin';
 
@@ -16,7 +17,7 @@ export async function kill(
   // wile result == null cast attack!!!!
   const result = await Promise.any([
     navigation.waitForRecall().then(() => 'flee'),
-    when(`${target} ha MUERTO!!`).then(() => 'win'),
+    when(concatRegexes(target, /(?:\w| )* ha MUERTO!!/)).then(() => 'win'),
     when('No esta aqui.')
       .timeout(3)
       .then(() => 'missing'),

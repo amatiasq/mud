@@ -6,6 +6,17 @@ export async function bank(
   { when, write, plugins: { navigation } }: Context,
   take?: number,
 ) {
+  const INGRESS = concatRegexes(
+    /Ingresas /,
+    int(),
+    / monedas? de oro en tu cuenta bancaria./,
+  );
+  const EXTRACT = concatRegexes(
+    /Retiras /,
+    int(),
+    / monedas? de oro de tu cuenta bancaria./,
+  );
+
   await navigation.execute('r4s2en');
 
   write('banco saldo');
@@ -31,22 +42,10 @@ export async function bank(
 
   if (carring < final) {
     write(`banco retirar ${final - carring}`);
-    await when(
-      concatRegexes(
-        /Retiras /,
-        int(),
-        / monedas? de oro de tu cuenta bancaria./,
-      ),
-    );
+    await when(EXTRACT);
   } else if (carring > final) {
     write(`banco ingresar ${carring - final}`);
-    await when(
-      concatRegexes(
-        /Ingresas /,
-        int(),
-        / monedas? de oro de tu cuenta bancaria./,
-      ),
-    );
+    await when(INGRESS);
   }
 
   await navigation.execute('s2w4n');

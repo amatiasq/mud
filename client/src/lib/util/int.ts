@@ -1,6 +1,6 @@
 import { concatRegexesUnescaped } from './concatRegexes';
 
-const NUMBER = /-?(?:\d|,)+/;
+const NUMBER = /-?\d+(?:,\d{3})*/;
 
 export function toInt(value: string) {
   return parseInt(value.replace(/,/g, ''), 10);
