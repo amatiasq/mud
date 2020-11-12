@@ -30,13 +30,21 @@ export function navigationPlugin({ log, when, write }: PluginContext) {
 
   when(/Plaza de Darkhaven\s+/, () => (landingAtRecall = true));
 
-  when('Puerta esta cerrada.', () => {
+  when('Puerta esta cerrada.', async () => {
     const closed = directions.find(x => x.includes(CLOSED));
 
     if (closed) {
       const dir = closed.replace(CLOSED, '');
       write(`abrir ${dir}`);
-      write(dir);
+
+      const result = await Promise.any([
+        when('Esta cerrada con llave.').then(() => false),
+        when('Abres ').then(() => true),
+      ]);
+
+      if (result) {
+        write(dir);
+      }
     }
   });
 
@@ -110,24 +118,21 @@ export function navigationPlugin({ log, when, write }: PluginContext) {
         continue;
       }
 
-      if (!untilEnd) {
-        if (await go(step)) {
+      if (untilEnd) {
+        while (canGo(step)) {
+          if (!(await go(step)) || (await callback()) === false) {
+            return false;
+          }
+
           await callback();
-          continue;
-        } else {
+        }
+
+        untilEnd = false;
+      } else {
+        if (!(await go(step)) || (await callback()) === false) {
           return false;
         }
       }
-
-      while (canGo(step)) {
-        if (!(await go(step))) {
-          return false;
-        }
-
-        await callback();
-      }
-
-      untilEnd = false;
     }
 
     return true;

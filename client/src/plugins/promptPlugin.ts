@@ -1,6 +1,8 @@
 import { emitter } from '@amatiasq/emitter';
 
 import { PluginContext } from '../lib/PluginContext';
+import { concatRegexes } from '../lib/util/concatRegexes';
+import { toInt } from '../util/toInt';
 
 const PROMPT = [
   '&W<',
@@ -16,17 +18,15 @@ const PROMPT = [
 
 const FPROMPT = PROMPT.replace('&W>', ' &R%E&W>');
 
-export const PROMPT_DETECTOR = new RegExp(
-  [
-    '<',
-    '(?<hpCurr>\\d+)/(?<hpTotal>\\d+)hp ',
-    '(?<mCurr>\\d+)/(?<mTotal>\\d+)m ',
-    '(?<mvCurr>\\d+)/(?<mvTotal>\\d+)mv ',
-    '(?<exp>(\\d|,)+)xp ',
-    '(?<gold>(\\d|,)+)g',
-    '( \\((?<enemy>\\d+)%\\))?',
-    '> (?<invis>I)?',
-  ].join(''),
+export const PROMPT_DETECTOR = concatRegexes(
+  /</,
+  /(?<hpCurr>\d+)\/(?<hpTotal>\d+)hp /,
+  /(?<mCurr>\d+)\/(?<mTotal>\d+)m /,
+  /(?<mvCurr>\d+)\/(?<mvTotal>\d+)mv /,
+  /(?<exp>(\d|,)+)xp /,
+  /(?<gold>(\d|,)+)g/,
+  /( \((?<enemy>\d+)%\))?/,
+  /> (?<invis>I)?/,
 );
 
 class Stat {
@@ -79,7 +79,6 @@ export async function promptPlugin({ when, write }: PluginContext) {
     });
 
   return {
-    waitForPrompt,
     getPercent,
     until,
     whenFresh,
@@ -108,15 +107,15 @@ export async function promptPlugin({ when, write }: PluginContext) {
     write(`fprompt ${FPROMPT}`);
   }
 
-  function waitForPrompt() {
-    return when(PROMPT_DETECTOR);
-  }
-
   function getPercent(stat: 'hp' | 'mana' | 'mv') {
     return stats[stat].percent;
   }
 
-  function until(predicate: (stats: Stats) => boolean) {
+  function until(predicate?: (stats: Stats) => boolean) {
+    if (!predicate) {
+      return when(PROMPT_DETECTOR);
+    }
+
     if (predicate(stats)) {
       return true;
     }
@@ -130,8 +129,4 @@ export async function promptPlugin({ when, write }: PluginContext) {
       });
     });
   }
-}
-
-function toInt(value: string) {
-  return parseInt(value.replace(/,/g, ''), 10);
 }

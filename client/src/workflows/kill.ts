@@ -1,4 +1,4 @@
-import { SPELLS_BY_TYPE } from './../spells';
+import { SPELLS_BY_TYPE } from '../data/spells';
 import { Context } from '../lib/workflow/Context';
 
 export async function kill(
@@ -16,10 +16,14 @@ export async function kill(
   const result = await Promise.any([
     navigation.waitForRecall().then(() => 'flee'),
     when(`${target} ha MUERTO!!`).then(() => 'win'),
-    when('Huyes como un cobarde del combate.').then(() => 'flee'),
     when('No esta aqui.')
       .timeout(3)
       .then(() => 'missing'),
+    when([
+      'Huyes como un cobarde del combate.',
+      'Estas demasiado malherido para hacer eso.',
+      'Estas demasiado aturdido para hacer eso.',
+    ]).then(() => 'flee'),
   ]);
 
   if (result === 'win') {

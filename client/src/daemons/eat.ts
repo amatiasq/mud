@@ -15,8 +15,10 @@ export async function eat({
       return;
     }
 
-    await buyFood();
-    await eatSomething();
+    if (nav.isAtRecall) {
+      await buyFood();
+      await eatSomething();
+    }
   });
 
   async function eatSomething() {
@@ -48,7 +50,6 @@ export async function eat({
   }
 
   async function buyFood() {
-    await nav.recall();
     await nav.execute('2sen');
 
     write(`comprar ${EXPECTED_FOOD} ${DEFAULT_FOOD_NAME}`);
@@ -73,6 +74,7 @@ export async function eat({
       'loncha de salami': 'salami',
       'pierna de cordero': 'pierna',
       'ricas longanizas': 'longanizas',
+      'un extranyo hongo': 'hongo',
     });
   }
 

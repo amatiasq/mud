@@ -21,9 +21,13 @@ export const SPELL_ALREADY_APPLIED = [
 
 export const SPELL_NOT_POSSIBLE = [
   'No tienes suficiente mana.',
+  'Sobre que quieres lanzar este conjuro?',
+  'No puedes encontrar ningun ',
   'Este estilo de lucha pide demasiado atencion para hacer eso!',
   'Este asalto del combate es demasiado febril para concentrarte adecuadamente.',
   'No has tenido suficiente tiempo en este asalto para completar el conjuro.',
+  'Estas demasiado malherido para hacer eso.',
+  'Estas demasiado aturdido para hacer eso.',
 ];
 
 export const SPELLS_BY_TYPE: Record<string, Spell> = {
@@ -90,8 +94,10 @@ const SPELLS = {
 
   bendecir: {
     success: 'Tu dios te otorga una poderosa bendicion.',
-    endEffect: UNKNOWN,
+    endEffect: 'La bendicion desaparece.',
   },
+
+  'bola fuego': UNKNOWN,
 
   'causar critica': UNKNOWN,
 
@@ -106,6 +112,8 @@ const SPELLS = {
   },
 
   'conocer alineamiento': UNKNOWN,
+
+  'control climatico': UNKNOWN,
 
   'crear agua': {
     success: ' esta lleno.\n',
@@ -159,7 +167,7 @@ const SPELLS = {
   'detectar maldad': {
     success:
       'Delgadas lineas rojas reseguiran las siluetas de los seres malvados que te encuentres.',
-    endEffect: UNKNOWN,
+    endEffect: 'Las lineas rojas desaparecen de tu vision.',
     dope: true,
   },
 
@@ -169,6 +177,8 @@ const SPELLS = {
     dope: true,
   },
 
+  'detectar veneno': UNKNOWN,
+  'disipar magia': UNKNOWN,
   'disipar maldad': UNKNOWN,
 
   flotar: {
@@ -178,6 +188,10 @@ const SPELLS = {
   },
 
   'fuego espectral': UNKNOWN,
+
+  identificar: {
+    success: /El objeto '(?<name>[^']+)' es un\(a\) (?<type>\w+), propiedades especiales: (?<properties>[^\n]+)\n/,
+  },
 
   invisibilidad: {
     success: 'Te desvaneces en el aire.',
@@ -192,6 +206,7 @@ const SPELLS = {
   },
 
   'llamar rayo': UNKNOWN,
+  'localizar objeto': UNKNOWN,
 
   'luz eterna': {
     success:
@@ -203,12 +218,21 @@ const SPELLS = {
   maldecir: UNKNOWN,
   'misil magico': UNKNOWN,
   'niebla espectral': UNKNOWN,
+
+  'piel robliza': {
+    success: 'Tu piel se oscurece a la vez que adquiere la dureza del roble.',
+    endEffect: 'Tu piel vuelve a su estado normal...',
+    dope: true,
+  },
+
   proteccion: UNKNOWN,
 
   refrescar: {
     success: 'Nueva vitalidad fluye hacia ti.',
   },
 
+  'retirar invisibilida': UNKNOWN,
+  'saciar hambre': UNKNOWN, // LEARN
   terremoto: UNKNOWN,
   veneno: UNKNOWN,
 

@@ -1,17 +1,6 @@
-import { SPELLS_BY_TYPE } from '../spells';
-import { Context } from './../lib/workflow/Context';
-
-const sustantives = [
-  'serpiente',
-  'caracol',
-  'lobo',
-  'conejo',
-  'ogro',
-  'orco',
-  'buitre',
-  'ciervo',
-  'dragon',
-];
+import { getMobIn } from '../data/mobs';
+import { SPELLS_BY_TYPE } from '../data/spells';
+import { Context } from '../lib/workflow/Context';
 
 export async function defend({
   log,
@@ -32,15 +21,34 @@ export async function defend({
       write('huir');
     } else if (prompt.getPercent('mana') > 0.1) {
       const fullName = captured[1];
-      const name = sustantives.find(x => fullName.includes(x));
-
-      if (!name) {
-        console.warn(`Unknown sustantive for "${fullName}"`);
-      }
-
+      const name = getMobIn(fullName);
       await skills.castSpell(SPELLS_BY_TYPE.attack, name || fullName);
     } else {
       log('Nothing');
+    }
+  });
+
+  when('.. Todo empieza a volverse negro.\n', async () => {
+    const RECUPERED =
+      'Tu cuerpo aparece de repente, rodeado por una divina presencia...';
+
+    let bodies = 0;
+
+    const sus = when(RECUPERED, () => bodies++);
+
+    await write('suplicar cuerpo');
+    await when(RECUPERED).timeout(5);
+
+    sus.unsubscribe();
+
+    when('El cadaver de May pasa a convertirse en polvo', () => bodies--);
+
+    while (bodies) {
+      write('coger todo may');
+      await prompt.until();
+      write('vestir todo');
+      await prompt.until();
+      await prompt.until();
     }
   });
 }

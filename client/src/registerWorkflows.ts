@@ -12,6 +12,7 @@ import { donations } from './workflows/donations';
 import { go } from './workflows/go';
 import { kill } from './workflows/kill';
 import { train } from './workflows/train';
+import { wear } from './workflows/wear';
 
 export function registerWorkflows(mud: Mud) {
   mud.workflow('afk', afk);
@@ -21,6 +22,7 @@ export function registerWorkflows(mud: Mud) {
   mud.workflow('kill', kill);
   mud.workflow('go', go);
   mud.workflow('train', train);
+  mud.workflow('wear', wear);
 
   mud.daemon('defend', defend);
   mud.daemon('dope', dope);

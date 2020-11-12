@@ -15,10 +15,14 @@ type History = ClientStorage<Record<string, Message[]>>;
 
 export function chatPlugin({ when }: PluginContext) {
   // const say = new ClientStorage<Record<string, Message[]>>('chat:say');
+  const order = new ClientStorage<Record<string, Message[]>>('chat:order');
   const tell = new ClientStorage<Record<string, Message[]>>('chat:tell');
   const whisper = new ClientStorage<Record<string, Message[]>>('chat:whisper');
 
   (window as any).chat = () => tell.get();
+
+  when(/(?<name>\[Orden: [^\]]+\]): '(?<message>[^']+)'/, receive(order));
+  when(/(?<name>\[Orden\]): '(?<message>[^']+)'/, sent(order));
 
   when(/(?<name>.+) te susurra '(?<message>[^']+)'/, receive(whisper));
   when(/Susurras a (?<name>.+) '(?<message>[^']+)'/, sent(whisper));
@@ -57,7 +61,10 @@ function sent(log: History) {
 
 async function notify(from: string, message: string) {
   await requestNotificationPermission();
-  return new Notification(`${name} te cuenta '${message}'`);
+
+  if (!from.startsWith('[Orden')) {
+    return new Notification(`${from} =>\n${message}`);
+  }
 }
 
 function addMessage(log: History, partial: { from: string } & msg): Message;

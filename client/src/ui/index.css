@@ -1,6 +1,8 @@
 body {
   --background-color: #1c1c1c;
   --border-color: #484848;
+  background-color: black;
+  color: white;
 }
 
 .container {

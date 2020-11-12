@@ -1,71 +1,82 @@
-import { Context } from './../lib/workflow/Context';
+import { getAreasForLevel } from '../data/areas';
+import { getMobIn, MOB_ARRIVES, MOB_LEAVES, MOB_PRESENT } from '../data/mobs';
+import { Context } from '../lib/workflow/Context';
 
 export async function train({
   when,
   run: invokeWorkflow,
-  plugins: { navigation: nav, prompt },
+  plugins: { navigation: nav, prompt, stats },
 }: Context) {
+  const arena = await getArena();
   const enemies: string[] = [];
-  let direction = 'sur';
 
-  await nav.recall();
-  await nav.go('abajo');
+  await nav.execute(arena.path);
 
-  const enemySpotted = (prey: string) => () => enemies.push(prey);
-  const enemyGone = (prey: string) => () => {
-    const index = enemies.indexOf(prey);
-    if (index > -1) {
-      enemies.splice(index, 1);
-    }
-  };
-
-  when(
-    [
-      'Un pequenyo caracol esta aqui haciendo trompos.',
-      'El pequenyo caracol llega desde el',
-    ],
-    enemySpotted('pequenyo caracol'),
+  when(MOB_PRESENT, ({ captured, fullMatch }) =>
+    enemySpotted(fullMatch || captured[0]),
   );
 
-  when(
-    ['Un buitre carronyero esta aqui.', 'El buitre carronyero llega desde el'],
-    enemySpotted('buitre carronyero'),
-  );
+  when(MOB_ARRIVES, ({ groups }) => enemySpotted(groups.mob));
+  when(MOB_LEAVES, ({ groups }) => enemyGone(groups.mob));
 
-  when(
-    [
-      'Un lobo hambriento te esta mirando.',
-      'El lobo hambriento llega desde el',
-    ],
-    enemySpotted('lobo hambriento'),
-  );
-
-  when(
-    [
-      'Una serpiente que parece venenosa te mira fijamente.',
-      'La serpiente llega desde el',
-    ],
-    enemySpotted('serpiente'),
-  );
-
-  when('El pequenyo caracol se va hacia el', enemyGone('pequenyo caracol'));
-  when('El buitre carronyero se va hacia el', enemyGone('buitre carronyero'));
-  when('El lobo hambriento se va hacia el', enemyGone('lobo hambriento'));
-  when('La serpiente se va hacia el', enemyGone('serpiente'));
-
-  await nav.execute('xsexnexsexnexs', checkRoom);
-  return nav.execute('4w5nu');
-
-  async function checkRoom() {
+  return nav.execute(arena.arena, async () => {
     await prompt.until(({ mv: { current: mv } }) => mv > 50);
 
+    if ((await checkEnemies()) === false) {
+      return false;
+    }
+
+    await prompt.until(
+      ({ hp: { percent: hp }, mana: { percent: mana } }) =>
+        hp > 0.6 && mana > 0.3,
+    );
+  });
+
+  function enemySpotted(text: string) {
+    const mob = getMobIn(text);
+
+    if (mob) {
+      enemies.push(mob);
+    }
+  }
+
+  function enemyGone(text: string) {
+    const mob = getMobIn(text);
+
+    if (mob) {
+      const index = enemies.indexOf(mob);
+      if (index > -1) {
+        enemies.splice(index, 1);
+      }
+    }
+  }
+
+  async function checkEnemies() {
     while (enemies.length) {
       const result = await invokeWorkflow('kill', [enemies.pop()!]);
 
       if (result === 'flee') {
         console.log('Had to run. Train over.');
-        return nav.recall();
+        await nav.recall();
+        return false;
       }
     }
+
+    return true;
+  }
+
+  async function getArena() {
+    const level = await stats.getLevel();
+    const areas = getAreasForLevel(level);
+    const [first, ...others] = areas.filter(x => x.arena);
+
+    if (others.length) {
+      console.warn('Multiple arenas available');
+    }
+
+    const path = first.path!.split('');
+    const last = path.pop();
+
+    return { path: path.join(''), arena: `${last}${first.arena}` };
   }
 }

@@ -91,7 +91,7 @@ async function initializeMud(telnet: RemoteTelnet) {
     terminal.write(`-> Running ${cmd}\n`);
 
     mud.run(name, args).then(
-      x => terminal.write(`\n<- Done ${cmd}\n`),
+      x => terminal.write(`\n<- Done ${cmd}: ${x}\n`),
       x => terminal.write(`\n\n<! FAILED ${cmd}: ${x.message}\n\n`),
     );
   }

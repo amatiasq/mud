@@ -6,7 +6,11 @@ export class PatternResult {
   }
 
   private get stringPatterns() {
-    return this.patterns.filter(x => !isRegex(x));
+    return this.patterns.filter(x => !isRegex(x)) as string[];
+  }
+
+  get fullMatch() {
+    return this.stringPatterns[0];
   }
 
   get captured() {

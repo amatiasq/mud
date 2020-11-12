@@ -7,20 +7,16 @@
 
 ## Plugins & workflows
 
+### died
+Tu cuerpo aparece de repente, rodeado por una divina presencia...
+El cadaver de May pasa a convertirse en polvo
+
 ### Navigation
-- nav.execute() to accept callback to run on every room
+- ~~nav.execute() to accept callback to run on every room~~
 
 ### Kill
 - ~~sacrificar cuerpo~~
-- luchar con causar graves
+- ~~luchar con causar graves~~
 
-### Dope
+### Cast
 - no conjurar cuando aturdido
-
-## Areas
-
-```ts
-const cementerio = 'r4wXs';
-const cadaver = 'ru2sw';
-const campamentoGoblin = 'Xs';
-```

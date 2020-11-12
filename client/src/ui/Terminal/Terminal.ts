@@ -82,17 +82,18 @@ export class Terminal {
   private submit() {
     const { value } = this.$input;
     this.$input.value = '';
-
-    if (value) {
-      this.history.shift();
-      this.history.unshift(value);
-      this.history.unshift('');
-      history.set(this.history);
-    }
-
     this.histPos = 0;
 
-    this.emitSubmit(value);
+    for (const command of value.split(/\s+;\s+/)) {
+      if (command) {
+        this.history.shift();
+        this.history.unshift(command);
+        this.history.unshift('');
+        history.set(this.history);
+      }
+
+      this.emitSubmit(command);
+    }
   }
 
   private loadHistory(modifier: 1 | -1) {

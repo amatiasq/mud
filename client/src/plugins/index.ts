@@ -4,6 +4,7 @@ import { inventoryPlugin } from './inventoryPlugin';
 import { navigationPlugin } from './navigationPlugin';
 import { promptPlugin } from './promptPlugin';
 import { skillsPlugin } from './skillsPlugin';
+import { statsPlugin } from './statsPlugin';
 
 const plugins = {
   chat: chatPlugin,
@@ -11,6 +12,7 @@ const plugins = {
   navigation: navigationPlugin,
   prompt: promptPlugin,
   skills: skillsPlugin,
+  stats: statsPlugin,
 };
 
 // -- Dirty implementation

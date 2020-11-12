@@ -1,12 +1,12 @@
-import { PluginContext } from '../lib/PluginContext';
-import { concatRegexes } from '../lib/util/concatRegexes';
-import { singleExecution } from '../lib/util/singleExecution';
 import {
   getSpells,
   SPELL_ALREADY_APPLIED,
   SPELL_FAILED,
   SPELL_NOT_POSSIBLE,
-} from '../spells';
+} from '../data/spells';
+import { PluginContext } from '../lib/PluginContext';
+import { concatRegexes } from '../lib/util/concatRegexes';
+import { singleExecution } from '../lib/util/singleExecution';
 
 // Skill cast results
 // const TIMEOUT = 0;
@@ -49,7 +49,7 @@ export function skillsPlugin({ when, write }: PluginContext) {
 
       console.log(skills);
     },
-    { captureLength: 3000 },
+    { captureLength: 5000 },
   );
 
   return {
