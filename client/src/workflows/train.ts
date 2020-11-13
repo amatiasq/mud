@@ -1,5 +1,11 @@
 import { getAreaMetadata, getAreasForLevel } from '../data/areas';
-import { getMobIn, MOB_ARRIVES, MOB_LEAVES, MOB_PRESENT } from '../data/mobs';
+import {
+  getMobIn,
+  MOB_ARRIVES,
+  MOB_LEAVES,
+  getMobsPresence,
+  getMobFromPrecence,
+} from '../data/mobs';
 import { Context } from '../lib/workflow/Context';
 
 export async function train(
@@ -16,9 +22,10 @@ export async function train(
   const arena = await getArena(area);
   const enemies: string[] = [];
 
-  when(MOB_PRESENT, ({ captured, fullMatch }) =>
-    enemySpotted(fullMatch || captured[0]),
-  );
+  when(getMobsPresence(), ({ patterns, fullMatch, captured }) => {
+    const mob = getMobFromPrecence(patterns);
+    enemySpotted((mob && mob.name) || fullMatch || captured[0]);
+  });
 
   when(MOB_ARRIVES, ({ groups }) => enemySpotted(groups.mob));
   when(MOB_LEAVES, x => {
@@ -38,19 +45,25 @@ export async function train(
   return nav.recall();
 
   async function enterRoom() {
+    log('ENTER_ROOM');
     await prompt.until(({ mv: { current: mv } }) => mv > 50);
+    log('READY');
 
     while (enemies.length) {
       if (await checkEnemies()) {
         return false;
       }
 
+      log('WAITING_READY_TO_FIGHT');
       await Promise.any([when(MOB_ARRIVES), readyToFight()]);
+      log('READY_TO_FIGHT!!!');
     }
+
+    log('LEAVE_ROOM');
   }
 
   async function readyToFight() {
-    return prompt.until(
+    await prompt.until(
       ({ hp: { percent: hp }, mana: { percent: mana } }) =>
         hp > 0.7 && mana > 0.5,
     );
@@ -76,6 +89,8 @@ export async function train(
   }
 
   async function checkEnemies() {
+    log('CHECK_ENEMIES', enemies.length);
+
     while (enemies.length) {
       const result = await run('kill', [enemies.pop()!]);
 

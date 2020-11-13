@@ -30,7 +30,7 @@ export function navigationPlugin({ log, when, write }: PluginContext) {
 
   when(/Plaza de Darkhaven\s+/, () => (landingAtRecall = true));
 
-  when('Puertas? esta cerrada.', async () => {
+  when(/Puertas? esta cerrada\./, async () => {
     const closed = directions.find(x => x.includes(CLOSED));
 
     if (closed) {
