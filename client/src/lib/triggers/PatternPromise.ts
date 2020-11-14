@@ -1,6 +1,5 @@
 import { wait } from '../util/wait';
 import { PatternMatchSubscription } from './PatternMatchSubscription';
-import { PatternPromiseTimeoutError } from './PatternPromiseTimeoutError';
 import { PatternResult } from './PatternResult';
 
 export class PatternPromise
@@ -25,10 +24,10 @@ export class PatternPromise
   }
 
   timeout(seconds: number) {
+    super.catch(() => {});
     wait(seconds).then(() =>
-      this.forceReject(new PatternPromiseTimeoutError()),
+      this.forceReject(new Error(`Timeout: ${seconds}`)),
     );
-
     return this as Promise<PatternResult>;
   }
 

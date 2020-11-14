@@ -17,6 +17,15 @@ const { terminal, controls } = renderUserInterface(document.body);
 
 openSocket();
 
+window.addEventListener('unhandledrejection', event => {
+  const error = event.reason as Error;
+
+  if (error.message.startsWith('Timeout: ')) {
+    event.preventDefault();
+    console.warn(error.message);
+  }
+});
+
 function openSocket() {
   const socket = new WebSocket(serverUri);
 

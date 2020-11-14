@@ -5,10 +5,12 @@ import { Context } from './../lib/workflow/Context';
 export async function recover({ run, plugins: { skills, prompt } }: Context) {
   const heal = SPELLS_BY_TYPE.heal;
   const refresh = 'refrescar';
+  const invisible = 'invisibilidad';
 
   const canHeal = await skills.has(heal);
   const canRefresh = await skills.has(refresh);
   const canMeditate = await skills.has('meditar');
+  const canInvisible = await skills.has(invisible);
 
   const hp = () => prompt.getPercent('hp');
   const mana = () => prompt.getPercent('mana');
@@ -25,6 +27,10 @@ export async function recover({ run, plugins: { skills, prompt } }: Context) {
     (canRefresh ? !needsRefresh() : true);
 
   while (!isDone()) {
+    if (!prompt.isInvisible) {
+      await run('cast', [invisible]);
+    }
+
     while (canHeal && needsHeal() && hasEnoughMana()) {
       await run('cast', [heal]);
     }

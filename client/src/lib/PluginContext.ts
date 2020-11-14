@@ -1,4 +1,3 @@
-import { ExecutionAbortedError } from './ExecutionAbortedError';
 import { Pattern } from './triggers/Pattern';
 import { PatternMatchSubscription } from './triggers/PatternMatchSubscription';
 import { PatternOptions } from './triggers/PatternOptions';
@@ -46,13 +45,29 @@ export class PluginContext {
     options?: PatternOptions,
   ) {
     this.checkNotAborted();
-    this.log('[WATCH]', pattern);
+    // this.log('[WATCH]', pattern, options);
+
+    const onResult = this.isPrintingLogs
+      ? ({ patterns, ...rest }: PatternResult) =>
+          this.log('[TRIGGERED]', ...patterns, rest)
+      : null;
 
     if (typeof handler === 'function') {
+      if (onResult) {
+        const original = handler;
+        handler = result => (onResult(result), original(result));
+      }
+
       return this.triggers.add(pattern, handler, options);
-    } else {
-      return this.triggers.add(pattern, handler);
     }
+
+    const promise = this.triggers.add(pattern, handler);
+
+    if (onResult) {
+      promise.then(onResult);
+    }
+
+    return promise;
   }
 
   sleep(seconds: number) {
@@ -80,7 +95,7 @@ export class PluginContext {
 
   protected checkNotAborted() {
     if (this.isAborted) {
-      throw new ExecutionAbortedError(`[${this.name}] Workflow aborted.`);
+      throw new Error(`[${this.name}] Workflow aborted.`);
     }
   }
 }

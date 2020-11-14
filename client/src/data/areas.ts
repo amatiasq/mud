@@ -40,11 +40,11 @@ const METADATA: Partial<Record<AreaName, AreaMetadata>> = {
       'une2wene2wenXsejk2whlen', // tercer piso
       'u3ne2we2n', // cuarto piso
       // 'u2se2wes3nd', // cuarto piso parte 2
-      'Xsune2wene2wene2wene2weXs', // quinto piso
-      'une2wene2weXs', // sexto piso
-      'uXnXs', // septimo piso
-      'une2wene2we2n', // octavo piso
-      'u', // techo
+      // 'Xsune2wene2wene2wene2weXs', // quinto piso
+      // 'une2wene2weXs', // sexto piso
+      // 'uXnXs', // septimo piso
+      // 'une2wene2we2n', // octavo piso
+      // 'u', // techo
     ],
   },
   'El Jardin de los Heroes': { path: 'r8e2n4el3e2s2j8l8e5j4els' },

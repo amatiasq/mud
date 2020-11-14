@@ -9,7 +9,6 @@ import { Context } from './workflow/Context';
 import { InvokeOptions } from './workflow/InvokeOptions';
 import { Workflow } from './workflow/Workflow';
 import { WorkflowFn } from './workflow/WorkflowFn';
-import { WorkflowNotFoundError } from './workflow/WorkflowNotFoundError';
 import { WriteOptions } from './WriteOptions';
 
 export class Mud {
@@ -96,7 +95,7 @@ export class Mud {
 
   run(name: string, params?: any[], options?: InvokeOptions) {
     if (!(name in this.workflows)) {
-      throw new WorkflowNotFoundError(`Workflow "${name}" is not registered.`);
+      throw new Error(`Workflow "${name}" is not registered.`);
     }
 
     const workflow = this.workflows[name];

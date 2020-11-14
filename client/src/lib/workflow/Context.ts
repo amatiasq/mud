@@ -1,12 +1,10 @@
 import { WorkflowFn } from './WorkflowFn';
 import { PluginMap } from '../../plugins/index';
-import { ExecutionAbortedError } from '../ExecutionAbortedError';
 import { Mud } from '../Mud';
 import { PluginContext } from '../PluginContext';
 import { TriggerCollection } from '../triggers/TriggerCollection';
 import { bindAll } from '../util/bindAll';
 import { WriteOptions } from '../WriteOptions';
-import { MissingPluginError } from './MissingPluginError';
 
 export class Context extends PluginContext {
   private finish: ((reason: any) => void) | null = null;
@@ -56,7 +54,7 @@ export class Context extends PluginContext {
     super.abort();
 
     if (this.finish) {
-      this.finish(new ExecutionAbortedError());
+      this.finish(new Error('Workflow aborted'));
     }
   }
 }
@@ -66,7 +64,7 @@ function createPluginsGetter(source: PluginMap, log: Function) {
     get(target, key: string) {
       if (!(key in target)) {
         log(`Failed to get plugin ${key}`);
-        throw new MissingPluginError(`Plugin ${key} is not registered.`);
+        throw new Error(`Plugin ${key} is not registered.`);
       }
 
       log(`Requires plugin ${key}`);
