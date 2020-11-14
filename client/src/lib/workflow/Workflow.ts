@@ -1,6 +1,7 @@
+import { WorkflowFn } from './WorkflowFn';
 import { Context } from './Context';
 
-export class Workflow<Args extends any[] = any[], Return = any> {
+export class Workflow<Args extends any[] = any[]> {
   private executionCount = 0;
   private currentExecutions = 0;
 
@@ -12,13 +13,7 @@ export class Workflow<Args extends any[] = any[], Return = any> {
     return this.executionCount;
   }
 
-  constructor(
-    readonly name: string,
-    private readonly run: (
-      context: Context,
-      ...args: Args
-    ) => Promise<Return> | void,
-  ) {}
+  constructor(readonly name: string, private readonly run: WorkflowFn<Args>) {}
 
   async execute(context: Context, ...args: Args) {
     this.currentExecutions++;
@@ -28,7 +23,7 @@ export class Workflow<Args extends any[] = any[], Return = any> {
 
     try {
       const result = await this.run(context, ...args);
-      context.log(`[Res(${iteration}]`, result);
+      context.log(`[Res(${iteration})]`, result);
       return result;
     } catch (error) {
       context.log(`[ERR(${iteration})]`, error);

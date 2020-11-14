@@ -12,6 +12,7 @@ import { cast } from './workflows/cast';
 import { donations } from './workflows/donations';
 import { go } from './workflows/go';
 import { kill } from './workflows/kill';
+import { recover } from './workflows/recover';
 import { train } from './workflows/train';
 import { wear } from './workflows/wear';
 
@@ -22,6 +23,7 @@ export function registerWorkflows(mud: Mud) {
   mud.workflow('donations', donations);
   mud.workflow('kill', kill);
   mud.workflow('go', go);
+  mud.workflow('recover', recover);
   mud.workflow('train', train);
   mud.workflow('wear', wear);
 

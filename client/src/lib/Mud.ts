@@ -15,6 +15,10 @@ import { WriteOptions } from './WriteOptions';
 export class Mud {
   private readonly triggers = new TriggerCollection();
   private readonly workflows: Record<string, Workflow> = {};
+  private readonly handlers: {
+    id: string;
+    handler: (command: string) => void | true;
+  }[] = [];
   private plugins!: PluginMap;
   private username!: string;
 
@@ -50,7 +54,17 @@ export class Mud {
     this.telnet.send(text);
   }
 
-  userInput(command: string): void {}
+  userInput(command: string): boolean {
+    const x = this.handlers.find(x => command.startsWith(x.id));
+    return Boolean(!x || x.handler(command.substr(x.id.length)));
+  }
+
+  registerHandler(
+    identifier: string,
+    handler: (command: string) => void | true,
+  ) {
+    this.handlers.push({ id: identifier, handler });
+  }
 
   getPlugin<Name extends keyof PluginMap>(name: Name): PluginMap[Name] {
     return this.plugins[name];
@@ -67,20 +81,20 @@ export class Mud {
       return context.runForever();
     });
 
-    return this.executeWorkflow(
-      workflow as Workflow<any, any>,
-      params,
-      options,
-    );
+    return this.executeWorkflow(workflow, params, options);
   }
 
   workflow<Args extends any[]>(name: string, run: WorkflowFn<Args>) {
     const workflow = new Workflow(name, run);
-    this.workflows[workflow.name] = workflow as Workflow<any, any>;
+    this.workflows[workflow.name] = workflow as Workflow<any>;
     return workflow;
   }
 
-  async run(name: string, params?: any[], options?: InvokeOptions) {
+  runOnce(name: string, run: WorkflowFn<[]>) {
+    return this.executeWorkflow(new Workflow(name, run));
+  }
+
+  run(name: string, params?: any[], options?: InvokeOptions) {
     if (!(name in this.workflows)) {
       throw new WorkflowNotFoundError(`Workflow "${name}" is not registered.`);
     }
@@ -109,7 +123,7 @@ export class Mud {
       abort() {
         context.abort();
       },
-    });
+    }) as typeof promise & { abort(): void };
   }
 
   private createWorkflowContext(name: string): Context {

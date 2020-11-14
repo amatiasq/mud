@@ -1,9 +1,19 @@
 import { Pattern } from './../lib/triggers/Pattern';
-export type SpellName = keyof typeof SPELLS;
-export type Spell = SpellName | SpellName[];
+import { spellList, SpellName, SpellBase } from './skills';
 
-export const UNKNOWN = null;
-export type UNKNOWN = typeof UNKNOWN;
+interface SpellMetadata {
+  readonly success: Pattern;
+  readonly target?: Pattern | false;
+  readonly endEffect?: Pattern;
+  readonly dope?: true | readonly SpellName[];
+  readonly afterDope?: string | readonly string[];
+}
+
+export type Casteable = SpellName | SpellName[];
+export type Spell = SpellBase & SpellMetadata;
+
+// export const UNKNOWN = null;
+// export type UNKNOWN = typeof UNKNOWN;
 
 export const SPELL_FAILED = [
   'Algo te distrae y pierdes la concentracion.',
@@ -21,6 +31,7 @@ export const SPELL_ALREADY_APPLIED = [
 ];
 
 export const SPELL_NOT_POSSIBLE = [
+  'No esta aqui.',
   'No tienes suficiente mana.',
   'Sobre que quieres lanzar este conjuro?',
   'No puedes encontrar ningun ',
@@ -31,7 +42,7 @@ export const SPELL_NOT_POSSIBLE = [
   'Estas demasiado aturdido para hacer eso.',
 ];
 
-export const SPELLS_BY_TYPE: Record<string, Spell> = {
+export const SPELLS_BY_TYPE: Record<string, Casteable> = {
   food: ['crear baya', 'crear comida'],
   water: ['crear manantial', 'crear agua'],
   levitate: ['volar', 'flotar'],
@@ -40,7 +51,7 @@ export const SPELLS_BY_TYPE: Record<string, Spell> = {
   dedope: ['ceguera', 'veneno'],
 };
 
-export const SPELL_LEARN_ORDER: Spell[] = [
+export const SPELL_LEARN_ORDER: Casteable[] = [
   // Survival
   SPELLS_BY_TYPE.food,
   SPELLS_BY_TYPE.water,
@@ -69,21 +80,23 @@ export const SPELL_LEARN_ORDER: Spell[] = [
   'crear fuego',
 ];
 
-export function getSpells(): SpellDescription[] {
-  return Object.entries(SPELLS)
-    .filter(([name, desc]) => desc)
-    .map(([name, desc]) => ({
-      ...((desc as any) as Omit<SpellDescription, 'name'>),
-      name: name as SpellName,
-    }));
+export function getSpells() {
+  return spells;
 }
 
 export function getSpell(name: string) {
   const lower = name.toLowerCase();
-  return getSpells().find(x => x.name.toLowerCase().startsWith(lower));
+  const base = spellList.find(x => x.name.startsWith(lower));
+
+  return (
+    base && {
+      ...base,
+      ...(metadata[base.name] || {}),
+    }
+  );
 }
 
-const SPELLS = {
+const metadata: Partial<Record<SpellName, SpellMetadata>> = {
   armadura: {
     success: 'Tu armadura brilla suavemente al ser mejorada por un conjuro.',
     target: /La armadura de (?<target>(?:\w+ )+)brilla suavemente al ser mejorada por un conjuro\./,
@@ -96,29 +109,25 @@ const SPELLS = {
     endEffect: 'La bendicion desaparece.',
   },
 
-  'bola fuego': UNKNOWN,
-
-  'causar critica': UNKNOWN,
+  'causar critica': {
+    success: /Tu conjuro [^\n]+ a( w+)+!/,
+  },
 
   'causar grave': {
     success: /Tu conjuro [^\n]+ a( w+)+!/,
   },
 
-  'causar leve': UNKNOWN,
+  'causar leve': {
+    success: /Tu conjuro [^\n]+ a( w+)+!/,
+  },
 
   ceguera: {
     success: /Lanzas un conjuro de ceguera contra ([^.]+)./,
   },
 
-  'conocer alineamiento': UNKNOWN,
-
-  'control climatico': UNKNOWN,
-
   'crear agua': {
     success: ' esta lleno.\n',
   },
-
-  'crear baya': UNKNOWN,
 
   'crear comida': {
     success: 'Una seta magica aparece de repente.',
@@ -134,15 +143,13 @@ const SPELLS = {
     endEffect: 'Un manantial magico se seca.',
   },
 
-  'curar ceguera': UNKNOWN,
-  'curar criticas': UNKNOWN,
-  'curar graves': UNKNOWN,
+  'curar graves': {
+    success: 'Tus heridas graves se cierran y el dolor desaparece.',
+  },
 
   'curar leves': {
     success: 'Tus heridas leves se cierran y el dolor desaparece.',
   },
-
-  'curar veneno': UNKNOWN,
 
   'detectar escondido': {
     success: 'Tus sentidos cobran la viveza de los del mejor predador.',
@@ -181,17 +188,11 @@ const SPELLS = {
     dope: true,
   },
 
-  'detectar veneno': UNKNOWN,
-  'disipar magia': UNKNOWN,
-  'disipar maldad': UNKNOWN,
-
   flotar: {
     success: 'Empiezas a flotar a unos centimetros del suelo...',
     endEffect: 'Tus pies aterrizan suavemente en el suelo.',
     dope: ['volar', 'flotar'],
   },
-
-  'fuego espectral': UNKNOWN,
 
   identificar: {
     success: /El objeto '(?<name>[^']+)' es un\(a\) (?<type>\w+), propiedades especiales: (?<properties>[^\n]+)\n/,
@@ -207,11 +208,8 @@ const SPELLS = {
   'invocar armadillo': {
     success:
       'Agitas tus brazos a la vez que te concentras para invocar un pequenyo armadillo.',
-    endEffect: UNKNOWN,
+    // endEffect: UNKNOWN,
   },
-
-  'llamar rayo': UNKNOWN,
-  'localizar objeto': UNKNOWN,
 
   'luz eterna': {
     success:
@@ -220,10 +218,6 @@ const SPELLS = {
     afterDope: ['vestir luz', 'mirar'],
   },
 
-  maldecir: UNKNOWN,
-  'misil magico': UNKNOWN,
-  'niebla espectral': UNKNOWN,
-
   'piel robliza': {
     success: 'Tu piel se oscurece a la vez que adquiere la dureza del roble.',
     target: false,
@@ -231,16 +225,9 @@ const SPELLS = {
     dope: true,
   },
 
-  proteccion: UNKNOWN,
-
   refrescar: {
     success: 'Nueva vitalidad fluye hacia ti.',
   },
-
-  'retirar invisibilida': UNKNOWN,
-  'saciar hambre': UNKNOWN, // LEARN
-  terremoto: UNKNOWN,
-  veneno: UNKNOWN,
 
   volar: {
     success: 'Te elevas entre las corrientes de aire...',
@@ -248,15 +235,9 @@ const SPELLS = {
     endEffect: 'Aterrizas suavemente en el suelo.',
     dope: ['volar', 'flotar'],
   },
-} as const;
+};
 
-SPELLS as Record<string, UNKNOWN | Omit<SpellDescription, 'name'>>;
-
-export interface SpellDescription {
-  readonly name: SpellName;
-  readonly success: Pattern;
-  readonly target?: Pattern | false;
-  readonly endEffect?: Pattern | UNKNOWN;
-  readonly dope?: true | readonly SpellName[];
-  readonly afterDope?: string | readonly string[];
-}
+const spells = spellList.map(x => ({
+  ...x,
+  ...(metadata[x.name] || {}),
+})) as Spell[];

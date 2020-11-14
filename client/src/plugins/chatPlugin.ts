@@ -13,9 +13,12 @@ const version = { version: 2 };
 const receive = (log: History) => ({
   groups: { name, message },
 }: PatternResult) => {
-  console.log(`[MESSAGE(${name})]:`, message);
+  console.log(`MESSAGE => ${name} =>`, message);
   addMessage(log, { from: name, message });
-  notify(name, message);
+
+  if (!name.startsWith('[Orden')) {
+    notify(`${name}: ${message}`);
+  }
 };
 
 const sent = (log: History) => ({ groups: { name, message } }: PatternResult) =>
@@ -54,16 +57,18 @@ export function chatPlugin({ when }: PluginContext) {
     ],
     sent(tell),
   );
+
+  when(/(?<name>\w+) te ha desafiado a un combate en la arena!/, ({ groups }) =>
+    notify(`[ARENA] w/ ${groups.name}`),
+  );
 }
 
 type msg = { message: string };
 
-async function notify(from: string, message: string) {
+async function notify(content: string) {
   await requestNotificationPermission();
 
-  if (!from.startsWith('[Orden')) {
-    return new Notification(`${from}=>${message}`);
-  }
+  return new Notification(content);
 }
 
 function addMessage(log: History, partial: { from: string } & msg): Message;

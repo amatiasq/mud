@@ -1,6 +1,7 @@
 import { Context } from './../lib/workflow/Context';
 
 export async function eat({
+  run,
   when,
   write,
   plugins: { inventory, navigation: nav, skills },
@@ -34,7 +35,10 @@ export async function eat({
   }
 
   async function createFood() {
-    if (!(await skills.castSpell('crear comida'))) {
+    if (
+      !(await skills.has('crear comida')) ||
+      !(await run('cast', ['crear comida']))
+    ) {
       return false;
     }
 

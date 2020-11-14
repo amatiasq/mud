@@ -1,6 +1,6 @@
 import { ClientStorage } from '@amatiasq/client-storage';
 
-import { getSpells, SpellDescription, SPELLS_BY_TYPE } from '../data/spells';
+import { getSpells, Spell, SPELLS_BY_TYPE } from '../data/spells';
 import { Context } from '../lib/workflow/Context';
 import { uniq } from '../util/uniq';
 
@@ -32,8 +32,18 @@ export async function dope({
       hp: { percent: hp },
       mv: { percent: mv },
     }) => {
-      if (isFighting || mana === 0) {
+      if (isFighting) {
         return;
+      }
+
+      const canMeditate = await skills.has('meditar');
+
+      if (mana < 0.1 && !canMeditate) {
+        return;
+      }
+
+      if (mana < 0.7 && canMeditate) {
+        return skills.meditate();
       }
 
       if (hp > 0 && shouldHeal(mana, hp)) {
@@ -56,7 +66,7 @@ export async function dope({
     }
   });
 
-  async function watchDope(spell: SpellDescription) {
+  async function watchDope(spell: Spell) {
     const invoke = Array.isArray(spell.dope) ? spell.dope : spell.name;
 
     when(spell.endEffect!, async () => {

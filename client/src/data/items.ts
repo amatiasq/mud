@@ -66,6 +66,7 @@ export const ITEM_SUSTANTIVES = [
   'polainas',
   'pulsera',
   'ropaje',
+  'sentido',
   'sombrero',
   'tobillera',
   'vara',
@@ -76,5 +77,12 @@ export const ITEM_SUSTANTIVES = [
 
 export function getItemSustantive(item: string): ItemName | null {
   const lower = item.toLowerCase();
-  return ITEM_SUSTANTIVES.find(x => lower.includes(x)) || null;
+  const found = ITEM_SUSTANTIVES.find(x => lower.includes(x));
+
+  if (!found) {
+    console.warn('Unknown item sustantive:', item);
+    return null;
+  }
+
+  return found;
 }

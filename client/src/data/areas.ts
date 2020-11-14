@@ -16,7 +16,7 @@ const METADATA: Partial<Record<AreaName, AreaMetadata>> = {
   // cadaver: { path: 'ru2sw'},
   'Academia de Darkhaven': {
     path: 'rd',
-    arena: ['Xse', 'Xne', 'Xse', 'Xne', 'Xse'],
+    arena: ['Xse', 'Xne', 'Xse', 'Xne', 'Xs'],
   },
   'Bosque de las Hadas': { path: 'r6w2nwk2wh' },
   'Catacumbas de la Capilla': { path: 'r6w8se7s' },
@@ -33,12 +33,18 @@ const METADATA: Partial<Record<AreaName, AreaMetadata>> = {
   'El Imperio Orco': {
     path: 'r13s2wn',
     arena: [
-      'Xnu',
-      'Xsu',
-      'ne2wene2weXsu',
-      'ne2wenXsnu',
-      '3ne2we2nu',
-      // 's', // hogoblin
+      '4ne2wen', // planta principal
+      'dse2wese2wese2wese2weXnu', // sotano
+      'uXs', // primer piso
+      'une2wene2weXs', // segundo piso
+      'une2wene2wenXsejk2whlen', // tercer piso
+      'u3ne2we2n', // cuarto piso
+      // 'u2se2wes3nd', // cuarto piso parte 2
+      'Xsune2wene2wene2wene2weXs', // quinto piso
+      'une2wene2weXs', // sexto piso
+      'uXnXs', // septimo piso
+      'une2wene2we2n', // octavo piso
+      'u', // techo
     ],
   },
   'El Jardin de los Heroes': { path: 'r8e2n4el3e2s2j8l8e5j4els' },

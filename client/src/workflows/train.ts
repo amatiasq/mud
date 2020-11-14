@@ -1,10 +1,11 @@
+import { Mob } from './../data/mobs';
 import { getAreaMetadata, getAreasForLevel } from '../data/areas';
 import {
   getMobIn,
   MOB_ARRIVES,
   MOB_LEAVES,
   getMobsPresence,
-  getMobFromPrecence,
+  getMobFromPresence,
 } from '../data/mobs';
 import { Context } from '../lib/workflow/Context';
 
@@ -14,24 +15,24 @@ export async function train(
     run,
     when,
     write,
-    printLogs,
     plugins: { navigation: nav, prompt, stats },
   }: Context,
   area?: string,
 ) {
   const arena = await getArena(area);
-  const enemies: string[] = [];
+  const enemies: Mob[] = [];
 
-  when(getMobsPresence(), ({ patterns, fullMatch, captured }) => {
-    const mob = getMobFromPrecence(patterns);
-    enemySpotted((mob && mob.name) || fullMatch || captured[0]);
-  });
+  when(getMobsPresence(), ({ patterns, fullMatch, captured }) =>
+    enemySpotted(
+      getMobFromPresence(patterns) || getMobIn(fullMatch || captured[0]),
+    ),
+  );
 
-  when(MOB_ARRIVES, ({ groups }) => enemySpotted(groups.mob));
+  when(MOB_ARRIVES, ({ groups }) => enemySpotted(getMobIn(groups.mob)));
   when(MOB_LEAVES, x => {
     const { mob } = x.groups;
     if (mob) {
-      enemyGone(x.groups.mob);
+      enemyGone(getMobIn(x.groups.mob));
     } else {
       console.warn(`No MOB detected in`, x.captured);
     }
@@ -55,31 +56,26 @@ export async function train(
       }
 
       log('WAITING_READY_TO_FIGHT');
-      await Promise.any([when(MOB_ARRIVES), readyToFight()]);
+
+      const recover = run('recover');
+      await Promise.any([
+        recover,
+        when(MOB_ARRIVES).then(() => recover.abort()),
+      ]);
+
       log('READY_TO_FIGHT!!!');
     }
 
     log('LEAVE_ROOM');
   }
 
-  async function readyToFight() {
-    await prompt.until(
-      ({ hp: { percent: hp }, mana: { percent: mana } }) =>
-        hp > 0.7 && mana > 0.5,
-    );
-  }
-
-  function enemySpotted(text: string) {
-    const mob = getMobIn(text);
-
+  function enemySpotted(mob: Mob | null = null) {
     if (mob) {
       enemies.push(mob);
     }
   }
 
-  function enemyGone(text: string) {
-    const mob = getMobIn(text);
-
+  function enemyGone(mob: Mob | null = null) {
     if (mob) {
       const index = enemies.indexOf(mob);
       if (index > -1) {
@@ -92,7 +88,7 @@ export async function train(
     log('CHECK_ENEMIES', enemies.length);
 
     while (enemies.length) {
-      const result = await run('kill', [enemies.pop()!]);
+      const result = await run('kill', [enemies.pop()!.name]);
 
       if (result === 'flee') {
         console.log('Had to run. Train over.');

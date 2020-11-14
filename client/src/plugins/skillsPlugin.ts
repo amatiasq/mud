@@ -1,6 +1,6 @@
-import { SpellDescription } from './../data/spells';
 import {
   getSpell,
+  Spell,
   SPELL_ALREADY_APPLIED,
   SPELL_FAILED,
   SPELL_NOT_POSSIBLE,
@@ -24,6 +24,12 @@ export type CastSpellResult =
   | typeof CASTED
   | typeof ALREADY_APPLIED;
 
+export type MeditationResult =
+  | typeof NOT_AVAILABLE
+  | typeof BUSY
+  | typeof FAILED
+  | typeof CASTED;
+
 const SKILL = /((?:\w+ )+)\s+(\d+)%/g;
 const SKILLS_DETECTOR = concatRegexes(
   /-+\[(\w+)\]-+\n/,
@@ -35,6 +41,7 @@ const SKILLS_DETECTOR = concatRegexes(
 export function skillsPlugin({ when, write }: PluginContext) {
   let isInitialized = false;
   let isSpellRunning = false;
+  let isMeditating = false;
   let skills: Record<string, number> = {};
 
   const refresh = singleExecution(() => {
@@ -62,6 +69,7 @@ export function skillsPlugin({ when, write }: PluginContext) {
     has,
     canLearn,
     castSpell,
+    meditate,
     NOT_AVAILABLE,
     BUSY,
     FAILED,
@@ -94,16 +102,33 @@ export function skillsPlugin({ when, write }: PluginContext) {
     }
   }
 
+  async function meditate() {
+    if (!(await has('meditar'))) return NOT_AVAILABLE;
+    if (isSpellRunning) return BUSY;
+    if (isMeditating) return waitResponse();
+
+    isMeditating = true;
+    write('meditar');
+    return waitResponse().finally(() => (isMeditating = false));
+
+    function waitResponse() {
+      return Promise.any([
+        when(
+          'Meditas con total paz interior, recolectando mana del cosmos.',
+        ).then(() => CASTED),
+        when(
+          'Te pasas varios minutos en profunda concentracion, pero fallas en el intento de recolectar mana.',
+        ).then(() => FAILED),
+      ]).finally();
+    }
+  }
+
   async function castSpell(name: string | string[], args = '') {
     const aliases = Array.isArray(name) ? name : [name];
-    const candidates = aliases
-      .map(getSpell)
-      .filter(Boolean) as SpellDescription[];
-    const learnt = await has(candidates.map(x => x.name));
+    const candidates = aliases.map(getSpell).filter(Boolean) as Spell[];
 
-    if (!learnt) {
-      return NOT_AVAILABLE;
-    }
+    const learnt = await has(candidates.map(x => x.name));
+    if (!learnt) return NOT_AVAILABLE;
 
     const spell = candidates.find(x => x.name === learnt)!;
 
@@ -111,7 +136,7 @@ export function skillsPlugin({ when, write }: PluginContext) {
       throw new Error(`Unknown response for spell "${name}" (${spell.name}).`);
     }
 
-    if (isSpellRunning) {
+    if (isSpellRunning || isMeditating) {
       return BUSY;
     }
 
@@ -132,7 +157,6 @@ export function skillsPlugin({ when, write }: PluginContext) {
     }
 
     const result: CastSpellResult = await Promise.any(promises);
-
     isSpellRunning = false;
     return result;
   }

@@ -21,8 +21,8 @@ export async function defend({
       write('huir');
     } else if (prompt.getPercent('mana') > 0.1) {
       const fullName = captured[1];
-      const name = getMobIn(fullName);
-      await skills.castSpell(SPELLS_BY_TYPE.attack, name || fullName);
+      const mob = getMobIn(fullName);
+      await skills.castSpell(SPELLS_BY_TYPE.attack, mob ? mob.name : fullName);
     } else {
       log('Nothing');
     }
@@ -49,6 +49,17 @@ export async function defend({
       write('vestir todo');
       await prompt.until();
       await prompt.until();
+    }
+  });
+
+  when(/El cadaver de.* contiene:(?<items>(?:.\n)+)\n\n/, ({ groups }) => {
+    const items = groups.items
+      .toLowerCase()
+      .split(/\n/)
+      .map(x => x.trim());
+
+    if (items.some(x => x.includes('llave'))) {
+      write('coger llave cuerpo');
     }
   });
 }

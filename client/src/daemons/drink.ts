@@ -1,6 +1,7 @@
 import { Context } from './../lib/workflow/Context';
 
 export async function drink({
+  run,
   when,
   write,
   plugins: { inventory, navigation, skills },
@@ -40,7 +41,7 @@ export async function drink({
       'Estas en peligro de deshidratacion.',
     ],
     async () => {
-      if (isFontAvailable || (await skills.castSpell('crear manantial'))) {
+      if (isFontAvailable || (await createFont())) {
         write('beber');
         return;
       }
@@ -56,6 +57,12 @@ export async function drink({
       await skills.castSpell('crear agua', bottle);
     },
   );
+
+  async function createFont() {
+    if (await skills.has('crear manantial')) {
+      return run('cast', ['crear manantial']);
+    }
+  }
 
   async function getWaterBottle() {
     return inventory.has({

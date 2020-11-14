@@ -25,28 +25,30 @@ export class Context extends PluginContext {
     ) => void,
     private readonly runWorkflow: Mud['run'],
   ) {
-    super(`W(${name})`, username, triggers, send);
+    super(name, username, triggers, send);
     this.plugins = createPluginsGetter(plugins, this.log.bind(this));
 
     bindAll(this, Context);
   }
 
-  async run(name: string, params: any[] = []) {
+  run(name: string, params: any[] = []) {
     this.checkNotAborted();
     this.log(`Invoke workflow "${name}" with`, ...params);
 
-    try {
-      const result = await this.runWorkflow(name, params, {
-        logs: this.isPrintingLogs,
-      });
-      this.log(`Invocation "${name}" returned `, result);
-      return result;
-    } catch (error) {
-      this.log(`Invocation "${name}" failed `, error);
-    }
+    const promise = this.runWorkflow(name, params, {
+      logs: this.isPrintingLogs,
+    });
+
+    promise.then(
+      result => this.log(`Invocation "${name}" returned `, result),
+      error => this.log(`Invocation "${name}" failed `, error),
+    );
+
+    return promise;
   }
 
   runForever() {
+    this.checkNotAborted();
     return new Promise(resolve => (this.finish = resolve));
   }
 

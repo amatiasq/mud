@@ -36,6 +36,7 @@ async function initializeMud(telnet: RemoteTelnet) {
 
   mud.onCommand(x => terminal.write(`${x}\n`));
   telnet.onData(data => terminal.write(data));
+  terminal.onSubmit(onUserInput);
 
   window.onbeforeunload = () => {
     if (telnet.isConnected) {
@@ -45,17 +46,23 @@ async function initializeMud(telnet: RemoteTelnet) {
     telnet.close();
   };
 
-  terminal.onSubmit(command => {
-    terminal.write(`${command}\n`);
+  mud.registerHandler('!', command => {
+    const [workflow, ...args] = command.split(/\s+/);
+    runWorkflow(workflow, args);
+  });
 
-    if (command.startsWith('!')) {
-      const [workflow, ...args] = command.substr(1).split(/\s+/);
-      runWorkflow(workflow, args);
-      return;
+  mud.registerHandler('#', command => {
+    const [trigger, action, permanent] = command.split(/#/).map(x => x.trim());
+    const name = `#${trigger}#`;
+    const run = () => onUserInput(action);
+
+    if (permanent != null) {
+      mud.daemon(name, ({ when, printLogs }) => when(trigger, run));
+    } else {
+      mud.runOnce(name, ({ when, printLogs }) => when(trigger).then(run));
     }
 
-    telnet.send(command);
-    mud.userInput(command);
+    terminal.write(`WHEN: ${trigger}\nRUN: ${action}\n`);
   });
 
   await mud.login(user, pass);
@@ -64,6 +71,14 @@ async function initializeMud(telnet: RemoteTelnet) {
   connectButtons();
 
   Object.assign(window, { mud });
+
+  function onUserInput(command: string) {
+    terminal.write(`${command}\n`);
+
+    if (mud.userInput(command)) {
+      telnet.send(command);
+    }
+  }
 
   async function connectStats() {
     const hp = emitter<number>();

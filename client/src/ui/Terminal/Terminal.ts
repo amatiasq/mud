@@ -84,14 +84,14 @@ export class Terminal {
     this.$input.value = '';
     this.histPos = 0;
 
-    for (const command of value.split(/\s+;\s+/)) {
-      if (command) {
-        this.history.shift();
-        this.history.unshift(command);
-        this.history.unshift('');
-        history.set(this.history);
-      }
+    if (value) {
+      this.history.shift();
+      this.history.unshift(value);
+      this.history.unshift('');
+      history.set(this.history);
+    }
 
+    for (const command of value.split(/;/)) {
       this.emitSubmit(command);
     }
   }

@@ -9,7 +9,7 @@ export async function cast(
   const result = await repeatUntilCasted();
 
   if (result === false) {
-    throw new Error(`Unable to cast "${spell}"`);
+    throw console.warn(`Unable to cast "${spell}"`);
   }
 
   return result;

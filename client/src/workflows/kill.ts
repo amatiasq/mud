@@ -8,19 +8,25 @@ export async function kill(
   target: string,
 ) {
   const attackSpells = [...SPELLS_BY_TYPE.dedope, ...SPELLS_BY_TYPE.attack];
-  const cast = () => skills.castSpell(attackSpells, target);
 
-  if (!(await tryNTimes(3, cast))) {
+  const cast = async () => skills.castSpell(attackSpells, target);
+  const casted = (x: CastSpellResult) =>
+    x === skills.CASTED || x === skills.ALREADY_APPLIED;
+  const cantCast = (x: CastSpellResult) => x === skills.NOT_AVAILABLE;
+
+  if (!(await tryNTimes(3, cast, casted, cantCast))) {
     write(`matar ${target}`);
   }
 
-  // wile result == null cast attack!!!!
   const result = await Promise.any([
     navigation.waitForRecall().then(() => 'flee'),
-    when(concatRegexes(target, /(?:\w| )* ha MUERTO!!/)).then(() => 'win'),
+
+    when(concatRegexes(target, /(?:\w|�| )* ha MUERTO!!/)).then(() => 'win'),
+
     when('No esta aqui.')
       .timeout(3)
       .then(() => 'missing'),
+
     when([
       'Huyes como un cobarde del combate.',
       'Estas demasiado malherido para hacer eso.',
@@ -35,14 +41,16 @@ export async function kill(
 
   return result;
 
-  async function tryNTimes(
+  async function tryNTimes<T>(
     times: number,
-    action: () => Promise<CastSpellResult>,
+    action: () => Promise<T>,
+    success: (x: T) => boolean,
+    abort: (x: T) => boolean,
   ) {
     for (let i = 0; i < times; i++) {
-      if (await action()) {
-        return true;
-      }
+      const result = await action();
+      if (success(result)) return true;
+      if (abort(result)) return false;
     }
 
     return false;

@@ -1,7 +1,7 @@
 import { Context } from './../lib/workflow/Context';
 
 export async function afk(
-  { abort, run, when, plugins: { prompt, navigation } }: Context,
+  { abort, printLogs, run, when, plugins: { navigation } }: Context,
   ...areas: string[]
 ) {
   when('.. Todo empieza a volverse negro.\n', abort);
@@ -9,10 +9,15 @@ export async function afk(
   await action();
 
   async function action(): Promise<void> {
-    await prompt.whenFresh();
-    await run('repair');
-    await run('dope');
-    await prompt.whenFresh();
+    try {
+      await run('recover');
+      await run('repair');
+      await run('dope');
+      await run('recover');
+    } catch (error) {
+      console.log('Preparation error', error);
+    }
+
     console.log('Stats 100%. Start train...');
 
     try {
@@ -22,8 +27,12 @@ export async function afk(
       console.log('workflow failed');
     }
 
-    if (navigation.isAtRecall) {
-      await run('bank');
+    try {
+      if (navigation.isAtRecall) {
+        await run('bank');
+      }
+    } catch (error) {
+      console.log('Bank error', error);
     }
 
     return action();

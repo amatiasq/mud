@@ -80,7 +80,7 @@ export class PluginContext {
 
   protected checkNotAborted() {
     if (this.isAborted) {
-      throw new ExecutionAbortedError();
+      throw new ExecutionAbortedError(`[${this.name}] Workflow aborted.`);
     }
   }
 }
