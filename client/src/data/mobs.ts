@@ -19,8 +19,10 @@ const MOB_GENERIC = {
     'Una joven cultista parece bastante serena, mientras no vea a nadie m',
   dragon: null,
   empleado: null,
-  esqueleto:
+  esqueleto: [
     'El esqueleto hace castanyetear sus dientes amenazadoramente y se acerca!',
+    'Un esqueleto con armadura avanza torpemente a traves de los arboles.',
+  ],
   fanatico: /Un humano pose.do por el fanatismo busca 'herejes'\./,
   hobgoblin: [
     'un guardia hobgoblin de elite esta aqui profundamente dormido.',

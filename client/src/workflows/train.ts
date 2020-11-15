@@ -15,10 +15,17 @@ export async function train(
     run,
     when,
     write,
+    printLogs,
     plugins: { navigation: nav, prompt, stats },
   }: Context,
   area?: string,
 ) {
+  if (area === 'test') {
+    const area = await getBestArea();
+    console.log(area.name, area);
+    return;
+  }
+
   const arena = await getArena(area);
   const enemies: Mob[] = [];
 

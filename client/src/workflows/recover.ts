@@ -27,7 +27,7 @@ export async function recover({ run, plugins: { skills, prompt } }: Context) {
     (canRefresh ? !needsRefresh() : true);
 
   while (!isDone()) {
-    if (!prompt.isInvisible) {
+    if (canInvisible && !prompt.isInvisible) {
       await run('cast', [invisible]);
     }
 

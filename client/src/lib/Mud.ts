@@ -142,6 +142,20 @@ function removeNoise(text: string) {
   return removeAsciiCodes(text).replace(/\r/g, '');
 }
 
+let stored = '';
+
 function removeAsciiCodes(text: string) {
-  return text.replace(/\u001b\[.*?m/g, '');
+  if (stored) {
+    text = `${stored}${text}`;
+    stored = '';
+  }
+
+  const match = text.match(/\u001b\[[^m]*?$/);
+
+  if (match) {
+    stored = match[0];
+    text = text.substr(0, text.length - stored.length);
+  }
+
+  return text.replace(/\u001b\[[^m]*?m/g, '');
 }

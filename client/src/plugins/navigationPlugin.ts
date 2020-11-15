@@ -19,6 +19,12 @@ const aliases = {
   h: 'noroeste',
 };
 
+const recalls = [
+  /Plaza de Darkhaven\s+/,
+  /Templo de la Justicia\s+/,
+  /Templo de las Tinieblas\s+/,
+];
+
 export function navigationPlugin({ log, when, write }: PluginContext) {
   let isNavigating = false;
   let landingAtRecall = false;
@@ -28,7 +34,7 @@ export function navigationPlugin({ log, when, write }: PluginContext) {
   const prompt = () => when(PROMPT_DETECTOR);
   const roomChanged = emitter<string[]>();
 
-  when(/Plaza de Darkhaven\s+/, () => (landingAtRecall = true));
+  when(recalls, () => (landingAtRecall = true));
 
   when(/Puertas? esta cerrada\./, async () => {
     const closed = directions.find(x => x.includes(CLOSED));

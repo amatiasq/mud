@@ -85,7 +85,7 @@ const STATE_DETECTOR = (() => {
   */
 })();
 
-export function statsPlugin({ when, write }: PluginContext) {
+export function statsPlugin({ when, write, printLogs }: PluginContext) {
   let isInitiated = false;
   const stats = {
     name: 0,

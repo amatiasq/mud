@@ -45,7 +45,7 @@ export class PluginContext {
     options?: PatternOptions,
   ) {
     this.checkNotAborted();
-    // this.log('[WATCH]', pattern, options);
+    this.log('[WATCH]', pattern, options);
 
     const onResult = this.isPrintingLogs
       ? ({ patterns, ...rest }: PatternResult) =>
@@ -55,7 +55,10 @@ export class PluginContext {
     if (typeof handler === 'function') {
       if (onResult) {
         const original = handler;
-        handler = result => (onResult(result), original(result));
+        handler = result => {
+          onResult(result);
+          original(result);
+        };
       }
 
       return this.triggers.add(pattern, handler, options);

@@ -3,6 +3,7 @@ import { dope } from './daemons/dope';
 import { drink } from './daemons/drink';
 import { eat } from './daemons/eat';
 import { idle } from './daemons/idle';
+import { quest } from './daemons/quest';
 import { repair } from './daemons/repair';
 import { rest } from './daemons/rest';
 import { Mud } from './lib/Mud';
@@ -32,6 +33,7 @@ export function registerWorkflows(mud: Mud) {
   mud.daemon('drink', drink);
   mud.daemon('eat', eat);
   mud.daemon('idle', idle);
+  mud.daemon('quest', quest);
   mud.daemon('repair', repair);
   mud.daemon('rest', rest);
 }

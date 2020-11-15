@@ -2,6 +2,7 @@ export default {
   Calimhar: [
     {
       name: 'Academia de Darkhaven',
+      path: 'rd',
       from: 1,
       to: 5,
       min: 0,
@@ -9,6 +10,7 @@ export default {
     },
     {
       name: 'Bosque de las Hadas',
+      path: 'r6w2nwk2wh',
       from: 1,
       to: 5,
       min: 0,
@@ -16,6 +18,7 @@ export default {
     },
     {
       name: 'Catacumbas de la Capilla',
+      path: 'r6w8se7s',
       from: 15,
       to: 25,
       min: 0,
@@ -23,6 +26,7 @@ export default {
     },
     {
       name: 'Cementerio Oscuro',
+      path: 'r4s4ws',
       clan: 'Legends',
       from: 5,
       to: 15,
@@ -31,6 +35,7 @@ export default {
     },
     {
       name: 'Ciudad Imperial',
+      path: 'r8e2n4el3e2sj',
       from: 0,
       to: 95,
       min: 0,
@@ -38,6 +43,7 @@ export default {
     },
     {
       name: 'DarkHaven',
+      path: 'rd',
       from: 0,
       to: 95,
       min: 0,
@@ -45,6 +51,7 @@ export default {
     },
     {
       name: 'El Campamento Goblin',
+      path: 'r10s4en3e2n',
       from: 1,
       to: 10,
       min: 0,
@@ -52,6 +59,7 @@ export default {
     },
     {
       name: 'El Cementerio',
+      path: 'r6w8ses',
       from: 5,
       to: 10,
       min: 0,
@@ -59,6 +67,7 @@ export default {
     },
     {
       name: 'El Centinela',
+      path: 'r7ws',
       from: 5,
       to: 10,
       min: 0,
@@ -66,6 +75,7 @@ export default {
     },
     {
       name: 'El Gran Estadio',
+      path: 'r8e2n4el3e2s2jn',
       from: 10,
       to: 20,
       min: 0,
@@ -73,6 +83,7 @@ export default {
     },
     {
       name: 'El Imperio Orco',
+      path: 'r13s2wn',
       clan: 'Legends',
       from: 10,
       to: 20,
@@ -81,6 +92,7 @@ export default {
     },
     {
       name: 'El Jardin de los Heroes',
+      path: 'r8e2n4el3e2s2j8l8e5j4els',
       from: 75,
       to: 80,
       min: 0,
@@ -88,6 +100,7 @@ export default {
     },
     {
       name: 'El Pantano Orco',
+      path: 'r13s2en',
       clan: 'DarkAngels',
       from: 5,
       to: 30,
@@ -96,6 +109,7 @@ export default {
     },
     {
       name: 'El Refugio Destruido',
+      path: 'r8e2ne',
       from: 5,
       to: 20,
       min: 0,
@@ -103,6 +117,7 @@ export default {
     },
     {
       name: 'Exportaciones de Dragones',
+      path: 'r4sen',
       clan: 'Legends',
       from: 5,
       to: 25,
@@ -111,6 +126,7 @@ export default {
     },
     {
       name: 'Foire de Reves',
+      path: 'r8n3ene',
       from: 0,
       to: 50,
       min: 0,
@@ -118,6 +134,7 @@ export default {
     },
     {
       name: 'Galeria de arte',
+      path: 'r4swn',
       from: 10,
       to: 50,
       min: 0,
@@ -125,6 +142,7 @@ export default {
     },
     {
       name: 'Guarderia Enana',
+      path: 'r8ejs',
       from: 1,
       to: 5,
       min: 0,
@@ -132,6 +150,7 @@ export default {
     },
     {
       name: 'Haon Dor',
+      path: 'r7w',
       from: 5,
       to: 10,
       min: 0,
@@ -139,6 +158,7 @@ export default {
     },
     {
       name: 'Holy Grove',
+      path: 'r9e',
       from: 5,
       to: 20,
       min: 0,
@@ -153,6 +173,7 @@ export default {
     },
     {
       name: 'La Fortaleza de Valor',
+      path: 'r11n2en',
       clan: 'DragonSlayers',
       from: 5,
       to: 30,
@@ -161,6 +182,7 @@ export default {
     },
     {
       name: 'La Mansion de Marmol',
+      path: 'r9w3s',
       from: 5,
       to: 15,
       min: 0,
@@ -168,6 +190,7 @@ export default {
     },
     {
       name: 'La Mansion de Tullfuhrzky',
+      path: 'r6w2nwk2wh4nj',
       from: 1,
       to: 10,
       min: 0,
@@ -175,6 +198,7 @@ export default {
     },
     {
       name: 'La Torre del Brujo',
+      path: 'r9w2sese2s',
       clan: 'Legends',
       from: 10,
       to: 20,
@@ -183,6 +207,7 @@ export default {
     },
     {
       name: 'Las Alcantarillas',
+      path: 'r4sd',
       from: 5,
       to: 20,
       min: 0,
@@ -190,6 +215,7 @@ export default {
     },
     {
       name: 'Las Llanuras del Norte',
+      path: 'r7n',
       from: 1,
       to: 20,
       min: 0,
@@ -197,6 +223,7 @@ export default {
     },
     {
       name: "Miden'nir",
+      path: 'r7s',
       from: 5,
       to: 15,
       min: 0,
@@ -221,6 +248,7 @@ export default {
   Earand: [
     {
       name: 'Armageddon',
+      path: 'r3s7w6n2wsl2sejls',
       clan: 'Conclave',
       from: 50,
       to: 80,
@@ -229,6 +257,7 @@ export default {
     },
     {
       name: 'Asgard',
+      path: 'r3s7w11ne2n2enhjn;entrar;.s',
       clan: 'El Santuario',
       from: 40,
       to: 60,
@@ -237,6 +266,7 @@ export default {
     },
     {
       name: 'Asoinwan, ciudad de las hadas',
+      path: 'r3s7w11ne2n',
       clan: 'DragonSlayers',
       from: 5,
       to: 30,
@@ -245,6 +275,7 @@ export default {
     },
     {
       name: 'Camelot',
+      path: 'r3s7w11ne2n2ej',
       from: 65,
       to: 80,
       min: 50,
@@ -252,6 +283,7 @@ export default {
     },
     {
       name: 'Dregoria',
+      path: 'r3s5e10n3wn',
       clan: 'Cantico',
       from: 40,
       to: 65,
@@ -260,6 +292,7 @@ export default {
     },
     {
       name: 'El Calabozo de la Muerte',
+      path: 'ruse7n',
       from: 10,
       to: 35,
       min: 0,
@@ -267,6 +300,7 @@ export default {
     },
     {
       name: 'El Campo de Batalla Desolado',
+      path: 'r3s7w6n2wsl2se',
       from: 15,
       to: 25,
       min: 0,
@@ -274,6 +308,7 @@ export default {
     },
     {
       name: 'El Plano Astral',
+      path: 'r2su',
       clan: 'DarkAngels',
       from: 15,
       to: 35,
@@ -282,6 +317,7 @@ export default {
     },
     {
       name: 'El Pueblo Fantasma',
+      path: 'r3s5e2j',
       clan: 'DragonSlayers',
       from: 35,
       to: 50,
@@ -290,6 +326,7 @@ export default {
     },
     {
       name: 'El Reino de Yggdrasil',
+      path: 'r3s7w11ne2n2enhjn;entrar',
       from: 15,
       to: 50,
       min: 0,
@@ -297,6 +334,7 @@ export default {
     },
     {
       name: 'El Yunque del Sol',
+      path: 'r3s7w6n2wsl2sejl2s5e4n3w2n4w',
       clan: 'Legends',
       from: 60,
       to: 80,
@@ -313,6 +351,7 @@ export default {
     },
     {
       name: 'Ghotiamir',
+      path: 'recall',
       from: 0,
       to: 95,
       min: 0,
@@ -320,6 +359,7 @@ export default {
     },
     {
       name: 'La Ciudad de Velas',
+      path: 'r3s7wn',
       from: 45,
       to: 55,
       min: 0,
@@ -327,6 +367,7 @@ export default {
     },
     {
       name: 'La Fortaleza de Lord Krothgar',
+      path: 'r3s5e3n',
       from: 35,
       to: 60,
       min: 0,
@@ -334,6 +375,7 @@ export default {
     },
     {
       name: 'La Fortaleza Enana',
+      path: 'r3s5el2nj',
       clan: 'El Santuario',
       from: 35,
       to: 65,
@@ -342,6 +384,7 @@ export default {
     },
     {
       name: 'La Guarida de Kotegaesi',
+      path: 'r3s7w6n2wslsk',
       from: 30,
       to: 45,
       min: 0,
@@ -349,6 +392,7 @@ export default {
     },
     {
       name: 'La tumba de Damara',
+      path: 'r3s5w3n',
       clan: 'Shinsent',
       from: 15,
       to: 25,
@@ -364,6 +408,7 @@ export default {
     },
     {
       name: 'Observatorio del Ojo Celeste',
+      path: 'r3s3e2s',
       clan: 'Cantico',
       from: 25,
       to: 65,
@@ -372,6 +417,7 @@ export default {
     },
     {
       name: 'Valle de Rivendel',
+      path: 'r3s7w11ne2n2e2n',
       from: 60,
       to: 80,
       min: 0,
@@ -379,6 +425,7 @@ export default {
     },
     {
       name: 'Villa Enana',
+      path: 'r3s5el',
       from: 10,
       to: 35,
       min: 0,
@@ -419,6 +466,7 @@ export default {
   Valmorag: [
     {
       name: 'Bosque de los Muertos',
+      path: 'r3s5e2n2e2ses2en',
       from: 20,
       to: 40,
       min: 0,
@@ -426,6 +474,7 @@ export default {
     },
     {
       name: 'Dhusebark',
+      path: 'recall',
       from: 0,
       to: 95,
       min: 0,
@@ -433,6 +482,7 @@ export default {
     },
     {
       name: 'El Devorador de Mundos',
+      path: 'r3s5e2n2e2ses2e3n2wkwnwhne6nunj',
       from: 30,
       to: 50,
       min: 0,
@@ -440,6 +490,7 @@ export default {
     },
     {
       name: 'El Legado de Xchantharus',
+      path: 'r3s5e2n2e3swse3sd9sh',
       clan: 'El Santuario',
       from: 30,
       to: 50,
@@ -448,6 +499,7 @@ export default {
     },
     {
       name: 'El Mausoleo del Minotauro',
+      path: 'r3s5e2n2en',
       from: 40,
       to: 65,
       min: 0,
@@ -455,6 +507,7 @@ export default {
     },
     {
       name: 'Guarida de Gigantes de Fuego',
+      path: 'r3s5wh2w',
       from: 40,
       to: 50,
       min: 0,
@@ -462,6 +515,7 @@ export default {
     },
     {
       name: 'Infierno',
+      path: 'r4sd',
       from: 30,
       to: 80,
       min: 0,
@@ -469,6 +523,7 @@ export default {
     },
     {
       name: 'La Ciudad Maldita',
+      path: 'r9sk3esek',
       clan: 'Sindicato',
       from: 40,
       to: 80,
@@ -477,6 +532,7 @@ export default {
     },
     {
       name: 'La Fortaleza de Lilith',
+      path: 'r9sk2w3usw',
       clan: 'Torre Arcana',
       from: 65,
       to: 80,
@@ -485,6 +541,7 @@ export default {
     },
     {
       name: 'La Fortaleza de Mahn-Tor',
+      path: 'r3s5e2n2e',
       from: 5,
       to: 35,
       min: 0,
@@ -492,6 +549,7 @@ export default {
     },
     {
       name: 'La Gran Torre de la Hechiceria',
+      path: 'r3s5e2nj',
       from: 10,
       to: 30,
       min: 0,
@@ -499,6 +557,7 @@ export default {
     },
     {
       name: 'La Maldicion del Nigromante',
+      path: 'r3s5e2n2e2s2e',
       clan: 'Cantico',
       from: 30,
       to: 55,
@@ -507,6 +566,7 @@ export default {
     },
     {
       name: 'La Residencia de Redferne',
+      path: 'r9sk2w',
       from: 20,
       to: 30,
       min: 0,
@@ -521,6 +581,7 @@ export default {
     },
     {
       name: 'Los Usurpadores de Hochenyana',
+      path: 'r3s6ele',
       clan: 'Shinsent',
       from: 20,
       to: 35,
@@ -529,6 +590,7 @@ export default {
     },
     {
       name: 'Profundidades Umbrias',
+      path: 'r3s5e2n2e3swse3sd9sd',
       from: 20,
       to: 50,
       min: 0,
@@ -536,6 +598,7 @@ export default {
     },
     {
       name: 'Puerto Libre',
+      path: 'r9ske',
       from: 10,
       to: 55,
       min: 0,
@@ -543,6 +606,7 @@ export default {
     },
     {
       name: 'Valle de Morgul',
+      path: 'r9sk2w3us',
       clan: 'Shinsent',
       from: 30,
       to: 55,

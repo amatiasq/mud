@@ -4,17 +4,20 @@ import { Context } from '../lib/workflow/Context';
 import { CastSpellResult } from '../plugins/skillsPlugin';
 
 export async function kill(
-  { when, write, plugins: { navigation, skills } }: Context,
+  { when, write, run, plugins: { navigation, skills } }: Context,
   target: string,
 ) {
-  const attackSpells = [...SPELLS_BY_TYPE.dedope, ...SPELLS_BY_TYPE.attack];
+  const { dedope, attack } = SPELLS_BY_TYPE;
+  let dedopeFailed = !dedope.length || false;
 
-  const cast = async () => skills.castSpell(attackSpells, target);
-  const casted = (x: CastSpellResult) =>
-    x === skills.CASTED || x === skills.ALREADY_APPLIED;
-  const cantCast = (x: CastSpellResult) => x === skills.NOT_AVAILABLE;
+  for (const spell of dedope) {
+    if (!(await run('cast', [spell, target]))) {
+      dedopeFailed = true;
+      break;
+    }
+  }
 
-  if (!(await tryNTimes(3, cast, casted, cantCast))) {
+  if (dedopeFailed) {
     write(`matar ${target}`);
   }
 

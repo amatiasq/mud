@@ -47,8 +47,8 @@ export const SPELLS_BY_TYPE: Record<string, Casteable> = {
   water: ['crear manantial', 'crear agua'],
   levitate: ['volar', 'flotar'],
   heal: ['curar criticas', 'curar graves', 'curar leves'],
-  attack: ['causar critica', 'causar grave', 'causar leve'],
-  dedope: ['ceguera', 'veneno'],
+  attack: ['terremoto', 'causar critica', 'causar grave', 'causar leve'],
+  dedope: ['terremoto', 'ceguera', 'veneno'],
 };
 
 export const SPELL_LEARN_ORDER: Casteable[] = [
@@ -143,6 +143,10 @@ const metadata: Partial<Record<SpellName, SpellMetadata>> = {
     endEffect: 'Un manantial magico se seca.',
   },
 
+  'curar criticas': {
+    success: 'Tus heridas mas graves se cierran y el dolor desaparece.',
+  },
+
   'curar graves': {
     success: 'Tus heridas graves se cierran y el dolor desaparece.',
   },
@@ -227,6 +231,10 @@ const metadata: Partial<Record<SpellName, SpellMetadata>> = {
 
   refrescar: {
     success: 'Nueva vitalidad fluye hacia ti.',
+  },
+
+  terremoto: {
+    success: 'La tierra tiembla bajo tus pies!',
   },
 
   volar: {
