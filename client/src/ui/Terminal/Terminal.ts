@@ -32,11 +32,11 @@ export class Terminal {
   }
 
   render(parent: HTMLElement) {
-    this.dom.$('.terminal').addEventListener('click', () => {
-      if (!userHasSelectedText()) {
-        this.$input.focus();
-      }
-    });
+    this.dom
+      .$('.terminal')
+      .addEventListener('click', () =>
+        setTimeout(() => !userHasSelectedText() && this.$input.focus(), 80),
+      );
 
     this.$input.addEventListener('keydown', this.onKeyDown);
     this.$input.addEventListener('keyup', this.onKeyUp);
@@ -60,8 +60,16 @@ export class Terminal {
     this.log.push(last);
     this.$log.innerHTML = asciiToHtml(last);
 
-    if (!userHasSelectedText()) {
-      $parent.scrollTop = $parent.scrollHeight;
+    this.autoScroll($parent);
+  }
+
+  private autoScroll(el: HTMLElement) {
+    const { scrollTop, scrollHeight, clientHeight } = el;
+    const distanceFromBottom = scrollHeight - (scrollTop + clientHeight);
+    const shouldScroll = distanceFromBottom < clientHeight / 3;
+
+    if (shouldScroll) {
+      el.scrollTop = scrollHeight;
     }
   }
 
@@ -77,6 +85,8 @@ export class Terminal {
     if (event.code === 'ArrowDown') {
       this.loadHistory(-1);
     }
+
+    this.onKeyUp(event);
   }
 
   private onKeyUp(event: KeyboardEvent) {

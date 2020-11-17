@@ -9,7 +9,6 @@ import {
 import { PluginContext } from '../lib/PluginContext';
 import { concatRegexes } from '../lib/util/concatRegexes';
 import { singleExecution } from '../lib/util/singleExecution';
-import { wait } from '../lib/util/wait';
 
 // Skill cast results
 // const TIMEOUT = 0;

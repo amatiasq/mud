@@ -1,9 +1,6 @@
 import { Pattern, SinglePattern } from './../lib/triggers/Pattern';
 import { concatRegexes } from '../lib/util/concatRegexes';
 
-const MOB_ARTICLE = /(?:un|una|el|la|los|las|unos|unas)/;
-const ALLIES = ['armadillo', 'lince'];
-
 const MOB_GENERIC = {
   // 'Un deforme humano, un engendro de la magia, quiere descargar su agresividad.',
   adorador: [
@@ -11,54 +8,60 @@ const MOB_GENERIC = {
     /Un devoto adorador mira con c.lera a su alrededor\./,
   ],
   aguila: [
-    'Una gigantesca aguila vuela a tu alrededor.',
     'Una enorme aguila esta aqui profundamente dormido.',
+    'Una gigantesca aguila vuela a tu alrededor.',
   ],
   buitre: 'Un buitre carronyero esta aqui.',
   calamar: 'Un calamar gigante esta aqui nadando.',
   caracol: 'Un pequenyo caracol esta aqui haciendo trompos.',
   ciervo: null,
   conejo: null,
-  criatura:
+  criatura: [
     'Una poderosa criatura del pantano esta aqui profundamente dormido.',
+  ],
   cubo: 'Un enorme cubo transparente de materia gelatinosa rezuma ante ti.',
-  cultista:
+  cultista: [
     'Una joven cultista parece bastante serena, mientras no vea a nadie m',
+  ],
   dragon: null,
   empleado: null,
   espiritu: /Un esp.ritu se desliza por el aire./,
   esqueleto: [
-    'Un esqueleto polvoriento esta aqui.',
-    'Un esqueleto huesudo esta aqui profundamente dormido.',
     'El esqueleto hace castanyetear sus dientes amenazadoramente y se acerca!',
     'Un esqueleto con armadura avanza torpemente a traves de los arboles.',
+    'Un esqueleto huesudo esta aqui profundamente dormido.',
+    'Un esqueleto polvoriento esta aqui.',
   ],
   fanatico: /Un humano pose.do por el fanatismo busca 'herejes'\./,
-  gusano: 'Un gusano de roca esta aqui profundamente dormido.',
+  gusano: [
+    'Un gusano de roca esta aqui profundamente dormido.',
+    /Un monstruoso gusano de hielo excava a traves del hielo y la nieve aqui\. Se yergue y\s+ataca!/,
+  ],
   hobgoblin: [
     'un guardia hobgoblin de elite esta aqui profundamente dormido.',
-    /Un guardian de la monta.a esta aqu., echando espuma por la boca\./,
-    'Un macizo hobgoblin esta de guardia cerca del hueco de la escalera.',
     'Un hobgoblin armado esta aqui, interrogando a un prisionero.',
+    'Un macizo hobgoblin esta de guardia cerca del hueco de la escalera.',
+    /Un guardian de la monta.a esta aqu., echando espuma por la boca\./,
   ],
   gnoll: 'un gnoll feo esta aqui profundamente dormido.',
   goblin: [
-    'Un habitante del bosque merodea por aqui, protegiendo su montanya.',
-    /Un guardian de la monta.a esta aqu., echando espuma por la boca\./,
-    'Un macizo chaman goblin esta aqui rugiendo a sus lacayos.',
     'un goblin negrero esta aqui profundamente dormido.',
+    'Un habitante del bosque merodea por aqui, protegiendo su montanya.',
+    'Un macizo chaman goblin esta aqui rugiendo a sus lacayos.',
+    /Un guardian de la monta.a esta aqu., echando espuma por la boca\./,
   ],
   guardia: /Un Guardia Real est. aqu. velando por la seguridad del estadio/,
   guerrero: 'Un guerrero asqueroso grunye al verte.',
   jefe: [
     'Un jefe esta aqui descansando.',
+    'Un jefe orco esta aqui mirandote desconfiado.',
     'Un macizo chaman goblin esta aqui rugiendo a sus lacayos.',
   ],
   ladron: 'Un ladron esta aqui profundamente dormido.',
   lobo: [
-    'Un lobo hambriento te esta mirando',
-    'Un lobo feroz esta aqui y grunye muy enojado.',
     'Un gran lobo negro, te muestra los colmillos hambriento.',
+    'Un lobo feroz esta aqui y grunye muy enojado.',
+    'Un lobo hambriento te esta mirando',
   ],
   mago: 'Un mago viejo esta aqui profundamente dormido.',
   merodeador: null,
@@ -73,8 +76,6 @@ const MOB_GENERIC = {
     'El chaman esta sentado detras de un escritorio, escribiendo una misiva.',
     'El desagradable y malioliente espadachin orco esta aqui.',
     'el jefe orco minero esta aqui profundamente dormido.',
-    'el orco espadachin esta aqui profundamente dormido.',
-    'El orco espadachin esta aqui profundamente dormido.',
     'El orco espadachin llega desde el este.',
     'Un asqueroso arquero orco esta aqui.',
     'Un corpulento orco esta aqui de guardia.',
@@ -86,17 +87,17 @@ const MOB_GENERIC = {
     'Un pequenyo orco se sienta en una de las sillas roncando.',
     'Un sargento orco mantiene vigilada la chusma a la que comanda.',
     'Un voluminoso cocinero orco sopesa un cuchillo de carnicero manchado de sangre.',
+    /El orco espadachin esta aqui profundamente dormido\./i,
   ],
   pantera: null,
   piranya: [
-    'una piranya esta aqui profundamente dormido.',
-    'Una piranya esta aqui profundamente dormido.',
     'Una piranya te mira con su enorme boca.',
+    /Una piranya esta aqui profundamente dormido\./i,
   ],
   rata: 'Una rata gigante esta aqui profundamente dormido.',
   sapo: 'un sapo gigante esta aqui profundamente dormido.',
   serpiente: 'Una serpiente que parece venenosa te mira fijamente.',
-  'urik-hai': [
+  'uruk-hai': [
     'Un asqueroso arquero uruk-hai tensa su arco al verte.',
     'Un superior uruk-hai esta aqui vigilando.',
   ],
@@ -107,6 +108,10 @@ const MOB_CHARACTERS = {
   Kivon: /Kivon, el l.der del culto, no est. nada contento con intromisiones\./,
   Nejane: /Nejane, la l.der, parece estar en trance\./,
 } as const;
+
+const MOB_ARTICLE = /(?:un|una|el|la|los|las|unos|unas)/;
+const MOB_NAME = /(?<mob>(?: |\w|-)+)/;
+const ALLIES = ['armadillo', 'lince'];
 
 const MOBS: Mob[] = Object.entries({
   ...MOB_CHARACTERS,
@@ -123,11 +128,10 @@ type CharacterMobName = keyof typeof MOB_CHARACTERS;
 
 export type MobName = GenericMobName | CharacterMobName;
 
-export const ATTACK_RECEIVED = concatRegexes(
-  /El \w+ de /,
-  MOB_ARTICLE,
-  / (?<mob>(?: |\w)+) te /,
-);
+export const ATTACK_RECEIVED = [
+  concatRegexes(/El \w+ de /, MOB_ARTICLE, / /, MOB_NAME, / te /),
+  /Tu ataque \w+ a un ladron./,
+];
 
 export interface Mob {
   name: MobName;
@@ -136,12 +140,16 @@ export interface Mob {
 
 export const MOB_ARRIVES = concatRegexes(
   MOB_ARTICLE,
-  / (?<mob>(?: \w+)) llega desde el (?<direction>\w+)/,
+  / /,
+  MOB_NAME,
+  / llega desde el (?<direction>\w+)/,
 );
 
 export const MOB_LEAVES = concatRegexes(
   MOB_ARTICLE,
-  / (?<mob>(?: \w+)) (?:se va)|(?:vuela) hacia (?:el )?(?<direction>\w+)/,
+  / /,
+  MOB_NAME,
+  / (?:se va)|(?:vuela) hacia (?:el )?(?<direction>\w+)/,
 );
 
 export function getMobsPresence() {
