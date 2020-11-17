@@ -20,7 +20,11 @@ openSocket();
 window.addEventListener('unhandledrejection', event => {
   const error = event.reason as Error;
 
-  if (error.message.startsWith('Timeout: ')) {
+  if ((error as any) === 'aborted') {
+    event.preventDefault();
+  }
+
+  if (error && error.message && error.message.startsWith('Timeout: ')) {
     event.preventDefault();
     console.warn(error.message);
   }

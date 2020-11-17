@@ -1,9 +1,10 @@
+import { Casteable } from '../data/spells';
 import { wait } from '../lib/util/wait';
 import { Context } from '../lib/workflow/Context';
 
 export async function cast(
   { plugins: { prompt, skills } }: Context,
-  spell: string | string[],
+  spell: Casteable,
   ...args: string[]
 ) {
   const result = await repeatUntilCasted();

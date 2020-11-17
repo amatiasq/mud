@@ -1,4 +1,5 @@
 import {
+  Casteable,
   getSpell,
   Spell,
   SPELL_ALREADY_APPLIED,
@@ -8,6 +9,7 @@ import {
 import { PluginContext } from '../lib/PluginContext';
 import { concatRegexes } from '../lib/util/concatRegexes';
 import { singleExecution } from '../lib/util/singleExecution';
+import { wait } from '../lib/util/wait';
 
 // Skill cast results
 // const TIMEOUT = 0;
@@ -52,15 +54,11 @@ export function skillsPlugin({ when, write }: PluginContext) {
   when(
     SKILLS_DETECTOR,
     ({ captured: [content] }) => {
-      isInitialized = true;
-
       for (const skill of content.matchAll(SKILL)!) {
         skills[skill[1].trim()] = parseInt(skill[2], 10);
       }
 
       isInitialized = true;
-
-      console.log(skills);
     },
     { captureLength: 5000 },
   );
@@ -123,7 +121,7 @@ export function skillsPlugin({ when, write }: PluginContext) {
     }
   }
 
-  async function castSpell(name: string | string[], args = '') {
+  async function castSpell(name: Casteable, args = '') {
     const aliases = Array.isArray(name) ? name : [name];
     const candidates = aliases.map(getSpell).filter(Boolean) as Spell[];
 

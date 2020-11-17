@@ -1,9 +1,9 @@
-import { getMobIn } from '../data/mobs';
+import { ATTACK_RECEIVED, getMobIn } from '../data/mobs';
 import { SPELLS_BY_TYPE } from '../data/spells';
 import { Context } from '../lib/workflow/Context';
 
 export async function defend({
-  log,
+  isRunning,
   when,
   write,
   plugins: { prompt, skills, navigation },
@@ -12,19 +12,19 @@ export async function defend({
     navigation.recall(),
   );
 
-  when(/El \w+ de (?:el|la|un|una) ((?: |\w)+) te /, async ({ captured }) => {
-    const hp = prompt.getPercent('hp');
+  when(ATTACK_RECEIVED, async ({ groups }) => {
+    console.log('Attack received', isRunning('kill'));
 
-    if (hp < 0.1) {
-      await navigation.recall();
-    } else if (prompt.getPercent('mv') < 0.1 || hp < 0.3) {
-      write('huir');
-    } else if (prompt.getPercent('mana') > 0.1) {
-      const fullName = captured[1];
+    if (isRunning('kill')) {
+      return;
+    }
+
+    const mana = prompt.getPercent('mana');
+    const fullName = groups.mob;
+
+    if (fullName && mana > 0.1) {
       const mob = getMobIn(fullName);
       await skills.castSpell(SPELLS_BY_TYPE.attack, mob ? mob.name : fullName);
-    } else {
-      log('Nothing');
     }
   });
 
@@ -52,11 +52,12 @@ export async function defend({
     }
   });
 
-  when(/El cadaver de.* contiene:(?<items>(?:.\n)+)\n\n/, ({ groups }) => {
+  when(/El cadaver de.* contiene:(?<items>(?:.|\n)+)\n[^ ]/, ({ groups }) => {
     const items = groups.items
       .toLowerCase()
       .split(/\n/)
-      .map(x => x.trim());
+      .map(x => x.trim())
+      .filter(x => x && x !== 'nada.');
 
     if (items.some(x => x.includes('llave'))) {
       write('coger llave cuerpo');

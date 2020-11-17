@@ -61,15 +61,19 @@ export class PluginContext {
         };
       }
 
-      return this.triggers.add(pattern, handler, options);
+      const subscription = this.triggers.add(pattern, handler, options);
+      this.subscriptions.push(subscription);
+      return subscription;
     }
 
-    const promise = this.triggers.add(pattern, handler);
+    options = handler;
+    const promise = this.triggers.add(pattern, options);
 
     if (onResult) {
       promise.then(onResult);
     }
 
+    this.subscriptions.push(promise);
     return promise;
   }
 

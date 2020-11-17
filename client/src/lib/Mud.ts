@@ -14,10 +14,18 @@ import { WriteOptions } from './WriteOptions';
 export class Mud {
   private readonly triggers = new TriggerCollection();
   private readonly workflows: Record<string, Workflow> = {};
+
+  private readonly runnning = new Set<{
+    workflow: Workflow;
+    context: Context;
+    promise: Promise<any>;
+  }>();
+
   private readonly handlers: {
     id: string;
     handler: (command: string) => void | true;
   }[] = [];
+
   private plugins!: PluginMap;
   private username!: string;
 
@@ -80,7 +88,8 @@ export class Mud {
       return context.runForever();
     });
 
-    return this.executeWorkflow(workflow, params, options);
+    const execution = this.executeWorkflow(workflow, params, options);
+    return execution.promise;
   }
 
   workflow<Args extends any[]>(name: string, run: WorkflowFn<Args>) {
@@ -99,7 +108,15 @@ export class Mud {
     }
 
     const workflow = this.workflows[name];
-    return this.executeWorkflow(workflow, params, options);
+    const execution = this.executeWorkflow(workflow, params, options);
+
+    this.runnning.add(execution);
+    execution.promise.finally(() => this.runnning.delete(execution));
+    return execution.promise;
+  }
+
+  isRunning(name: string) {
+    return [...this.runnning].some(x => x.workflow.name === name);
   }
 
   private executeWorkflow(
@@ -118,23 +135,17 @@ export class Mud {
       return result;
     });
 
-    return Object.assign(promise, {
+    const workflowPromise = Object.assign(promise, {
       abort() {
         context.abort();
       },
-    }) as typeof promise & { abort(): void };
+    });
+
+    return { workflow, context, promise: workflowPromise };
   }
 
   private createWorkflowContext(name: string): Context {
-    return new Context(
-      name,
-      this.username,
-      this.triggers,
-      this.plugins,
-      this.send,
-      this.workflow,
-      this.run,
-    );
+    return new Context(name, this.username, this.triggers, this.plugins, this);
   }
 }
 
@@ -150,7 +161,7 @@ function removeAsciiCodes(text: string) {
     stored = '';
   }
 
-  const match = text.match(/\u001b\[[^m]*?$/);
+  const match = text.match(/\u001b[^m]*?$/);
 
   if (match) {
     stored = match[0];

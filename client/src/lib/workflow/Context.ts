@@ -1,10 +1,9 @@
-import { WorkflowFn } from './WorkflowFn';
 import { PluginMap } from '../../plugins/index';
 import { Mud } from '../Mud';
 import { PluginContext } from '../PluginContext';
 import { TriggerCollection } from '../triggers/TriggerCollection';
 import { bindAll } from '../util/bindAll';
-import { WriteOptions } from '../WriteOptions';
+import { WorkflowFn } from './WorkflowFn';
 
 export class Context extends PluginContext {
   private finish: ((reason: any) => void) | null = null;
@@ -16,24 +15,26 @@ export class Context extends PluginContext {
     username: string,
     triggers: TriggerCollection,
     plugins: PluginMap,
-    send: (command: string, options?: WriteOptions) => void,
-    readonly register: <Args extends any[]>(
-      name: string,
-      action: WorkflowFn<Args>,
-    ) => void,
-    private readonly runWorkflow: Mud['run'],
+    private readonly mud: Mud,
   ) {
-    super(name, username, triggers, send);
+    super(name, username, triggers, mud.send);
     this.plugins = createPluginsGetter(plugins, this.log.bind(this));
-
     bindAll(this, Context);
+  }
+
+  register<Args extends any[]>(name: string, workflow: WorkflowFn<Args>) {
+    return this.mud.workflow(name, workflow);
+  }
+
+  isRunning(workflowName: string) {
+    return this.mud.isRunning(workflowName);
   }
 
   run(name: string, params: any[] = []) {
     this.checkNotAborted();
     this.log(`Invoke workflow "${name}" with`, ...params);
 
-    const promise = this.runWorkflow(name, params, {
+    const promise = this.mud.run(name, params, {
       logs: this.isPrintingLogs,
     });
 

@@ -33,7 +33,7 @@ const STATE_DETECTOR = (() => {
 
   return r(
     DASH,
-    /\n\/\s{78}\\\n/,
+    /\n ?\/\s{78}\\\n/,
     row(/Ficha de (?<name>\w+)(?<principal> \(Personaje Principal\))\./),
     row(DASH),
     row(stat('FUE'), SPACE, stat('DES'), PIPE, percent('Vida')),
@@ -41,10 +41,10 @@ const STATE_DETECTOR = (() => {
     row(stat('CON'), SPACE, stat('CAR'), PIPE, percent('Mov')),
     row(stat('SUE'), SPACE, PIPE, SPACE),
     SPACER,
-    row(/Nivel\s+: /, int('level'), ANY),
-    ANY,
-    / \|\|\n\\\s{78}\/\n  /,
-    DASH,
+    r(/\|\|\s*Nivel\s+: /, int('level'), ANY),
+    // ANY,
+    // / \|\|\n\\\s{78}\/\n  /,
+    // DASH,
   );
 
   /*
@@ -85,11 +85,12 @@ const STATE_DETECTOR = (() => {
   */
 })();
 
-export function statsPlugin({ when, write, printLogs }: PluginContext) {
+export function statsPlugin({ when, write }: PluginContext) {
   let isInitiated = false;
+  let name = '';
+  let principal = false;
+
   const stats = {
-    name: 0,
-    principal: 0,
     fue: 0,
     fueBase: 0,
     des: 0,
@@ -120,8 +121,11 @@ export function statsPlugin({ when, write, printLogs }: PluginContext) {
     STATE_DETECTOR,
     ({ groups }) => {
       for (const key of Object.keys(stats) as (keyof typeof stats)[]) {
-        stats[key] = toInt(groups[key]);
+        stats[key] = toInt(groups[key]) as any;
       }
+
+      name = groups.name;
+      principal = Boolean(groups.principal);
 
       console.log(stats);
       isInitiated = true;

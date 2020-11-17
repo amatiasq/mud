@@ -7,47 +7,66 @@ export type AreaName = AreaBase['name'];
 export type AreaMetadata = { path?: string; arena?: string | string[] };
 export type Area = AreaBase & AreaMetadata;
 
+const sides = 'e2we';
+
 const ARENAS: Partial<Record<AreaName, AreaMetadata['arena']>> = {
   // cadaver: { path: 'ru2sw'},
   'Academia de Darkhaven': ['Xse', 'Xne', 'Xse', 'Xne', 'Xs'],
   'El Gran Estadio': 'j',
   'El Imperio Orco': [
-    '4ne2wen', // planta principal
-    'dse2wese2wese2wese2weXnu', // sotano
+    `4n${sides}n`, // planta principal
+    `ds${sides}s${sides}s${sides}s${sides}Xnu`, // sotano
     'uXs', // primer piso
-    'une2wene2weXs', // segundo piso
-    'une2wene2wenXsejk2whlen', // tercer piso
-    'u3ne2we2n', // cuarto piso
-    // 'u2se2wes3nd', // cuarto piso parte 2
-    // 'Xsune2wene2wene2wene2weXs', // quinto piso
-    // 'une2wene2weXs', // sexto piso
-    // 'uXnXs', // septimo piso
-    // 'une2wene2we2n', // octavo piso
-    // 'u', // techo
+    `un${sides}n${sides}Xs`, // segundo piso
+    `un${sides}n${sides}nXsejk2whlen`, // tercer piso
+    `u3n${sides}2nXs`, // cuarto piso
+    `Xnu2s${sides}2ndXs`, // `Xnu2s${x}s3ndXs`, // cuarto piso parte 2 - we skip El Jefe
+    `un${sides}n${sides}n${sides}n${sides}Xs`, // quinto piso
+    `un${sides}n${sides}Xs`, // sexto piso
+    'uns', // uXnXs', // septimo piso // cerrado con llave
+    `un${sides}n${sides}2n`, // octavo piso
+    'u', // techo
+  ],
+  'El Pantano Orco': [
+    'wn2w',
+    'n3esje4n4sw',
+    '4nw3sw3nw3sw3nd',
+    '3es3w3es3w',
+    // 'Xs' // cerrado
   ],
   'La Mansion de Marmol': [
     'e2n', // entrada
     'n2d', // sotano
-    '3n3s',
-    '3e3w', // prisionera
-    // '3w3e', engendro
-    '3s3n',
-    '2us', // salir sotano
+    [
+      '3n3s',
+      '3e3w', // prisionera
+      '3w3e', // engendro
+      '3s3n',
+      '2us', // salir sotano
+    ].join(''),
     '2e2w',
     '4w4e',
-    // '2un', // Kivon & Nejane
+    '2unu', // Kivon & Nejane
+  ],
+  'La tumba de Damara': [
+    'nnwes', // despensa
+    'esn', // la prision
+    '2ln',
   ],
 };
 
 export function getAreasForLevel(level: number) {
-  return REALMS.Calimhar.filter(x => x.from <= level && x.to >= level)
-    .sort((a, b) => avg(a, level) - avg(b, level))
-    .map(getWithMetadata);
+  return (
+    REALMS.Calimhar.filter(x => x.from <= level && x.to >= level)
+      .sort((a, b) => a.to - b.to)
+      // .sort((a, b) => avg(a, level) - avg(b, level))
+      .map(getWithMetadata)
+  );
 }
 
-function avg(area: AreaBase, level: number) {
-  return Math.abs(level - area.from + (level - area.to));
-}
+// function avg(area: AreaBase, level: number) {
+//   return Math.abs(level - area.from + (level - area.to));
+// }
 
 export function getAreaMetadata(areaName: string) {
   const lower = areaName.toLowerCase();

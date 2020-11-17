@@ -23,7 +23,8 @@ export class Terminal {
   readonly onSubmit = this.emitSubmit.subscribe;
 
   constructor() {
-    this.onKey = this.onKey.bind(this);
+    this.onKeyDown = this.onKeyDown.bind(this);
+    this.onKeyUp = this.onKeyUp.bind(this);
   }
 
   focus() {
@@ -37,7 +38,8 @@ export class Terminal {
       }
     });
 
-    this.$input.addEventListener('keydown', this.onKey);
+    this.$input.addEventListener('keydown', this.onKeyDown);
+    this.$input.addEventListener('keyup', this.onKeyUp);
     parent.appendChild(this.dom);
   }
 
@@ -63,7 +65,7 @@ export class Terminal {
     }
   }
 
-  private onKey(event: KeyboardEvent) {
+  private onKeyDown(event: KeyboardEvent) {
     if (event.code === 'Enter') {
       this.submit();
     }
@@ -75,8 +77,10 @@ export class Terminal {
     if (event.code === 'ArrowDown') {
       this.loadHistory(-1);
     }
+  }
 
-    this.$input.size = this.$input.value.length + 1;
+  private onKeyUp(event: KeyboardEvent) {
+    this.$input.size = this.$input.value.length + 3;
   }
 
   private submit() {

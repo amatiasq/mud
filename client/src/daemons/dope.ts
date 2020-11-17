@@ -23,7 +23,7 @@ export async function dope({
   const casting = new Set(memory.get());
   const spells = getSpells();
 
-  spells.filter(x => x.endEffect).forEach(watchDope);
+  spells.filter(x => x.end).forEach(watchDope);
 
   prompt.onUpdate(
     async ({
@@ -69,7 +69,7 @@ export async function dope({
   async function watchDope(spell: Spell) {
     const invoke = Array.isArray(spell.dope) ? spell.dope : spell.name;
 
-    when(spell.endEffect!, async () => {
+    when(spell.end!, async () => {
       casting.add(invoke);
       memory.set([...casting]);
 

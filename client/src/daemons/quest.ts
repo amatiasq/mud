@@ -8,4 +8,8 @@ export async function quest({ when, write, plugins: { navigation } }: Context) {
       write('carto mapa');
     },
   );
+
+  when('No has desenterrado nada a pesar de haber cavado bien hondo.', () =>
+    write('cavar'),
+  );
 }

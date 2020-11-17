@@ -36,7 +36,7 @@ export function navigationPlugin({ log, when, write }: PluginContext) {
 
   when(recalls, () => (landingAtRecall = true));
 
-  when(/Puertas? esta cerrada\./, async () => {
+  when([/Puerta \w+ esta cerrada./, /Puertas? esta cerrada\./], async () => {
     const closed = directions.find(x => x.includes(CLOSED));
 
     if (closed) {
@@ -67,6 +67,7 @@ export function navigationPlugin({ log, when, write }: PluginContext) {
     canGo,
     go,
     execute,
+    getRealm,
     recall,
     waitForRecall,
     onRoomChange: roomChanged.subscribe,
@@ -114,10 +115,12 @@ export function navigationPlugin({ log, when, write }: PluginContext) {
     }
 
     let untilEnd = false;
+    let done = '';
 
     for (const step of parsePath(pattern)) {
       if (step.toUpperCase() === 'X') {
         untilEnd = true;
+        done += '(X)';
         continue;
       }
 
@@ -143,8 +146,9 @@ export function navigationPlugin({ log, when, write }: PluginContext) {
         if (!(await go(step))) {
           return true;
         }
+        done += step;
       } catch (error) {
-        throw new Error(`${error.message} - on ${pattern}`);
+        throw new Error(`${error.message} - on ${pattern} - ${done}`);
       }
 
       if (typeof callback === 'function') {
@@ -169,7 +173,7 @@ export function navigationPlugin({ log, when, write }: PluginContext) {
       write(`abrir ${direction}`);
 
       const success = await Promise.any([
-        when(/Abres la puertas?\./).then(() => true),
+        when([/Abres la puertas?\./, /Abres la puerta \w+\./]).then(() => true),
         when('Esta cerrada con llave.').then(() => false),
       ]);
 
@@ -187,6 +191,14 @@ export function navigationPlugin({ log, when, write }: PluginContext) {
 
     isNavigating = false;
     return true;
+  }
+
+  async function getRealm() {
+    write('donde');
+    const result = await when(
+      /Jugadores cerca de ti en (?: |\w)+, Reino de (?<realm>\w+):/,
+    );
+    return result.groups.realm as 'Calimhar' | 'Earand' | 'Valmorag';
   }
 
   function get(direction: string) {

@@ -15,7 +15,6 @@ export async function train(
     run,
     when,
     write,
-    printLogs,
     plugins: { navigation: nav, prompt, stats },
   }: Context,
   area?: string,
@@ -40,14 +39,13 @@ export async function train(
     const { mob } = x.groups;
     if (mob) {
       enemyGone(getMobIn(x.groups.mob));
-    } else {
-      console.warn(`No MOB detected in`, x.captured);
     }
   });
 
   const route = `${arena.path}${arena.arena}`;
 
   write('visible');
+  write('huida');
 
   await nav.execute(route, enterRoom);
   return nav.recall();
@@ -55,14 +53,11 @@ export async function train(
   async function enterRoom() {
     log('ENTER_ROOM');
     await prompt.until(({ mv: { current: mv } }) => mv > 50);
-    log('READY');
 
     while (enemies.length) {
       if (await checkEnemies()) {
         return false;
       }
-
-      log('WAITING_READY_TO_FIGHT');
 
       const recover = run('recover');
       await Promise.any([
@@ -72,8 +67,6 @@ export async function train(
 
       log('READY_TO_FIGHT!!!');
     }
-
-    log('LEAVE_ROOM');
   }
 
   function enemySpotted(mob: Mob | null = null) {
@@ -115,7 +108,7 @@ export async function train(
     }
 
     if (!area.arena) {
-      throw new Error(`"${area.name}" is unknown`);
+      throw new Error(`"${area.name}" training path is unknown`);
     }
 
     const path = area.path!.split('');
@@ -134,6 +127,7 @@ export async function train(
       console.warn('Multiple arenas available');
     }
 
+    console.log('Selected', first.name);
     return first;
   }
 }
