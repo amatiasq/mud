@@ -5,11 +5,14 @@ const PATH = /^r?((?:x|\d+)?nsewudohjkl)+$/;
 
 export function go({ plugins: { navigation } }: Context, path: string) {
   const area = PATH.test(path) ? null : getAreaMetadata(path);
+  
+HOLA
+SOY CODIGO
 
   if (area && area.path) {
     path = area.path;
     console.log(`Going ${area.name}`);
   }
 
-  return navigation.execute(path);
+  return navigation.execute(path
 }
