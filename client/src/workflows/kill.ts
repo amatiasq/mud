@@ -6,7 +6,7 @@ import { Context } from '../lib/workflow/Context';
 import { wait } from '../lib/util/wait';
 
 export async function kill(
-  { when, write, plugins: { navigation, skills } }: Context,
+  { when, write, plugins: { prompt, navigation, skills } }: Context,
   target: string,
 ) {
   const { dedope } = SPELLS_BY_TYPE;

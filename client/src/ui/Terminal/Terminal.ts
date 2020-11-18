@@ -66,7 +66,7 @@ export class Terminal {
   private autoScroll(el: HTMLElement) {
     const { scrollTop, scrollHeight, clientHeight } = el;
     const distanceFromBottom = scrollHeight - (scrollTop + clientHeight);
-    const shouldScroll = distanceFromBottom < clientHeight / 3;
+    const shouldScroll = distanceFromBottom < clientHeight / 2;
 
     if (shouldScroll) {
       el.scrollTop = scrollHeight;

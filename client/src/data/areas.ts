@@ -1,15 +1,15 @@
-import REALMS from './realms';
-
-const ALL_AREAS = Object.values(REALMS).flat();
+import ALL_AREAS from './areas-data';
 
 type AreaBase = typeof ALL_AREAS[number];
+type Arena = string | string[];
+
+export type Realm = AreaBase['realm'];
 export type AreaName = AreaBase['name'];
-export type AreaMetadata = { path?: string; arena?: string | string[] };
-export type Area = AreaBase & AreaMetadata;
+export type Area = AreaBase & { path?: string; arena?: Arena };
 
 const sides = 'e2we';
 
-const ARENAS: Partial<Record<AreaName, AreaMetadata['arena']>> = {
+const ARENAS: Partial<Record<AreaName, Arena>> = {
   // cadaver: { path: 'ru2sw'},
   'Academia de Darkhaven': ['Xse', 'Xne', 'Xse', 'Xne', 'Xs'],
   'El Gran Estadio': 'j',
@@ -55,18 +55,18 @@ const ARENAS: Partial<Record<AreaName, AreaMetadata['arena']>> = {
   ],
 };
 
-export function getAreasForLevel(level: number) {
+export function getAreasForLevel(realm: Realm, level: number) {
   return (
-    REALMS.Calimhar.filter(x => x.from <= level && x.to >= level)
+    ALL_AREAS.filter(x => x.realm === realm && x.from <= level && x.to >= level)
       .sort((a, b) => a.to - b.to)
       // .sort((a, b) => avg(a, level) - avg(b, level))
       .map(getWithMetadata)
   );
-}
 
-// function avg(area: AreaBase, level: number) {
-//   return Math.abs(level - area.from + (level - area.to));
-// }
+  // function avg(area: AreaBase, level: number) {
+  //   return Math.abs(level - area.from + (level - area.to));
+  // }
+}
 
 export function getAreaMetadata(areaName: string) {
   const lower = areaName.toLowerCase();

@@ -59,7 +59,7 @@ export async function drink({
   );
 
   async function createFont() {
-    if (await skills.has('crear manantial')) {
+    if (await skills.can('crear manantial')) {
       return run('cast', ['crear manantial']);
     }
   }

@@ -1,16 +1,15 @@
+import { Realm } from '../data/areas';
 import { Context } from './../lib/workflow/Context';
 
 interface Location {
-  Calimhar: string;
-  Earand?: string;
-  Valmorag?: string;
+  path: Partial<Record<Realm, string>>;
   name?: string;
   amount?: number;
 }
 
 const locations: Record<string, Location> = {
   viajar: {
-    Calimhar: 'r2s3wn',
+    path: { Calimhar: 'r2s3wn' },
     amount: 5,
   },
 };
@@ -37,7 +36,7 @@ export async function shop({ when, write, register }: Context) {
 
       const realm = await navigation.getRealm();
       const config = locations[item as keyof typeof locations];
-      const path = config[realm];
+      const path = config.path[realm];
       const name = config.name || item;
 
       if (!amount) {

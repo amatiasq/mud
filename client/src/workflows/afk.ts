@@ -1,12 +1,19 @@
 import { Context } from './../lib/workflow/Context';
 
 export async function afk(
-  { abort, printLogs, run, when, plugins: { navigation } }: Context,
+  { abort, run, when, printLogs, plugins: { navigation } }: Context,
   ...areas: string[]
 ) {
-  when('.. Todo empieza a volverse negro.\n', abort);
+  let isAborted = false;
 
-  await action();
+  when('.. Todo empieza a volverse negro.\n', () => {
+    isAborted = true;
+    abort();
+  });
+
+  while (!isAborted) {
+    await action();
+  }
 
   async function action(): Promise<void> {
     try {
@@ -34,8 +41,6 @@ export async function afk(
     } catch (error) {
       console.log('Bank error', error);
     }
-
-    return action();
   }
 }
 

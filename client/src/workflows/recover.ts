@@ -7,10 +7,10 @@ export async function recover({ run, plugins: { skills, prompt } }: Context) {
   const refresh = 'refrescar';
   const invisible = 'invisibilidad';
 
-  const canHeal = await skills.has(heal);
-  const canRefresh = await skills.has(refresh);
-  const canMeditate = await skills.has('meditar');
-  const canInvisible = await skills.has(invisible);
+  const canHeal = await skills.can(heal);
+  const canRefresh = await skills.can(refresh);
+  const canMeditate = await skills.can('meditar');
+  const canInvisible = await skills.can(invisible);
 
   const hp = () => prompt.getPercent('hp');
   const mana = () => prompt.getPercent('mana');

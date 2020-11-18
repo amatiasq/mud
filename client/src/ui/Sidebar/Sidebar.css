@@ -1,2 +1,46 @@
 .sidebar {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.sidebar .workflow-list {
+  list-style: none;
+  padding: 0;
+}
+
+.workflow {
+  border-bottom: 1px solid var(--border-color);
+}
+.workflow.running {
+  color: gray;
+}
+
+.workflow header {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+}
+
+.workflow .name {
+  flex: 1;
+  margin: 0 1rem;
+  font-size: 2rem;
+  font-family: monospace;
+  text-transform: uppercase;
+  font-weight: normal;
+}
+
+.workflow .runner {
+  /* appearance: none;
+  background-color: var(--border-color);
+  border: none;
+  padding: 3px;
+  color: var(--color); */
+  text-transform: uppercase;
+  font-size: 1rem;
+}
+
+.workflow:not(.expanded) .triggers {
+  display: none;
 }

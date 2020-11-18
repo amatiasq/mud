@@ -7,5 +7,5 @@ declare module 'ansi-to-html' {
 }
 
 interface PromiseConstructor {
-  any(promises: Promise<any>[]): Promise<any>;
+  any<T = any>(promises: T[]): T;
 }

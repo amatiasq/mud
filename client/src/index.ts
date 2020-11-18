@@ -13,7 +13,7 @@ let FORCE_PROD_SERVER = false;
 
 const serverUri = getSocketUri();
 const { host, port, user, pass } = getParams();
-const { terminal, controls } = renderUserInterface(document.body);
+const { terminal, controls, sidebar } = renderUserInterface(document.body);
 
 openSocket();
 
@@ -79,9 +79,9 @@ async function initializeMud(telnet: RemoteTelnet) {
   });
 
   await mud.login(user, pass);
+  connectButtons();
   registerWorkflows(mud);
   await connectStats();
-  connectButtons();
 
   Object.assign(window, { mud });
 
@@ -112,6 +112,15 @@ async function initializeMud(telnet: RemoteTelnet) {
 
   function connectButtons() {
     controls.addButton('Entrenar', () => mud.run('train'));
+
+    mud.onWorkflowsChange(workflows => {
+      sidebar.setWorkflows(
+        workflows,
+        x => mud.isRunning(x.name),
+        x => mud.run(x.name),
+        async x => mud.stop(x.name),
+      );
+    });
   }
 
   function runWorkflow(name: string, args: string[]) {

@@ -63,7 +63,7 @@ export function skillsPlugin({ when, write }: PluginContext) {
   );
 
   return {
-    has,
+    can,
     canLearn,
     castSpell,
     meditate,
@@ -74,7 +74,7 @@ export function skillsPlugin({ when, write }: PluginContext) {
     ALREADY_APPLIED,
   };
 
-  async function has(search: string | string[]) {
+  async function can(search: string | string[]) {
     await ensureInitiated();
 
     if (typeof search === 'string') {
@@ -100,7 +100,7 @@ export function skillsPlugin({ when, write }: PluginContext) {
   }
 
   async function meditate() {
-    if (!(await has('meditar'))) return NOT_AVAILABLE;
+    if (!(await can('meditar'))) return NOT_AVAILABLE;
     if (isSpellRunning) return BUSY;
     if (isMeditating) return waitResponse();
 
@@ -124,7 +124,7 @@ export function skillsPlugin({ when, write }: PluginContext) {
     const aliases = Array.isArray(name) ? name : [name];
     const candidates = aliases.map(getSpell).filter(Boolean) as Spell[];
 
-    const learnt = await has(candidates.map(x => x.name));
+    const learnt = await can(candidates.map(x => x.name));
     if (!learnt) return NOT_AVAILABLE;
 
     const spell = candidates.find(x => x.name === learnt)!;

@@ -119,8 +119,12 @@ export async function train(
   }
 
   async function getBestArea() {
-    const level = await stats.getLevel();
-    const areas = getAreasForLevel(level);
+    const [realm, level] = await Promise.all([
+      nav.getRealm(),
+      stats.getLevel(),
+    ]);
+
+    const areas = getAreasForLevel(realm, level);
     const [first, ...others] = areas.filter(x => x.arena);
 
     if (others.length) {

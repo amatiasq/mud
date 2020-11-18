@@ -36,7 +36,7 @@ export async function dope({
         return;
       }
 
-      const canMeditate = await skills.has('meditar');
+      const canMeditate = await skills.can('meditar');
 
       if (mana < 0.1 && !canMeditate) {
         return;

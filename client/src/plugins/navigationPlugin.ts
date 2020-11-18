@@ -1,4 +1,5 @@
 import { emitter } from '@amatiasq/emitter';
+import { Realm } from '../data/areas';
 
 import { PluginContext } from '../lib/PluginContext';
 import { PatternPromise } from '../lib/triggers/PatternPromise';
@@ -198,7 +199,7 @@ export function navigationPlugin({ log, when, write }: PluginContext) {
     const result = await when(
       /Jugadores cerca de ti en (?: |\w)+, Reino de (?<realm>\w+):/,
     );
-    return result.groups.realm as 'Calimhar' | 'Earand' | 'Valmorag';
+    return result.groups.realm as Realm;
   }
 
   function get(direction: string) {

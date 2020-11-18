@@ -130,7 +130,7 @@ export type MobName = GenericMobName | CharacterMobName;
 
 export const ATTACK_RECEIVED = [
   concatRegexes(/El \w+ de /, MOB_ARTICLE, / /, MOB_NAME, / te /),
-  /Tu ataque \w+ a un ladron./,
+  /Tu ataque \w+ a un (?<mob>ladron)./,
 ];
 
 export interface Mob {

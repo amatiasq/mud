@@ -32,6 +32,9 @@ export class Mud {
   private readonly emitCommand = emitter<string>();
   readonly onCommand = this.emitCommand.subscribe;
 
+  private readonly emitWorkflowsChange = emitter<Workflow[]>();
+  readonly onWorkflowsChange = this.emitWorkflowsChange.subscribe;
+
   private emitLoggedIn!: (usernamne: string) => void;
   readonly whenLoggedIn = new Promise(resolve => (this.emitLoggedIn = resolve));
 
@@ -95,6 +98,7 @@ export class Mud {
   workflow<Args extends any[]>(name: string, run: WorkflowFn<Args>) {
     const workflow = new Workflow(name, run);
     this.workflows[workflow.name] = workflow as Workflow<any>;
+    this.emitWorkflowsChange(Object.values(this.workflows));
     return workflow;
   }
 
@@ -111,8 +115,19 @@ export class Mud {
     const execution = this.executeWorkflow(workflow, params, options);
 
     this.runnning.add(execution);
-    execution.promise.finally(() => this.runnning.delete(execution));
+    execution.promise.finally(() => {
+      this.runnning.delete(execution);
+      this.emitWorkflowsChange(Object.values(this.workflows));
+    });
+
+    this.emitWorkflowsChange(Object.values(this.workflows));
     return execution.promise;
+  }
+
+  stop(name: string) {
+    const target = [...this.runnning].filter(x => x.workflow.name === name);
+    target.forEach(x => x.context.abort());
+    this.emitWorkflowsChange(Object.values(this.workflows));
   }
 
   isRunning(name: string) {

@@ -36,7 +36,7 @@ export async function eat({
 
   async function createFood() {
     if (
-      !(await skills.has('crear comida')) ||
+      !(await skills.can('crear comida')) ||
       !(await run('cast', ['crear comida']))
     ) {
       return false;

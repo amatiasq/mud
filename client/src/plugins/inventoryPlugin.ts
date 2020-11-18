@@ -1,11 +1,34 @@
+import {
+  concatRegexes,
+  concatRegexesUnescaped,
+} from './../lib/util/concatRegexes';
 import { PluginContext } from '../lib/PluginContext';
 import { singleExecution } from '../lib/util/singleExecution';
+import { int, toInt } from '../lib/util/int';
 
-const INVENTORY_DETECTOR = /Estas llevando:(\n.*)+?\n\n/;
+interface ItemData {
+  amount: number;
+  effects: string[];
+}
+
+type ItemList = Record<string, ItemData>;
+type ItemSearch = string | string[] | Record<string, string>;
+
+const CONTENT = /\n(?<content>(?:.|\n)*)\n[^ ]/;
+const INVENTORY_DETECTOR = concatRegexes(/Estas llevando:/, CONTENT);
+const ITEM_EFECTS = /(?<effects>(?:\(\w[^\)]+\w\) )*)/;
+const ITEM_AMOUNT = concatRegexesUnescaped('(?: \\(', int('amount'), '\\))');
+const ITEM_MATCHER = concatRegexes(
+  /^/,
+  ITEM_EFECTS,
+  /(?<name>\w[^\(\)]*\w)/,
+  ITEM_AMOUNT,
+  /$/,
+);
 
 export function inventoryPlugin({ when, write }: PluginContext) {
   let isInitialized = false;
-  let items: Record<string, number> = {};
+  let items: ItemList = {};
 
   const refresh = singleExecution(async () => {
     write('inventario');
@@ -16,52 +39,84 @@ export function inventoryPlugin({ when, write }: PluginContext) {
 
   when(
     INVENTORY_DETECTOR,
-    ({ captured }) => {
-      const [_, ...inventory] = captured[0]
-        .split('\n')
-        .map(x => x.trim())
-        .filter(Boolean);
-
+    ({ groups }) => {
       isInitialized = true;
-      items = {};
-
-      for (const item of inventory) {
-        if (item === 'Nada.') {
-          return;
-        }
-
-        const match = item.match(/(.*) \((\d+)\)$/);
-
-        if (match) {
-          items[match[1]] = parseInt(match[2], 10);
-        } else {
-          items[item] = 1;
-        }
-      }
+      items = parseItems(groups.content);
+      console.log('INVENTORY', items);
     },
     { captureLength: 1000 },
   );
 
-  return { refresh, has };
+  return { refresh, has, hasIn, hasInBackpack: hasIn.bind(null, 'mochila') };
 
-  async function has(search: string | string[] | Record<string, string>) {
+  async function has(search: ItemSearch) {
     if (!isInitialized) {
       await refresh();
     }
 
+    return searchInList(items, search);
+  }
+
+  async function hasIn(container: string, search: ItemSearch) {
+    write(`examinar ${container}`);
+
+    const match = await Promise.any([
+      when('No ves eso aqui.').then(() => null),
+      when(concatRegexes(/Cuando miras dentro ves:\n.+ contiene:/, CONTENT), {
+        captureLength: 1000,
+      }),
+    ]);
+
+    if (!match) {
+      return false;
+    }
+
+    const items = parseItems(match.groups.content);
+    console.log('IN', container, items);
+    return searchInList(items, search);
+  }
+
+  function parseItems(captured: string) {
+    const list = captured
+      .split('\n')
+      .map(x => x.trim())
+      .filter(Boolean);
+
+    const result: ItemList = {};
+
+    for (const item of list) {
+      if (item === 'Nada.') {
+        return {};
+      }
+
+      const match = item.match(ITEM_MATCHER);
+
+      if (!match) {
+        console.error(`Can't match item "${item}"`);
+        continue;
+      }
+
+      const { effects, name, amount } = match.groups!;
+
+      result[name] = {
+        amount: amount ? toInt(amount) : 1,
+        effects: effects.replace(/^\s*\(|\)\s*$/g, '').split(') ('),
+      };
+    }
+
+    return result;
+  }
+
+  function searchInList(items: ItemList, search: ItemSearch) {
     if (typeof search === 'string') {
-      return hasSync(search) ? search : null;
+      return items[search] ? search : null;
     }
 
     if (Array.isArray(search)) {
-      return search.find(hasSync) || null;
+      return search.find(x => items[x]) || null;
     }
 
-    const key = Object.keys(search).find(hasSync);
+    const key = Object.keys(search).find(x => items[x]);
     return key ? search[key] : null;
-  }
-
-  function hasSync(key: string) {
-    return items[key];
   }
 }

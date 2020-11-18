@@ -29,8 +29,13 @@ export function renderUserInterface(parent: HTMLElement) {
   const hamburger = new Hamburger(data.showControls);
   hamburger.render(parent);
 
-  hamburger.onChange(x => {
-    if (x) {
+  hamburger.onChange(onControlsToggle);
+  onControlsToggle(data.showControls);
+
+  return { controls, sidebar, terminal };
+
+  function onControlsToggle(value: boolean) {
+    if (value) {
       main.classList.add('show-controls');
       data.showControls = true;
     } else {
@@ -39,9 +44,7 @@ export function renderUserInterface(parent: HTMLElement) {
     }
 
     state.set(data);
-  });
-
-  return { controls, sidebar, terminal };
+  }
 }
 
 function initState() {

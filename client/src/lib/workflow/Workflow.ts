@@ -9,6 +9,10 @@ export class Workflow<Args extends any[] = any[]> {
     return this.currentExecutions > 0;
   }
 
+  get instancesRunning() {
+    return this.currentExecutions;
+  }
+
   get timesExecuted() {
     return this.executionCount;
   }

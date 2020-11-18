@@ -1,6 +1,7 @@
 body {
   --background-color: #1c1c1c;
   --border-color: #484848;
+  --color: white;
   background-color: black;
   color: white;
 }

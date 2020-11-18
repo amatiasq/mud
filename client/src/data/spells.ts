@@ -38,15 +38,15 @@ const metadata: Partial<Record<SpellName, SpellMetadata>> = {
   },
 
   'causar critica': {
-    success: /Tu conjuro [^\n]+ a( w+)+!/,
+    success: /Tu conjuro [^\n]+ a( \w+)+!/,
   },
 
   'causar grave': {
-    success: /Tu conjuro [^\n]+ a( w+)+!/,
+    success: /Tu conjuro [^\n]+ a( \w+)+!/,
   },
 
   'causar leve': {
-    success: /Tu conjuro [^\n]+ a( w+)+!/,
+    success: /Tu conjuro [^\n]+ a( \w+)+!/,
   },
 
   ceguera: {
