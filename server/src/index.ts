@@ -35,12 +35,14 @@ wss.on('connection', ws => {
   telnet.on('data', x => ws.send(x));
 
   ws.on('message', event => {
+    if (event instanceof Buffer) {
+      telnet.send(event);
+      return;
+    }
+
     const { type, payload } = parseJson(String(event));
 
     switch (type) {
-      case 'INPUT':
-        telnet.send(payload);
-        break;
       case 'OPEN':
         connect(payload);
         break;

@@ -26,7 +26,7 @@ export class RemoteTelnet {
   }
 
   send(value: string) {
-    this.proxy('INPUT', unescape(encodeURIComponent(value)));
+    this.socket.send(encode(value));
   }
 
   close() {
@@ -39,9 +39,7 @@ export class RemoteTelnet {
 
   private async onMessage(event: MessageEvent<Blob>) {
     const reader = new FileReader();
-
     reader.onloadend = x => this.emitData(reader.result as string);
-
     reader.readAsText(event.data, 'ISO-8859-1');
 
     // .replace(/z<Ex>/g, '')
@@ -50,4 +48,10 @@ export class RemoteTelnet {
     // .replace(/&gt;/g, '>')
     // .replace(/&amp;/g, '&');
   }
+}
+
+function encode(text: string) {
+  const encoder = new TextEncoder();
+  const invariant = text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  return encoder.encode(invariant);
 }
