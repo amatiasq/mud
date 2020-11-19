@@ -1,8 +1,8 @@
-import { ClientStorage } from '@amatiasq/client-storage';
 import './Terminal.css';
 
 import Convert from 'ansi-to-html';
 
+import { ClientStorage } from '@amatiasq/client-storage';
 import { emitter } from '@amatiasq/emitter';
 
 import { render } from '../render';
@@ -15,8 +15,8 @@ export class Terminal {
   private readonly dom = render(html);
   private readonly $log = this.dom.$('.log');
   private readonly $input = this.dom.$<HTMLInputElement>('input');
-  private readonly log: string[] = [];
   private readonly history: string[] = history.get() || [];
+  private lastChunk: string = '';
   private histPos = 0;
 
   private readonly emitSubmit = emitter<string>();
@@ -44,33 +44,14 @@ export class Terminal {
   }
 
   write(data: string) {
-    const $parent = this.$log.parentElement!;
-    const prev = this.log.length ? this.log.pop() : '';
-    const content = `${prev}${fixLineEndings(data)}`.split(/\n\n+/);
-    const last = content.pop()!;
+    const content = `${this.lastChunk}${fixLineEndings(data)}`.split(/\n\n+/);
+    this.lastChunk = content.pop()!;
 
     for (const block of content) {
-      this.log.push(block);
-
-      const p = document.createElement('p');
-      p.innerHTML = asciiToHtml(block);
-      $parent.insertBefore(p, this.$log);
+      this.$log.before(render(`<p>${asciiToHtml(block)}</p>`));
     }
 
-    this.log.push(last);
-    this.$log.innerHTML = asciiToHtml(last);
-
-    this.autoScroll($parent);
-  }
-
-  private autoScroll(el: HTMLElement) {
-    const { scrollTop, scrollHeight, clientHeight } = el;
-    const distanceFromBottom = scrollHeight - (scrollTop + clientHeight);
-    const shouldScroll = distanceFromBottom < clientHeight / 2;
-
-    if (shouldScroll) {
-      el.scrollTop = scrollHeight;
-    }
+    this.$log.innerHTML = asciiToHtml(this.lastChunk);
   }
 
   private onKeyDown(event: KeyboardEvent) {
@@ -90,7 +71,9 @@ export class Terminal {
   }
 
   private onKeyUp(event: KeyboardEvent) {
-    this.$input.size = this.$input.value.length + 3;
+    const value = this.$input.value;
+    this.history[0] = value;
+    this.$input.size = value.length + 3;
   }
 
   private submit() {
@@ -98,7 +81,7 @@ export class Terminal {
     this.$input.value = '';
     this.histPos = 0;
 
-    if (value) {
+    if (value && value !== this.history[1]) {
       this.history.shift();
       this.history.unshift(value);
       this.history.unshift('');

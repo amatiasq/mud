@@ -4,6 +4,8 @@
   overflow-y: auto;
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
+  display: flex;
+  flex-direction: column-reverse;
 }
 
 .terminal::-webkit-scrollbar {
