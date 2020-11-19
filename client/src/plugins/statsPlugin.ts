@@ -126,8 +126,6 @@ export function statsPlugin({ when, write }: PluginContext) {
 
       name = groups.name;
       principal = Boolean(groups.principal);
-
-      console.log(stats);
       isInitiated = true;
     },
     { captureLength: SIZE },

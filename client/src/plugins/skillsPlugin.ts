@@ -68,6 +68,7 @@ export function skillsPlugin({ when, write }: PluginContext) {
     canLearn,
     castSpell,
     meditate,
+    polimorfar,
     NOT_AVAILABLE,
     BUSY,
     FAILED,
@@ -142,11 +143,13 @@ export function skillsPlugin({ when, write }: PluginContext) {
       return BUSY;
     }
 
+    const canCreateBerry = await can('crear baya');
     isSpellRunning = true;
     write(`conjurar "${spell.name}" ${args}`);
 
     const promises: Promise<CastSpellResult>[] = [
       when(success).then(() => CASTED),
+      // when('Falta algo...').then(() => )
       when(SPELL_NOT_POSSIBLE).then(() => NOT_AVAILABLE),
       when(SPELL_ALREADY_APPLIED).then(() => ALREADY_APPLIED),
       when(SPELL_FAILED)
@@ -158,8 +161,27 @@ export function skillsPlugin({ when, write }: PluginContext) {
       promises.push(when(spell.target).then(() => CASTED));
     }
 
-    const result: CastSpellResult = await Promise.any(promises);
+    const result = await Promise.any(promises);
     isSpellRunning = false;
     return result;
+  }
+
+  async function polimorfar(level: number) {
+    const options: [number, string][] = [
+      [20, 'Gato'],
+      [23, 'Aguila'],
+      [25, 'Serpiente'],
+      [30, 'Lobo'],
+      [35, 'Tortuga'],
+      [40, 'Cocodrilo'],
+      [45, 'Oso'],
+      [50, 'Pegaso'],
+      [55, 'Elem aire'],
+      [60, 'Elem tierra'],
+      [65, 'Ent'],
+    ];
+
+    const target = options.reverse().find(([minLevel]) => level >= minLevel);
+    return target && castSpell('polimorfar', target[1]);
   }
 }

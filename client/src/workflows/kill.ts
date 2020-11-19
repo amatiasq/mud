@@ -5,10 +5,12 @@ import { concatRegexes } from '../lib/util/concatRegexes';
 import { Context } from '../lib/workflow/Context';
 import { wait } from '../lib/util/wait';
 
+export type KillResult = 'win' | 'flee' | 'missing';
+
 export async function kill(
   { when, write, plugins: { prompt, navigation, skills } }: Context,
   target: string,
-) {
+): Promise<KillResult> {
   const { dedope } = SPELLS_BY_TYPE;
   const focused = target.startsWith('!');
 
@@ -19,6 +21,12 @@ export async function kill(
   if (!(await repeatUntilCasted(dedope, target))) {
     write(`matar ${target}`);
   }
+
+  const unsubscribe = prompt.onUpdate(x => {
+    if (x.hp.percent <= 0.4) {
+      navigation.recall();
+    }
+  });
 
   when(ATTACK_RECEIVED, async ({ groups }) => {
     const fullName = groups.mob;
@@ -33,29 +41,31 @@ export async function kill(
 
   let bodyContent: string[] = [];
 
-  const result = await Promise.any([
-    navigation.waitForRecall().then(() => 'flee'),
+  const result = await Promise.any<Promise<KillResult>>([
+    navigation.waitForRecall().then(() => 'flee' as const),
 
-    when(
+    when([
       concatRegexes(target, /(?:\w|�| )* (ha)|(cae al suelo) MUERTO!!/i),
-    ).then(() => 'win'),
+      'monedas de oro de el cadaver de un ladron',
+    ]).then(() => 'win' as const),
 
     when('No esta aqui.')
       .timeout(3)
-      .then(() => 'missing'),
+      .then(() => 'missing' as const),
 
     when([
       'Huyes como un cobarde del combate.',
       'Estas demasiado malherido para hacer eso.',
       'Estas demasiado aturdido para hacer eso.',
-    ]).then(() => 'flee'),
+    ]).then(() => 'flee' as const),
   ]);
 
   if (result === 'win') {
     // no need to await for this
-    handleBody(bodyContent);
+    setTimeout(() => handleBody(bodyContent));
   }
 
+  unsubscribe();
   return result;
 
   async function handleBody(items: string[]) {

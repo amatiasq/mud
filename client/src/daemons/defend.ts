@@ -1,5 +1,5 @@
 import { ATTACK_RECEIVED, getMobIn } from '../data/mobs';
-import { SPELLS_BY_TYPE } from '../data/spells';
+import { Casteable, SPELLS_BY_TYPE } from '../data/spells';
 import { Context } from '../lib/workflow/Context';
 
 export async function defend({
@@ -14,8 +14,6 @@ export async function defend({
   );
 
   when(ATTACK_RECEIVED, async ({ groups }) => {
-    console.log('Attack received', isRunning('kill'));
-
     if (isRunning('kill')) {
       return;
     }
@@ -23,10 +21,18 @@ export async function defend({
     const mana = prompt.getPercent('mana');
     const fullName = groups.mob;
 
-    if (fullName && mana > 0.1) {
-      const mob = getMobIn(fullName);
-      await skills.castSpell(SPELLS_BY_TYPE.attack, mob ? mob.name : fullName);
+    if (!fullName || mana <= 0.1) {
+      return;
     }
+
+    const mob = getMobIn(fullName);
+    const hp = prompt.getPercent('hp');
+    const attack =
+      hp < 0.5
+        ? <Casteable>[...SPELLS_BY_TYPE.massAttack, ...SPELLS_BY_TYPE.attack]
+        : SPELLS_BY_TYPE.attack;
+
+    await skills.castSpell(attack, mob ? mob.name : fullName);
   });
 
   when('.. Todo empieza a volverse negro.\n', async () => {
@@ -67,6 +73,11 @@ export async function defend({
       .split(/\n/)
       .map(x => x.trim())
       .filter(x => x && x !== 'nada.');
+
+    // Use if looking for a specific item
+    // if (items.some(x => x.includes('yelmo de orco'))) {
+    //   write('coger yelmo cuerpo');
+    // }
 
     if (items.some(x => x.includes('llave'))) {
       write('coger llave cuerpo');

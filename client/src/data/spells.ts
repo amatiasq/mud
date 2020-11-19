@@ -61,35 +61,29 @@ const metadata: Partial<Record<SpellName, SpellMetadata>> = {
     effect: effectProp('armor class'),
   },
 
+  'atravesar puerta': {
+    success: 'Te vuelves translucido.',
+    end: 'Vuelves a tener un cuerpo solido.',
+    effect: effectDuration,
+  },
+
   bendecir: {
     success: 'Tu dios te otorga una poderosa bendicion.',
     end: 'La bendicion desaparece.',
     effect: effectProp('hit roll'),
   },
 
-  'causar critica': {
-    target: /Tu conjuro [^\n]+ a(?<target>(?: \w+)+)!/,
+  'causar critica': { target: /Tu conjuro [^\n]+ a(?<target>(?: \w+)+)!/ },
+  'causar grave': { target: /Tu conjuro [^\n]+ a(?<target>(?: \w+)+)!/ },
+  'causar leve': { target: /Tu conjuro [^\n]+ a(?<target>(?: \w+)+)!/ },
+  ceguera: { target: /Lanzas un conjuro de ceguera contra (?<target>[^.]+)./ },
+  'crear agua': { target: ' esta lleno.\n' },
+
+  'crear baya': {
+    success: 'Una baya brillante y dorada aparece en tus manos!',
   },
 
-  'causar grave': {
-    target: /Tu conjuro [^\n]+ a(?<target>(?: \w+)+)!/,
-  },
-
-  'causar leve': {
-    target: /Tu conjuro [^\n]+ a(?<target>(?: \w+)+)!/,
-  },
-
-  ceguera: {
-    target: /Lanzas un conjuro de ceguera contra (?<target>[^.]+)./,
-  },
-
-  'crear agua': {
-    target: ' esta lleno.\n',
-  },
-
-  'crear comida': {
-    success: 'Una seta magica aparece de repente.',
-  },
+  'crear comida': { success: 'Una seta magica aparece de repente.' },
 
   'crear fuego': {
     success: 'Una gran hoguera se enciende en el suelo delante tuyo.',
@@ -154,6 +148,11 @@ const metadata: Partial<Record<SpellName, SpellMetadata>> = {
     end: 'Tus pies aterrizan suavemente en el suelo.',
   },
 
+  'fuerza vampirica': {
+    success: 'La fuerza de los vampiros fluye por tus venas...',
+    effect: effectProp('fuerza'),
+  },
+
   identificar: {
     target: /El objeto '(?<name>[^']+)' es un\(a\) (?<type>\w+), propiedades especiales: (?<properties>[^\n]+)\n/,
   },
@@ -163,6 +162,11 @@ const metadata: Partial<Record<SpellName, SpellMetadata>> = {
     target: /\n(?<target>[^\n]+) se desvanece en el aire./,
     end: 'Ya no eres invisible.',
     effect: effectDuration,
+  },
+
+  'invisibilidad grupo': {
+    success:
+      'Tu cuerpo se vuelve traslucido por un momento y luego se desvanece.',
   },
 
   'invocar armadillo': {
@@ -181,9 +185,12 @@ const metadata: Partial<Record<SpellName, SpellMetadata>> = {
     effect: effectProp('armor class'),
   },
 
-  refrescar: {
-    success: 'Nueva vitalidad fluye hacia ti.',
+  polimorfar: {
+    success: /Tu cuerpo empieza a cambiar... hasta transformarte en (?<result>[^!]+)!/,
+    end: 'Recuperas tu forma natural.',
   },
+
+  refrescar: { success: 'Nueva vitalidad fluye hacia ti.' },
 
   'respiracion acuatica': {
     success: 'Tus pulmones ahora son capaces de respirar bajo agua...',
@@ -194,10 +201,11 @@ const metadata: Partial<Record<SpellName, SpellMetadata>> = {
 
   terremoto: {
     success: 'La tierra tiembla bajo tus pies!',
+    target: 'La tierra tiembla bajo tus pies!',
   },
 
   veneno: {
-    success: /\n(?<target>[^\n]+)cobra un aspecto enfermizo cuando tu veneno se esparce por su cuerpo./,
+    target: /\n(?<target>[^\n]+)cobra un aspecto enfermizo cuando tu veneno se esparce por su cuerpo./,
   },
 
   'vista distancia': {
@@ -246,6 +254,7 @@ export const SPELL_ALREADY_APPLIED = [
 
 export const SPELL_NOT_POSSIBLE = [
   'No esta aqui.',
+  'Falta algo...',
   'No tienes suficiente mana.',
   'Sobre que quieres lanzar este conjuro?',
   'No puedes encontrar ningun ',
@@ -256,14 +265,41 @@ export const SPELL_NOT_POSSIBLE = [
   'Estas demasiado aturdido para hacer eso.',
 ];
 
-export const SPELLS_BY_TYPE: Record<string, Casteable> = {
-  food: ['crear baya', 'crear comida'],
-  water: ['crear manantial', 'crear agua'],
-  levitate: ['volar', 'flotar'],
-  heal: ['curar criticas', 'curar graves', 'curar leves'],
-  attack: ['terremoto', 'causar critica', 'causar grave', 'causar leve'],
-  massAttack: ['terremoto'],
-  dedope: ['ceguera', 'veneno'],
+export const SPELLS_BY_TYPE = {
+  food: ['saciar hambre', 'crear comida'] as Casteable,
+  water: ['crear manantial', 'crear agua'] as Casteable,
+  movement: ['volar', 'flotar'] as Casteable,
+  heal: ['curar criticas', 'curar graves', 'curar leves'] as Casteable,
+  invisibility: ['invisibilidad grupo', 'invisibilidad'] as Casteable,
+  massAttack: ['terremoto'] as Casteable,
+  attack: ['causar critica', 'causar grave', 'causar leve'] as Casteable,
+
+  attackAlternative: [
+    'agarron impactante',
+    'relampago',
+    'bola fuego',
+    'misil magico',
+  ] as Casteable,
+
+  dedope: [
+    'ceguera',
+    'veneno',
+    'disipar magia',
+    'disipar maldad',
+    'maldecir',
+    'proteccion',
+    'fuego espectral',
+    'debilitar',
+  ] as Casteable,
+
+  pet: [
+    'invocar oso',
+    'invocar jaguar',
+    'invocar lobo',
+    'invocar aguila',
+    'invocar lince',
+    'invocar armadillo',
+  ] as Casteable,
 };
 
 export const SPELL_LEARN_ORDER: Casteable[] = [
@@ -283,7 +319,7 @@ export const SPELL_LEARN_ORDER: Casteable[] = [
   'detectar escondido',
   'detectar invisible',
   'detectar magia',
-  SPELLS_BY_TYPE.levitate,
+  SPELLS_BY_TYPE.movement,
 
   // Medic
   'curar ceguera',

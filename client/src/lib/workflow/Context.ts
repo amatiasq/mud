@@ -6,6 +6,7 @@ import { bindAll } from '../util/bindAll';
 import { WorkflowFn } from './WorkflowFn';
 
 export class Context extends PluginContext {
+  private readonly children: { abort(): void }[] = [];
   private finish: ((reason: any) => void) | null = null;
 
   readonly plugins: PluginMap;
@@ -43,6 +44,7 @@ export class Context extends PluginContext {
       error => this.log(`Invocation "${name}" failed `, error),
     );
 
+    this.children.push(promise);
     return promise;
   }
 
@@ -56,6 +58,10 @@ export class Context extends PluginContext {
 
     if (this.finish) {
       this.finish(new Error('Workflow aborted'));
+    }
+
+    for (const child of this.children) {
+      child.abort();
     }
   }
 }

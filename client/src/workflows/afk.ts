@@ -1,14 +1,23 @@
 import { Context } from './../lib/workflow/Context';
 
 export async function afk(
-  { abort, run, when, printLogs, plugins: { navigation } }: Context,
+  { abort, run, when, plugins: { navigation, prompt } }: Context,
   ...areas: string[]
 ) {
+  const initialExp = prompt.getValue('exp');
   let isAborted = false;
 
-  when('.. Todo empieza a volverse negro.\n', () => {
-    isAborted = true;
-    abort();
+  console.log({ initialExp });
+
+  when('.. Todo empieza a volverse negro.\n', async () => {
+    await prompt.until();
+
+    const exp = prompt.getValue('exp');
+
+    if (exp > initialExp) {
+      isAborted = true;
+      abort();
+    }
   });
 
   while (!isAborted) {
@@ -25,13 +34,10 @@ export async function afk(
       console.log('Preparation error', error);
     }
 
-    console.log('Stats 100%. Start train...');
-
     try {
       await run('train', [rand(areas || [])]);
-      console.log('workflow completed');
     } catch (error) {
-      console.log('workflow failed');
+      console.log('Train error', error);
     }
 
     try {

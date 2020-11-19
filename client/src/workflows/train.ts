@@ -1,13 +1,15 @@
-import { Mob } from './../data/mobs';
 import { getAreaMetadata, getAreasForLevel } from '../data/areas';
 import {
-  getMobIn,
-  MOB_ARRIVES,
-  MOB_LEAVES,
-  getMobsPresence,
   getMobFromPresence,
+  getMobIn,
+  getMobsPresence,
+  Mob,
+  MOB_ARRIVES,
+  MOB_DIES,
+  MOB_LEAVES,
 } from '../data/mobs';
 import { Context } from '../lib/workflow/Context';
+import { KillResult } from './kill';
 
 export async function train(
   {
@@ -26,6 +28,7 @@ export async function train(
   }
 
   const arena = await getArena(area);
+  const theif = getMobIn('ladron');
   const enemies: Mob[] = [];
 
   when(getMobsPresence(), ({ patterns, fullMatch, captured }) =>
@@ -35,12 +38,11 @@ export async function train(
   );
 
   when(MOB_ARRIVES, ({ groups }) => enemySpotted(getMobIn(groups.mob)));
-  when(MOB_LEAVES, x => {
-    const { mob } = x.groups;
-    if (mob) {
-      enemyGone(getMobIn(x.groups.mob));
-    }
-  });
+  when(
+    MOB_LEAVES,
+    ({ groups }) => groups.mob && enemyGone(getMobIn(groups.mob)),
+  );
+  when(MOB_DIES, ({ groups }) => groups.mob && enemyGone(getMobIn(groups.mob)));
 
   const route = `${arena.path}${arena.arena}`;
 
@@ -70,7 +72,7 @@ export async function train(
   }
 
   function enemySpotted(mob: Mob | null = null) {
-    if (mob) {
+    if (mob && (mob !== theif || !enemies.includes(theif))) {
       enemies.push(mob);
     }
   }
@@ -88,7 +90,10 @@ export async function train(
     log('CHECK_ENEMIES', enemies.length);
 
     while (enemies.length) {
-      const result = await run('kill', [enemies.pop()!.name]);
+      const enemy = enemies[0];
+      const result = (await run('kill', [enemy.name])) as KillResult;
+
+      console.log(`Fight result: ${result}`);
 
       if (result === 'flee') {
         console.log('Had to run. Train over.');
@@ -96,7 +101,9 @@ export async function train(
         return true;
       }
 
-      log(`Fight result: ${result}`);
+      if (result === 'missing') {
+        enemies.shift();
+      }
     }
   }
 

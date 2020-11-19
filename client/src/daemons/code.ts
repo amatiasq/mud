@@ -4,7 +4,6 @@ import { Context } from '../lib/workflow/Context';
 const storage = new ClientStorage<Record<string, number>>('things-in-rooms');
 
 export function code({ when }: Context) {
-  console.log('running');
   when(
     /Salidas: [^\.]+\.\n\n([^<]+)\n<\d+/,
     ({ captured }) => {

@@ -42,7 +42,6 @@ export function inventoryPlugin({ when, write }: PluginContext) {
     ({ groups }) => {
       isInitialized = true;
       items = parseItems(groups.content);
-      console.log('INVENTORY', items);
     },
     { captureLength: 1000 },
   );

@@ -86,6 +86,7 @@ export async function promptPlugin({ when, write }: PluginContext) {
 
   return {
     getPercent,
+    getValue,
     until,
     whenFresh,
     onUpdate: update.subscribe,
@@ -124,6 +125,12 @@ export async function promptPlugin({ when, write }: PluginContext) {
 
   function getPercent(stat: 'hp' | 'mana' | 'mv') {
     return stats[stat].percent;
+  }
+
+  function getValue(stat: 'gold' | 'exp'): number;
+  function getValue(stat: 'enemy'): number | null;
+  function getValue(stat: 'gold' | 'exp' | 'enemy') {
+    return stats[stat];
   }
 
   function until(predicate?: (stats: Stats) => boolean) {

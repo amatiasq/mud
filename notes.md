@@ -1,5 +1,16 @@
-## Tech
 - Google "Cloudflare websocket disconnects"
+- No aceptar input hasta login ready
+
+### Workflow for skills
+- `skill('cast', 'volar', 'armadillo')`
+- `skill('meditar')`
+- `skill('polimorfar')`
+- Cuando `Falta algo...` run `conjurar 'crear baya'`
+
+
+- ~~Research scroll to bottom~~
+
+## Tech
 - ~~1 Socket => 1 Telnet~~
 
 ## Code
@@ -21,11 +32,9 @@
 ### Cast
 - ~~no conjurar cuando aturdido~~
 
-- No aceptar input hasta login ready
-- Research scroll to bottom
--
-
 ## Arena
+
+```
 Lo que hace un total de 3,542,030 monedas de oro.
 
 <418/418hp 382/382m 249/280mv 1,034,799xp 1g> I
@@ -37,6 +46,7 @@ Por favor, acepta o declina el desafio.
 Sternhard te mira.
 
 <418/418hp 382/382m 269/280mv 1,034,799xp 1g> I
+```
 
 ---
 

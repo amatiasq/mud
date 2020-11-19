@@ -1,8 +1,7 @@
-import { Pattern, SinglePattern } from './../lib/triggers/Pattern';
+import { Pattern, SinglePattern } from '../lib/triggers/Pattern';
 import { concatRegexes } from '../lib/util/concatRegexes';
 
 const MOB_GENERIC = {
-  // 'Un deforme humano, un engendro de la magia, quiere descargar su agresividad.',
   adorador: [
     'Un adorador mira con cólera a su alrededor.',
     'Un devoto adorador mira con cólera a su alrededor.',
@@ -25,6 +24,8 @@ const MOB_GENERIC = {
   ],
   dragon: null,
   empleado: null,
+  engendro:
+    'Un deforme humano, un engendro de la magia, quiere descargar su agresividad.',
   espiritu: 'Un espíritu se desliza por el aire.',
   esqueleto: [
     'El esqueleto hace castanyetear sus dientes amenazadoramente y se acerca!',
@@ -56,7 +57,10 @@ const MOB_GENERIC = {
     'Un jefe orco esta aqui mirandote desconfiado.',
     'Un macizo chaman goblin esta aqui rugiendo a sus lacayos.',
   ],
-  ladron: 'Un ladron esta aqui profundamente dormido.',
+  ladron: [
+    'Un ladron esta aqui profundamente dormido.',
+    /Tu ataque causa .* a un ladron!/,
+  ],
   lobo: [
     'Un gran lobo negro, te muestra los colmillos hambriento.',
     'Un lobo feroz esta aqui y grunye muy enojado.',
@@ -79,6 +83,7 @@ const MOB_GENERIC = {
     'Un asqueroso arquero orco esta aqui.',
     'Un corpulento orco esta aqui de guardia.',
     'Un jefe orco esta aqui profundamente dormido.',
+    'Un ogro centinela esta de guardia delante de la puerta norte.',
     'Un orco esta de pie al lado de la ballesta.',
     'Un orco fuera de servicio esta sentado aqui jugando a las cartas.',
     'Un orco fuera de servicio esta sentado aqui jugando a los dados.',
@@ -108,7 +113,7 @@ const MOB_CHARACTERS = {
   Nejane: 'Nejane, la líder, parece estar en trance.',
 } as const;
 
-const MOB_ARTICLE = /(?:un|una|el|la|los|las|unos|unas)/;
+const MOB_ARTICLE = /(?:(?:un|una|el|la|los|las|unos|unas) )?/;
 const MOB_NAME = /(?<mob>(?: |\w|-)+)/;
 const ALLIES = ['armadillo', 'lince'];
 
@@ -127,29 +132,29 @@ type CharacterMobName = keyof typeof MOB_CHARACTERS;
 
 export type MobName = GenericMobName | CharacterMobName;
 
-export const ATTACK_RECEIVED = [
-  concatRegexes(/El \w+ de /, MOB_ARTICLE, / /, MOB_NAME, / te /),
-  /Tu ataque \w+ a un (?<mob>ladron)./,
-];
-
 export interface Mob {
   name: MobName;
   presence?: Pattern | null;
 }
 
+export const ATTACK_RECEIVED = [
+  /Tu ataque \w+ a un (?<mob>ladron)./,
+  concatRegexes(/El \w+ de /, MOB_ARTICLE, MOB_NAME, / te /),
+];
+
 export const MOB_ARRIVES = concatRegexes(
   MOB_ARTICLE,
-  / /,
   MOB_NAME,
   / llega desde el (?<direction>\w+)/,
 );
 
 export const MOB_LEAVES = concatRegexes(
   MOB_ARTICLE,
-  / /,
   MOB_NAME,
   / (?:se va)|(?:vuela) hacia (?:el )?(?<direction>\w+)/,
 );
+
+export const MOB_DIES = concatRegexes(MOB_ARTICLE, MOB_NAME, / ha MUERTO!!/);
 
 export function getMobsPresence() {
   return MOBS.map(x => x.presence)

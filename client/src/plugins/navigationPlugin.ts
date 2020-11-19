@@ -88,7 +88,7 @@ export function navigationPlugin({ log, when, write }: PluginContext) {
     }
 
     write('recall');
-    await when('Plaza de Darkhaven');
+    await when(recalls);
     await prompt();
   }
 
@@ -97,7 +97,7 @@ export function navigationPlugin({ log, when, write }: PluginContext) {
       return new PatternPromise(resolve => resolve());
     }
 
-    return when('Plaza de Darkhaven');
+    return when(recalls);
   }
 
   function canGo(direction: string) {
@@ -197,7 +197,7 @@ export function navigationPlugin({ log, when, write }: PluginContext) {
   async function getRealm() {
     write('donde');
     const result = await when(
-      /Jugadores cerca de ti en (?: |\w)+, Reino de (?<realm>\w+):/,
+      /Jugadores cerca de ti en [^,]+, Reino de (?<realm>\w+):/,
     );
     return result.groups.realm as Realm;
   }
