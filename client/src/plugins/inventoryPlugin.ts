@@ -17,7 +17,7 @@ type ItemSearch = string | string[] | Record<string, string>;
 const CONTENT = /\n(?<content>(?:.|\n)*)\n[^ ]/;
 const INVENTORY_DETECTOR = concatRegexes(/Estas llevando:/, CONTENT);
 const ITEM_EFECTS = /(?<effects>(?:\(\w[^\)]+\w\) )*)/;
-const ITEM_AMOUNT = concatRegexesUnescaped('(?: \\(', int('amount'), '\\))');
+const ITEM_AMOUNT = concatRegexesUnescaped('(?: \\(', int('amount'), '\\))?');
 const ITEM_MATCHER = concatRegexes(
   /^/,
   ITEM_EFECTS,
@@ -100,7 +100,10 @@ export function inventoryPlugin({ when, write }: PluginContext) {
 
       result[name] = {
         amount: amount ? toInt(amount) : 1,
-        effects: effects.replace(/^\s*\(|\)\s*$/g, '').split(') ('),
+        effects: effects
+          .replace(/^\s*\(|\)\s*$/g, '')
+          .split(') (')
+          .filter(Boolean),
       };
     }
 

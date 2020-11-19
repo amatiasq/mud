@@ -4,8 +4,8 @@ import { concatRegexes } from '../lib/util/concatRegexes';
 const MOB_GENERIC = {
   // 'Un deforme humano, un engendro de la magia, quiere descargar su agresividad.',
   adorador: [
-    /Un adorador mira con c.lera a su alrededor\./,
-    /Un devoto adorador mira con c.lera a su alrededor\./,
+    'Un adorador mira con cólera a su alrededor.',
+    'Un devoto adorador mira con cólera a su alrededor.',
   ],
   aguila: [
     'Una enorme aguila esta aqui profundamente dormido.',
@@ -25,14 +25,14 @@ const MOB_GENERIC = {
   ],
   dragon: null,
   empleado: null,
-  espiritu: /Un esp.ritu se desliza por el aire./,
+  espiritu: 'Un espíritu se desliza por el aire.',
   esqueleto: [
     'El esqueleto hace castanyetear sus dientes amenazadoramente y se acerca!',
     'Un esqueleto con armadura avanza torpemente a traves de los arboles.',
     'Un esqueleto huesudo esta aqui profundamente dormido.',
     'Un esqueleto polvoriento esta aqui.',
   ],
-  fanatico: /Un humano pose.do por el fanatismo busca 'herejes'\./,
+  fanatico: "Un humano poseído por el fanatismo busca 'herejes'.",
   gusano: [
     'Un gusano de roca esta aqui profundamente dormido.',
     /Un monstruoso gusano de hielo excava a traves del hielo y la nieve aqui\. Se yergue y\s+ataca!/,
@@ -41,16 +41,15 @@ const MOB_GENERIC = {
     'un guardia hobgoblin de elite esta aqui profundamente dormido.',
     'Un hobgoblin armado esta aqui, interrogando a un prisionero.',
     'Un macizo hobgoblin esta de guardia cerca del hueco de la escalera.',
-    /Un guardian de la monta.a esta aqu., echando espuma por la boca\./,
+    'Un guardian de la montaña esta aquí, echando espuma por la boca.',
   ],
   gnoll: 'un gnoll feo esta aqui profundamente dormido.',
   goblin: [
     'un goblin negrero esta aqui profundamente dormido.',
     'Un habitante del bosque merodea por aqui, protegiendo su montanya.',
     'Un macizo chaman goblin esta aqui rugiendo a sus lacayos.',
-    /Un guardian de la monta.a esta aqu., echando espuma por la boca\./,
   ],
-  guardia: /Un Guardia Real est. aqu. velando por la seguridad del estadio/,
+  guardia: 'Un Guardia Real está aquí velando por la seguridad del estadio',
   guerrero: 'Un guerrero asqueroso grunye al verte.',
   jefe: [
     'Un jefe esta aqui descansando.',
@@ -105,8 +104,8 @@ const MOB_GENERIC = {
 };
 
 const MOB_CHARACTERS = {
-  Kivon: /Kivon, el l.der del culto, no est. nada contento con intromisiones\./,
-  Nejane: /Nejane, la l.der, parece estar en trance\./,
+  Kivon: 'Kivon, el líder del culto, no está nada contento con intromisiones.',
+  Nejane: 'Nejane, la líder, parece estar en trance.',
 } as const;
 
 const MOB_ARTICLE = /(?:un|una|el|la|los|las|unos|unas)/;

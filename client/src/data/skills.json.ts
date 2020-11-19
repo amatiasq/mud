@@ -1,4 +1,4 @@
-const x = [
+export default [
   {
     level: 1,
     type: 'Hechizo',
@@ -863,21 +863,3 @@ const x = [
     minPos: 'luchando (berserk)',
   },
 ] as const;
-
-type Item = typeof x[number];
-
-// prettier-ignore
-export const languageList = x.filter(x => x.type === 'Idioma') as LanguageBase[];
-export const skillList = x.filter(x => x.type === 'Habilidad') as SkillBase[];
-export const spellList = x.filter(x => x.type === 'Hechizo') as SpellBase[];
-export const weaponList = x.filter(x => x.type === 'Arma') as WeaponBase[];
-
-export type LanguageBase = Extract<Item, { type: 'Idioma' }>;
-export type SkillBase = Extract<Item, { type: 'Habilidad' }>;
-export type SpellBase = Extract<Item, { type: 'Hechizo' }>;
-export type WeaponBase = Extract<Item, { type: 'Arma' }>;
-
-export type LanguageName = LanguageBase['name'];
-export type SkillName = SkillBase['name'];
-export type SpellName = SpellBase['name'];
-export type WeaponName = WeaponBase['name'];

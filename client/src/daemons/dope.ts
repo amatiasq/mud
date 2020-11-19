@@ -1,14 +1,14 @@
 import { ClientStorage } from '@amatiasq/client-storage';
 
-import { getSpells, Spell, SPELLS_BY_TYPE } from '../data/spells';
+import { getSpells, Spell, SpellName, SPELLS_BY_TYPE } from '../data/spells';
 import { Context } from '../lib/workflow/Context';
 import { uniq } from '../util/uniq';
 
 const memory = new ClientStorage<(string | string[])[]>('dope:casting');
+const spellGroups = Object.values(SPELLS_BY_TYPE) as SpellName[][];
 
 export async function dope({
   when,
-  write,
   register,
   run,
   plugins: { prompt, skills },
@@ -56,18 +56,20 @@ export async function dope({
     },
   );
 
-  register('dope', async (x: Context, name?: string) => {
+  register('dope', async (_: Context, target?: string) => {
     const list = spells
-      .filter(x => x.dope && (name ? x.target : true))
-      .map(x => (Array.isArray(x.dope) ? x.dope.join('|') : x.name));
+      .filter(spell => spell.effect && (target ? spell.target : true))
+      .map(spell => getSpellGroup(spell.name));
 
-    for (const spell of uniq(list)) {
-      await repeatUntilCasted(spell.split('|'), name);
+    const clean = uniq(list.map(x => x.join('|'))).map(x => x.split('|'));
+
+    for (const spell of clean) {
+      await repeatUntilCasted(spell, target);
     }
   });
 
   async function watchDope(spell: Spell) {
-    const invoke = Array.isArray(spell.dope) ? spell.dope : spell.name;
+    const invoke = getSpellGroup(spell.name);
 
     when(spell.end!, async () => {
       casting.add(invoke);
@@ -78,14 +80,6 @@ export async function dope({
       if (success) {
         casting.delete(invoke);
         memory.set([...casting]);
-
-        const after = spell.afterDope;
-
-        if (Array.isArray(after)) {
-          after.forEach(x => write(x));
-        } else if (after) {
-          write(after as string);
-        }
       }
     });
   }
@@ -100,5 +94,10 @@ export async function dope({
       const clapped = (stat - min) * multiplier;
       return Math.hypot(mana, 1 - clapped) > 1;
     };
+  }
+
+  function getSpellGroup(name: SpellName) {
+    const group = spellGroups.find(x => x.includes(name));
+    return group ? group : [name];
   }
 }

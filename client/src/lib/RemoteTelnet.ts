@@ -26,7 +26,7 @@ export class RemoteTelnet {
   }
 
   send(value: string) {
-    this.proxy('INPUT', value);
+    this.proxy('INPUT', unescape(encodeURIComponent(value)));
   }
 
   close() {
@@ -38,14 +38,16 @@ export class RemoteTelnet {
   }
 
   private async onMessage(event: MessageEvent<Blob>) {
-    const escaped = await event.data.text();
-    const text = escaped
-      // .replace(/z<Ex>/g, '')
-      // .replace(/\[1z<\/Ex>/g, '')
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
-      .replace(/&amp;/g, '&');
+    const reader = new FileReader();
 
-    this.emitData(text);
+    reader.onloadend = x => this.emitData(reader.result as string);
+
+    reader.readAsText(event.data, 'ISO-8859-1');
+
+    // .replace(/z<Ex>/g, '')
+    // .replace(/\[1z<\/Ex>/g, '')
+    // .replace(/&lt;/g, '<')
+    // .replace(/&gt;/g, '>')
+    // .replace(/&amp;/g, '&');
   }
 }

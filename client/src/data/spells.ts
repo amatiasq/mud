@@ -1,7 +1,35 @@
 import { Pattern } from '../lib/triggers/Pattern';
 import { concatRegexes } from '../lib/util/concatRegexes';
 import { int } from '../lib/util/int';
-import { SpellBase, spellList, SpellName } from './skills';
+import ALL_SKILLS from './skills.json';
+
+type Item = typeof ALL_SKILLS[number];
+
+// prettier-ignore-start
+export const languageList = ALL_SKILLS.filter(
+  x => x.type === 'Idioma',
+) as LanguageBase[];
+export const skillList = ALL_SKILLS.filter(
+  x => x.type === 'Habilidad',
+) as SkillBase[];
+export const spellList = ALL_SKILLS.filter(
+  x => x.type === 'Hechizo',
+) as SpellBase[];
+export const weaponList = ALL_SKILLS.filter(
+  x => x.type === 'Arma',
+) as WeaponBase[];
+// prettier-ignore-end
+
+export type LanguageBase = Extract<Item, { type: 'Idioma' }>;
+export type SkillBase = Extract<Item, { type: 'Habilidad' }>;
+export type SpellBase = Extract<Item, { type: 'Hechizo' }>;
+export type WeaponBase = Extract<Item, { type: 'Arma' }>;
+
+export type SkillName = Item['name'];
+
+export type LanguageName = LanguageBase['name'];
+export type SpellName = SpellBase['name'];
+export type WeaponName = WeaponBase['name'];
 
 const effectDuration = (name: SpellName) =>
   concatRegexes(
@@ -12,11 +40,13 @@ const effectDuration = (name: SpellName) =>
     / asaltos./,
   );
 
-const effectArmorClass = (name: SpellName) =>
+const effectProp = (prop: string | RegExp) => (name: SpellName) =>
   concatRegexes(
     /Hechizo  : '/,
     name,
-    /' Afecta armor class en /,
+    /' Afecta /,
+    prop,
+    / en /,
     int('cantidad'),
     / durante /,
     int('asaltos'),
@@ -28,33 +58,33 @@ const metadata: Partial<Record<SpellName, SpellMetadata>> = {
     success: 'Tu armadura brilla suavemente al ser mejorada por un conjuro.',
     target: /La armadura de (?<target>(?:\w+ )+)brilla suavemente al ser mejorada por un conjuro\./,
     end: 'Tu armadura vuelve a su valor normal.',
-    effect: effectArmorClass,
-    dope: true,
+    effect: effectProp('armor class'),
   },
 
   bendecir: {
     success: 'Tu dios te otorga una poderosa bendicion.',
     end: 'La bendicion desaparece.',
+    effect: effectProp('hit roll'),
   },
 
   'causar critica': {
-    success: /Tu conjuro [^\n]+ a( \w+)+!/,
+    target: /Tu conjuro [^\n]+ a(?<target>(?: \w+)+)!/,
   },
 
   'causar grave': {
-    success: /Tu conjuro [^\n]+ a( \w+)+!/,
+    target: /Tu conjuro [^\n]+ a(?<target>(?: \w+)+)!/,
   },
 
   'causar leve': {
-    success: /Tu conjuro [^\n]+ a( \w+)+!/,
+    target: /Tu conjuro [^\n]+ a(?<target>(?: \w+)+)!/,
   },
 
   ceguera: {
-    success: /Lanzas un conjuro de ceguera contra ([^.]+)./,
+    target: /Lanzas un conjuro de ceguera contra (?<target>[^.]+)./,
   },
 
   'crear agua': {
-    success: ' esta lleno.\n',
+    target: ' esta lleno.\n',
   },
 
   'crear comida': {
@@ -73,74 +103,66 @@ const metadata: Partial<Record<SpellName, SpellMetadata>> = {
 
   'curar criticas': {
     success: 'Tus heridas mas graves se cierran y el dolor desaparece.',
+    target: /Curas las heridas mas graves de (?<target>[^\.]+)\./,
   },
 
   'curar graves': {
     success: 'Tus heridas graves se cierran y el dolor desaparece.',
+    target: /Curas las heridas graves de (?<target>[^\.]+)\./,
   },
 
   'curar leves': {
     success: 'Tus heridas leves se cierran y el dolor desaparece.',
+    target: /Curas las heridas leves de (?<target>[^\.]+)\./,
   },
 
   'detectar escondido': {
     success: 'Tus sentidos cobran la viveza de los del mejor predador.',
-    effect: effectDuration,
-    target: false,
     end: 'Te sientes menos consciente de lo que te rodea.',
-    dope: true,
+    effect: effectDuration,
   },
 
   'detectar invisible': {
     success: 'Tus ojos brillan, siendo capaces ahora de ver lo invisible.',
-    effect: effectDuration,
-    target: false,
     end: 'Ya no ves objetos invisibles.',
-    dope: true,
+    effect: effectDuration,
   },
 
   'detectar magia': {
     success:
       'Delgadas lineas azules reseguiran las siluetas de los objetos magicos que te encuentres.',
-    effect: effectDuration,
-    target: false,
     end: 'Las lineas azules desaparecen de tu vision',
-    dope: true,
+    effect: effectDuration,
   },
 
   'detectar maldad': {
     success:
       'Delgadas lineas rojas reseguiran las siluetas de los seres malvados que te encuentres.',
     effect: effectDuration,
-    target: false,
     end: 'Las lineas rojas desaparecen de tu vision.',
-    dope: true,
   },
 
   'detectar trampas': {
     success: 'De repente te sientes mas alerta de los peligros que te rodean.',
-    effect: effectDuration,
-    target: false,
     end: 'Te sientes menos alerta de los peligros que te rodean.',
-    dope: true,
+    effect: effectDuration,
   },
 
   flotar: {
     success: 'Empiezas a flotar a unos centimetros del suelo...',
+    target: /\n(?<target>[^\n]+) empieza a flotar a unos centimetros del suelo\.\.\./,
     end: 'Tus pies aterrizan suavemente en el suelo.',
-    dope: ['volar', 'flotar'],
   },
 
   identificar: {
-    success: /El objeto '(?<name>[^']+)' es un\(a\) (?<type>\w+), propiedades especiales: (?<properties>[^\n]+)\n/,
+    target: /El objeto '(?<name>[^']+)' es un\(a\) (?<type>\w+), propiedades especiales: (?<properties>[^\n]+)\n/,
   },
 
   invisibilidad: {
     success: 'Te desvaneces en el aire.',
-    effect: effectDuration,
-    target: /(?<target>(?:\w+ )+)se desvanece en el aire./,
+    target: /\n(?<target>[^\n]+) se desvanece en el aire./,
     end: 'Ya no eres invisible.',
-    dope: true,
+    effect: effectDuration,
   },
 
   'invocar armadillo': {
@@ -151,16 +173,12 @@ const metadata: Partial<Record<SpellName, SpellMetadata>> = {
   'luz eterna': {
     success:
       'Rayos de luz iridiscente colisionan para formar una bola de luz eterna...',
-    end: 'Esta completamente oscuro ...',
-    afterDope: ['vestir luz', 'mirar'],
   },
 
   'piel robliza': {
     success: 'Tu piel se oscurece a la vez que adquiere la dureza del roble.',
-    effect: effectArmorClass,
-    target: false,
     end: 'Tu piel vuelve a su estado normal...',
-    dope: true,
+    effect: effectProp('armor class'),
   },
 
   refrescar: {
@@ -169,7 +187,9 @@ const metadata: Partial<Record<SpellName, SpellMetadata>> = {
 
   'respiracion acuatica': {
     success: 'Tus pulmones ahora son capaces de respirar bajo agua...',
-    dope: true,
+    target: /Los pulmones de (?<target>[^\n]+) ahora son capaces de respirar bajo agua\.\.\./,
+    end: 'Tus pulmones vuelven a su estado original.',
+    effect: effectDuration,
   },
 
   terremoto: {
@@ -177,20 +197,20 @@ const metadata: Partial<Record<SpellName, SpellMetadata>> = {
   },
 
   veneno: {
-    success: /(?<target>(?:\w| )+)cobra un aspecto enfermizo cuando tu veneno se esparce por su cuerpo./,
+    success: /\n(?<target>[^\n]+)cobra un aspecto enfermizo cuando tu veneno se esparce por su cuerpo./,
   },
 
   'vista distancia': {
     success: 'Tienes una vision reveladora...',
-    dope: true,
+    target: /Los ojos de (?<target>[^\n]+) parecen estar mirando un lugar lejano\.\.\./,
+    effect: effectDuration,
   },
 
   volar: {
     success: 'Te elevas entre las corrientes de aire...',
-    effect: effectDuration,
-    target: /(?<target>(?:\w+ )+)se eleva entre las corrientes de aire.../,
+    target: /\n(?<target>[^\n]+) se eleva entre las corrientes de aire.../,
     end: 'Aterrizas suavemente en el suelo.',
-    dope: ['volar', 'flotar'],
+    effect: effectDuration,
   },
 };
 
@@ -200,12 +220,10 @@ const spells = spellList.map(x => ({
 })) as Spell[];
 
 interface SpellMetadata {
-  readonly success: Pattern;
-  readonly target?: Pattern | false;
-  readonly effect?: Pattern | ((string: SpellName) => Pattern);
+  readonly success?: Pattern;
+  readonly target?: Pattern;
   readonly end?: Pattern;
-  readonly dope?: true | readonly SpellName[];
-  readonly afterDope?: string | readonly string[];
+  readonly effect?: (string: SpellName) => Pattern;
 }
 
 export type Casteable = SpellName | SpellName[];

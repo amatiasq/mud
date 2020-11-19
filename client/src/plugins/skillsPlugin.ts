@@ -1,6 +1,7 @@
 import {
   Casteable,
   getSpell,
+  SkillName,
   Spell,
   SPELL_ALREADY_APPLIED,
   SPELL_FAILED,
@@ -74,7 +75,7 @@ export function skillsPlugin({ when, write }: PluginContext) {
     ALREADY_APPLIED,
   };
 
-  async function can(search: string | string[]) {
+  async function can(search: SkillName | SkillName[]) {
     await ensureInitiated();
 
     if (typeof search === 'string') {
@@ -128,9 +129,13 @@ export function skillsPlugin({ when, write }: PluginContext) {
     if (!learnt) return NOT_AVAILABLE;
 
     const spell = candidates.find(x => x.name === learnt)!;
+    const success = args ? spell.target : spell.success;
 
-    if (!spell.success) {
-      throw new Error(`Unknown response for spell "${name}" (${spell.name}).`);
+    if (!success) {
+      throw new Error(
+        `Unknown response for spell "${name}" (${spell.name}).` +
+          (args ? ` With target "${args}"` : ''),
+      );
     }
 
     if (isSpellRunning || isMeditating) {
@@ -141,7 +146,7 @@ export function skillsPlugin({ when, write }: PluginContext) {
     write(`conjurar "${spell.name}" ${args}`);
 
     const promises: Promise<CastSpellResult>[] = [
-      when(spell.success).then(() => CASTED),
+      when(success).then(() => CASTED),
       when(SPELL_NOT_POSSIBLE).then(() => NOT_AVAILABLE),
       when(SPELL_ALREADY_APPLIED).then(() => ALREADY_APPLIED),
       when(SPELL_FAILED)

@@ -4,6 +4,7 @@ import { Context } from '../lib/workflow/Context';
 
 export async function defend({
   isRunning,
+  run,
   when,
   write,
   plugins: { prompt, skills, navigation },
@@ -52,6 +53,14 @@ export async function defend({
     }
   });
 
+  when('Esta completamente oscuro ...', async () => {
+    if (await skills.can('luz eterna')) {
+      await run('cast', ['luz eterna']);
+      write('vestir luz');
+      write('mirar');
+    }
+  });
+
   when(/El cadaver de.* contiene:(?<items>(?:.|\n)+)\n[^ ]/, ({ groups }) => {
     const items = groups.items
       .toLowerCase()
@@ -61,6 +70,12 @@ export async function defend({
 
     if (items.some(x => x.includes('llave'))) {
       write('coger llave cuerpo');
+    }
+  });
+
+  when('Tragas agua al intentar respirar!', async () => {
+    if (await skills.can('respiracion acuatica')) {
+      skills.castSpell('respiracion acuatica');
     }
   });
 }

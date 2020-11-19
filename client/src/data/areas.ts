@@ -1,4 +1,4 @@
-import ALL_AREAS from './areas-data';
+import ALL_AREAS from './areas.json';
 
 type AreaBase = typeof ALL_AREAS[number];
 type Arena = string | string[];

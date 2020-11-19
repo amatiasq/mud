@@ -21,6 +21,10 @@
 ### Cast
 - ~~no conjurar cuando aturdido~~
 
+- No aceptar input hasta login ready
+- Research scroll to bottom
+-
+
 ## Arena
 Lo que hace un total de 3,542,030 monedas de oro.
 
@@ -206,4 +210,13 @@ El reclutador te cuenta 'El mapa es de Bosque de los Muertos, Reino de Valmorag,
 El reclutador te cuenta 'Tienes 18 minutos para realizar la mision'
 El reclutador te cuenta 'Que los dioses te bendigan!'
 El reclutador te entrega un mapa.
+```
+
+```
+El reclutador te cuenta 'Gracias valiente May!'
+El reclutador te cuenta 'Algun maldito ladron ha robado el ornitorrinco de peluche de mi casa!'
+El reclutador te cuenta 'Me han llegado rumores de donde se encuentra mi preciado objeto'
+El reclutador te cuenta 'Buscalo en 'Dos puertas... O es.. ?' en el area de El Calabozo de la Muerte, Reino de Earand, no pierdas mas tiempo!'
+El reclutador te cuenta 'Tienes 28 minutos para realizar la mision'
+El reclutador te cuenta 'Que los dioses vayan contigo!'
 ```

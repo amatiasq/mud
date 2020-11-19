@@ -24,7 +24,7 @@ const receive = (log: History) => ({
 const sent = (log: History) => ({ groups: { name, message } }: PatternResult) =>
   addMessage(log, { to: name, message });
 
-export function chatPlugin({ when }: PluginContext) {
+export function chatPlugin({ when, write }: PluginContext) {
   // const say = new ClientStorage<Record<string, Message[]>>('chat:say');
   const order = new ClientStorage<Message[]>('chat:order', version);
   const tell = new ClientStorage<Message[]>('chat:tell', version);
@@ -42,12 +42,23 @@ export function chatPlugin({ when }: PluginContext) {
   when(/(?<name>.+) te susurra '(?<message>[^']+)'/, receive(whisper));
   when(/Susurras a (?<name>.+) '(?<message>[^']+)'/, sent(whisper));
 
+  const receiveTell = receive(tell);
+
   when(
     [
       /(?<name>.+) te cuenta '(?<message>[^']+)'/,
       /(?<name>.+) te responde '(?<message>[^']+)'/,
     ],
-    receive(tell),
+    result => {
+      receiveTell(result);
+
+      const token = 'porfa dime ';
+      const { name, message } = result.groups;
+
+      if (message.startsWith(token)) {
+        write(`re ${message.substr(token.length)}`);
+      }
+    },
   );
 
   when(
