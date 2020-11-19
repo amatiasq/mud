@@ -1,4 +1,5 @@
 import { emitter } from '@amatiasq/emitter';
+import { playAudio } from './audio';
 
 export class RemoteTelnet {
   private _isConnected = false;
@@ -39,7 +40,7 @@ export class RemoteTelnet {
 
   private async onMessage(event: MessageEvent<Blob>) {
     const reader = new FileReader();
-    reader.onloadend = x => this.emitData(reader.result as string);
+    reader.onloadend = x => this.processor(reader.result as string);
     reader.readAsText(event.data, 'ISO-8859-1');
 
     // .replace(/z<Ex>/g, '')
@@ -47,6 +48,20 @@ export class RemoteTelnet {
     // .replace(/&lt;/g, '<')
     // .replace(/&gt;/g, '>')
     // .replace(/&amp;/g, '&');
+  }
+
+  private processor(chunk: string) {
+    const SOUND = /!!SOUND\((?<path>[\w\/\.]+) U=http:\/\/(?<host>[\w\/\.]+)\)/g;
+
+    if (chunk.match(SOUND)) {
+      for (const sound of chunk.matchAll(SOUND)) {
+        playAudio('/assets/' + sound.groups!.path);
+      }
+
+      chunk = chunk.replace(SOUND, '');
+    }
+
+    this.emitData(chunk);
   }
 }
 

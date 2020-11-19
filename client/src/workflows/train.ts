@@ -93,8 +93,6 @@ export async function train(
       const enemy = enemies[0];
       const result = (await run('kill', [enemy.name])) as KillResult;
 
-      console.log(`Fight result: ${result}`);
-
       if (result === 'flee') {
         console.log('Had to run. Train over.');
         await nav.recall();

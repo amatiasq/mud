@@ -82,8 +82,10 @@ const MOB_GENERIC = {
     'El orco espadachin llega desde el este.',
     'Un asqueroso arquero orco esta aqui.',
     'Un corpulento orco esta aqui de guardia.',
+    'un guardia orco esta aqui profundamente dormido.',
     'Un jefe orco esta aqui profundamente dormido.',
     'Un ogro centinela esta de guardia delante de la puerta norte.',
+    'un orco centinela esta aqui profundamente dormido.',
     'Un orco esta de pie al lado de la ballesta.',
     'Un orco fuera de servicio esta sentado aqui jugando a las cartas.',
     'Un orco fuera de servicio esta sentado aqui jugando a los dados.',
@@ -105,6 +107,7 @@ const MOB_GENERIC = {
     'Un asqueroso arquero uruk-hai tensa su arco al verte.',
     'Un superior uruk-hai esta aqui vigilando.',
   ],
+  troll: null,
   zombie: 'Un zombie se acerca hacia ti con los brazos extendidos.',
 };
 

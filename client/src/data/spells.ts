@@ -110,6 +110,10 @@ const metadata: Partial<Record<SpellName, SpellMetadata>> = {
     target: /Curas las heridas leves de (?<target>[^\.]+)\./,
   },
 
+  'curar veneno': {
+    success: 'Un agradable sensacion recorre tu cuerpo.',
+  },
+
   'detectar escondido': {
     success: 'Tus sentidos cobran la viveza de los del mejor predador.',
     end: 'Te sientes menos consciente de lo que te rodea.',
@@ -151,6 +155,10 @@ const metadata: Partial<Record<SpellName, SpellMetadata>> = {
   'fuerza vampirica': {
     success: 'La fuerza de los vampiros fluye por tus venas...',
     effect: effectProp('fuerza'),
+  },
+
+  'furia naturaleza': {
+    success: 'Sientes como la furia de la naturaleza te embarga...',
   },
 
   identificar: {

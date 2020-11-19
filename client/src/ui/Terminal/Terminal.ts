@@ -88,7 +88,7 @@ export class Terminal {
       history.set(this.history);
     }
 
-    for (const command of value.split(/;/)) {
+    for (const command of value.split(/;\s+/)) {
       this.emitSubmit(command);
     }
   }

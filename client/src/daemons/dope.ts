@@ -56,6 +56,12 @@ export async function dope({
     },
   );
 
+  when('No puedes mantener un pensamiento fijo.', () => {
+    if (skills.can('curar veneno')) {
+      // cast curar veneno
+    }
+  });
+
   register('dope', async (_: Context, target?: string) => {
     const list = spells
       .filter(spell => spell.effect && (target ? spell.target : true))
