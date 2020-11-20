@@ -111,8 +111,6 @@ async function initializeMud(telnet: RemoteTelnet) {
   }
 
   function connectButtons() {
-    // controls.addButton('Entrenar', () => mud.run('train'));
-
     mud.onWorkflowsChange(workflows => {
       sidebar.setWorkflows(
         workflows.sort((a, b) => (a.name < b.name ? -1 : 1)),

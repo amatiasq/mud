@@ -1,20 +1,27 @@
-import './Terminal.css';
-
 import Convert from 'ansi-to-html';
 
 import { ClientStorage } from '@amatiasq/client-storage';
+import { dom } from '@amatiasq/dom';
 import { emitter } from '@amatiasq/emitter';
-
-import { render } from '../render';
-import html from './Terminal.html';
 
 const convert = new Convert();
 const history = new ClientStorage<string[]>('mud:command-history');
+const MIN_INPUT_SIZE = 3;
 
 export class Terminal {
-  private readonly fragment = render(html);
-  private readonly $log = this.fragment.$('.log');
-  private readonly $input = this.fragment.$<HTMLInputElement>('input');
+  private readonly $log = dom`<span class="log"></span>`;
+  private readonly $input = dom<
+    HTMLInputElement
+  >`<input type="text" size="${MIN_INPUT_SIZE}" autofocus>`;
+  private readonly $el = dom`
+    <main class="terminal">
+      <div class="scroll-bottom">
+        ${this.$log}
+        ${this.$input}
+      </div>
+    </main>
+  `;
+
   private readonly history: string[] = history.get() || [];
   private lastChunk: string = '';
   private histPos = 0;
@@ -31,16 +38,15 @@ export class Terminal {
     this.$input.focus();
   }
 
-  render(parent: HTMLElement) {
-    this.fragment
-      .$('.terminal')
-      .addEventListener('click', () =>
-        setTimeout(() => !userHasSelectedText() && this.$input.focus(), 80),
-      );
+  render() {
+    this.$el.addEventListener('click', () =>
+      setTimeout(() => !userHasSelectedText() && this.$input.focus(), 80),
+    );
 
     this.$input.addEventListener('keydown', this.onKeyDown);
     this.$input.addEventListener('keyup', this.onKeyUp);
-    parent.appendChild(this.fragment);
+
+    return this.$el;
   }
 
   write(data: string) {
@@ -48,7 +54,7 @@ export class Terminal {
     this.lastChunk = content.pop()!;
 
     for (const block of content) {
-      this.$log.before(render(`<p>${asciiToHtml(block)}</p>`));
+      this.$log.before(dom`<p>${{ __html__: asciiToHtml(block) }}</p>`);
     }
 
     this.$log.innerHTML = asciiToHtml(this.lastChunk);
@@ -73,7 +79,7 @@ export class Terminal {
   private onKeyUp(event: KeyboardEvent) {
     const value = this.$input.value;
     this.history[0] = value;
-    this.$input.size = value.length + 3;
+    this.$input.size = value.length + MIN_INPUT_SIZE;
   }
 
   private submit() {

@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "@amatiasq/client-storage": "^2.0.0",
+    "@amatiasq/dom": "^1.0.1",
     "@amatiasq/emitter": "^4.1.1",
     "ansi-to-html": "^0.6.14"
   }

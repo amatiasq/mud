@@ -1,4 +1,5 @@
 import { emitter } from '@amatiasq/emitter';
+import { ContextReplacementPlugin } from 'webpack';
 
 import { initializePlugins, PluginMap } from '../plugins/index';
 import { login } from '../plugins/login';
@@ -18,7 +19,7 @@ export class Mud {
   private readonly runnning = new Set<{
     workflow: Workflow;
     context: Context;
-    promise: Promise<any>;
+    promise: Promise<any> & { abort(): void };
   }>();
 
   private readonly handlers: {
@@ -115,6 +116,7 @@ export class Mud {
     const execution = this.executeWorkflow(workflow, params, options);
 
     this.runnning.add(execution);
+
     execution.promise.finally(() => {
       this.runnning.delete(execution);
       this.emitWorkflowsChange(Object.values(this.workflows));
@@ -126,7 +128,7 @@ export class Mud {
 
   stop(name: string) {
     const target = [...this.runnning].filter(x => x.workflow.name === name);
-    target.forEach(x => x.context.abort());
+    target.forEach(x => x.promise.abort());
     this.emitWorkflowsChange(Object.values(this.workflows));
   }
 
@@ -140,23 +142,29 @@ export class Mud {
     { logs }: InvokeOptions = {},
   ) {
     const context = this.createWorkflowContext(workflow.name);
-
-    if (logs) {
-      context.printLogs;
-    }
+    if (logs) context.printLogs;
 
     const promise = workflow.execute(context, ...params).then(result => {
       context.dispose();
       return result;
     });
 
-    const workflowPromise = Object.assign(promise, {
-      abort() {
-        context.abort();
-      },
+    let abort!: () => void;
+    const contexAbort = context.abort;
+
+    const workflowPromise = new Promise((resolve, reject) => {
+      promise.then(resolve, reject);
+      abort = () => {
+        contexAbort.call(context);
+        reject();
+      };
     });
 
-    return { workflow, context, promise: workflowPromise };
+    return {
+      workflow,
+      promise: Object.assign(workflowPromise, { abort }),
+      context: Object.assign(context, { abort }),
+    };
   }
 
   private createWorkflowContext(name: string): Context {

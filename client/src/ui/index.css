@@ -31,30 +31,200 @@ body {
     'terminal sidebar';
 }
 
+.container:not(.show-controls) .sidebar,
+.container:not(.show-controls) .controls {
+  display: none;
+}
+
+.container.show-controls:not(.top) .controls:empty {
+  border-top: 1px solid var(--border-color);
+}
+
+.container.show-controls.top .controls:empty {
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* TERMINAL */
+
 .terminal {
   grid-area: terminal;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+  display: flex;
+  flex-direction: column-reverse;
+  padding: 0.5em;
 }
+
+.terminal::-webkit-scrollbar {
+  display: none;
+}
+
+.terminal p {
+  margin: 1em 0;
+}
+
+.terminal input {
+  background-color: transparent;
+  border: none;
+  color: white;
+  display: inline-block;
+  font-family: monospace;
+  outline: none;
+}
+
+/* CONTROLS */
+
+.controls {
+  grid-area: controls;
+  background-color: var(--background-color);
+  display: flex;
+  align-items: stretch;
+  height: 30px;
+}
+
+.controls .meters {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  flex: 1;
+}
+
+.controls .meters .meter {
+  flex: 1;
+  --color: white;
+  --value: 100%;
+}
+
+.controls .meter .bar {
+  height: 100%;
+  width: var(--value);
+  background-color: var(--color);
+}
+
+/* SIDEBAR */
 
 .sidebar {
   grid-area: sidebar;
   background-color: var(--background-color);
   border-left: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: stretch;
 }
 
-.controls {
-  grid-area: controls;
-  background-color: var(--background-color);
+.sidebar .title {
+  text-align: center;
+  text-transform: uppercase;
 }
 
-.show-controls:not(.top) .controls {
-  /*border-top: 1px solid var(--border-color);*/
+.sidebar .workflow-list {
+  list-style: none;
+  margin-bottom: 0;
+  padding: 0;
 }
 
-.show-controls.top .controls {
-  border-bottom: 1px solid var(--border-color);
+.sidebar .workflow {
+  border-top: 1px solid var(--border-color);
+}
+.sidebar .workflow.running {
+  color: gray;
 }
 
-.container:not(.show-controls) .sidebar,
-.container:not(.show-controls) .controls {
+.sidebar .workflow header {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+}
+
+.sidebar .workflow .name {
+  flex: 1;
+  margin: 0 0.5rem;
+  font-size: 1.4rem;
+  font-family: monospace;
+  text-transform: uppercase;
+  font-weight: normal;
+}
+
+.sidebar .action {
+  appearance: none;
+  background: none;
+  border: none;
+  outline: none;
+  margin: 0;
+  padding: 3px;
+  color: var(--control-color);
+  font-size: 0.9rem;
+  transition: opacity 0.1s ease-in-out;
+  text-align: center;
+  opacity: 0.8;
+}
+.sidebar .action:hover {
+  opacity: 1;
+}
+.sidebar .action:active {
+  opacity: 0.5;
+}
+
+.sidebar .workflow.running .run,
+.sidebar .workflow:not(.running) .stop,
+.sidebar .workflow:not(.expanded) .triggers {
   display: none;
+}
+
+/* HAMBURGER */
+
+.hamburger {
+  display: inline-block;
+  position: absolute;
+  top: 24px;
+  right: 40px;
+  z-index: 1;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.hamburger input {
+  display: block;
+  width: 40px;
+  height: 32px;
+  position: absolute;
+  top: -7px;
+  left: -5px;
+  cursor: pointer;
+  opacity: 0; /* hide this */
+  z-index: 2; /* and place it over the hamburger */
+  -webkit-touch-callout: none;
+}
+
+.hamburger span {
+  display: block;
+  width: 33px;
+  height: 4px;
+  margin-bottom: 5px;
+  position: relative;
+  background: #cdcdcd;
+  border-radius: 3px;
+  z-index: 1;
+  transform-origin: center right;
+  transition: transform 0.5s cubic-bezier(0.77, 0.2, 0.05, 1),
+    background 0.5s cubic-bezier(0.77, 0.2, 0.05, 1), opacity 0.55s ease;
+}
+
+/*
+ * Transform all the slices of hamburger
+ * into a crossmark.
+ */
+.hamburger input:checked ~ span:nth-of-type(2) {
+  opacity: 0;
+  transform: rotate(0deg) scale(0.2, 0.2);
+}
+
+.hamburger input:checked ~ span:first-of-type {
+  transform: rotate(-45deg) translate(0, -4px);
+}
+
+.hamburger input:checked ~ span:last-of-type {
+  transform: rotate(45deg) translate(0, 4px);
 }

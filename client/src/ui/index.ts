@@ -1,35 +1,35 @@
-import { ClientStorage } from '@amatiasq/client-storage';
 import './index.css';
 
-import { Controls } from './Controls/Controls';
-import { Hamburger } from './Hamburger/Hamburger';
-import html from './index.html';
-import { render } from './render';
-import { Sidebar } from './Sidebar/Sidebar';
-import { Terminal } from './Terminal/Terminal';
+import { ClientStorage } from '@amatiasq/client-storage';
+import { dom } from '@amatiasq/dom';
+
+import { Controls } from './Controls';
+import { Hamburger } from './Hamburger';
+import { Sidebar } from './Sidebar';
+import { Terminal } from './Terminal';
 
 export function renderUserInterface(parent: HTMLElement) {
   const state = initState();
   const data = state.get()!;
 
-  const dom = render(html);
-  const main = dom.$('.container');
-
   const sidebar = new Sidebar();
-  sidebar.render(main);
-
   const controls = new Controls();
-  controls.render(main);
-
   const terminal = new Terminal();
-  terminal.render(main);
-
-  parent.appendChild(dom);
 
   const hamburger = new Hamburger(data.showControls);
-  hamburger.render(parent);
-
   hamburger.onChange(onControlsToggle);
+
+  const main = dom`
+    <div class="container">
+      ${sidebar.render()}
+      ${controls.render()}
+      ${terminal.render()}
+    </div>
+  `;
+
+  parent.appendChild(main);
+  parent.appendChild(hamburger.render());
+
   onControlsToggle(data.showControls);
 
   return { controls, sidebar, terminal };
