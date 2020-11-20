@@ -1,38 +1,26 @@
 - Google "Cloudflare websocket disconnects"
 - No aceptar input hasta login ready
 
+- ~~Research scroll to bottom~~
+- ~~1 Socket => 1 Telnet~~
+- ~~Use new `spells.ts` for spells info~~
+- ~~Tu cuerpo aparece de repente, rodeado por una divina presencia...~~
+- ~~El cadaver de May pasa a convertirse en polvo~~
+- ~~nav.execute() to accept callback to run on every room~~
+- ~~sacrificar cuerpo~~
+- ~~luchar con causar graves~~
+- ~~no conjurar cuando aturdido~~
+
 ### Workflow for skills
 - `skill('cast', 'volar', 'armadillo')`
 - `skill('meditar')`
 - `skill('polimorfar')`
 - Cuando `Falta algo...` run `conjurar 'crear baya'`
 
+- `Un lince moteado cae al suelo... MUERTO.`
+- `Intentas moverte sigilosamente.`
+- `Ninjarkin te da `
 
-- ~~Research scroll to bottom~~
-
-## Tech
-- ~~1 Socket => 1 Telnet~~
-
-## Code
-- ~~Use new `spells.ts` for spells info~~
-
-## Plugins & workflows
-
-### died
-~~Tu cuerpo aparece de repente, rodeado por una divina presencia...~~
-~~El cadaver de May pasa a convertirse en polvo~~
-
-### Navigation
-- ~~nav.execute() to accept callback to run on every room~~
-
-### Kill
-- ~~sacrificar cuerpo~~
-- ~~luchar con causar graves~~
-
-### Cast
-- ~~no conjurar cuando aturdido~~
-
-## Arena
 
 ```
 Lo que hace un total de 3,542,030 monedas de oro.
@@ -228,5 +216,29 @@ El reclutador te cuenta 'Algun maldito ladron ha robado el ornitorrinco de peluc
 El reclutador te cuenta 'Me han llegado rumores de donde se encuentra mi preciado objeto'
 El reclutador te cuenta 'Buscalo en 'Dos puertas... O es.. ?' en el area de El Calabozo de la Muerte, Reino de Earand, no pierdas mas tiempo!'
 El reclutador te cuenta 'Tienes 28 minutos para realizar la mision'
+El reclutador te cuenta 'Que los dioses vayan contigo!'
+```
+
+```
+El reclutador te cuenta 'Gracias valiente May!'
+El reclutador te cuenta 'Hace unos dias, revolviendo el atico de mi casa
+El reclutador te cuenta 'encontre un extranyo mapa'
+El reclutador te cuenta 'Quiero que lo uses para llegar al lugar que indica'
+El reclutador te cuenta 'investiga si esconde algun tesoro'
+El reclutador te cuenta 'El mapa es de La Fortaleza de Mahn-Tor, Reino de Valmorag, no pierdas mas tiempo!'
+El reclutador te cuenta 'Tienes 35 minutos para realizar la mision'
+El reclutador te cuenta 'Que los dioses te bendigan!'
+
+El reclutador te cuenta 'Bien hecho May! sabia que podia contar contigo'
+El reclutador te cuenta 'Aunque la mision no acaba aqui, necesito que hagas algo mas...'
+El reclutador te cuenta 'Un viejo amigo necesita de mi ayuda y no puedo fallarle'
+El reclutador te cuenta 'Se trata de el Sauce Lloron de La Fortaleza de Mahn-Tor, Reino de Valmorag'
+El reclutador te cuenta 'Se encuentra en un serio aprieto y para salir de el'
+El reclutador te cuenta 'necesita nuestra ayuda. Consiguele unos mocasines cubiertos de musgo'
+El reclutador te cuenta 'le sera de gran utilidad'
+El reclutador te cuenta 'Lo lleva un Leshy'
+El reclutador te cuenta 'Podras encontrarlo en Bosque de los Muertos, Reino de Valmorag'
+El reclutador te cuenta 'Te recompensare por ello!'
+El reclutador te cuenta 'Tienes 21 minutos para realizar la mision'
 El reclutador te cuenta 'Que los dioses vayan contigo!'
 ```

@@ -6,12 +6,14 @@ import html from './Controls.html';
 type Observable = (listener: (data: number) => void) => void;
 
 export class Controls {
-  private readonly dom = render(html);
-  private readonly meterTpl = this.dom.$('.meter-template')!;
-  private readonly buttonTpl = this.dom.$('.button-template')!;
+  private readonly fragment = render(html);
+  private readonly el = this.fragment.$('.controls');
+  private readonly meters = this.fragment.$('.meters');
+  private readonly meterTpl = this.fragment.$('.meter-template')!;
+  private readonly buttonTpl = this.fragment.$('.button-template')!;
 
   render(parent: HTMLElement) {
-    parent.appendChild(this.dom);
+    parent.appendChild(this.fragment);
   }
 
   addMeter(color: string, observable: Observable) {
@@ -27,7 +29,7 @@ export class Controls {
       },
     });
 
-    this.dom.appendChild(fragment);
+    this.meters.appendChild(fragment);
   }
 
   addButton(name: string, onClick: () => void) {
@@ -38,6 +40,6 @@ export class Controls {
       },
     });
 
-    this.dom.appendChild(fragment);
+    this.el.appendChild(fragment);
   }
 }

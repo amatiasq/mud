@@ -12,9 +12,9 @@ const convert = new Convert();
 const history = new ClientStorage<string[]>('mud:command-history');
 
 export class Terminal {
-  private readonly dom = render(html);
-  private readonly $log = this.dom.$('.log');
-  private readonly $input = this.dom.$<HTMLInputElement>('input');
+  private readonly fragment = render(html);
+  private readonly $log = this.fragment.$('.log');
+  private readonly $input = this.fragment.$<HTMLInputElement>('input');
   private readonly history: string[] = history.get() || [];
   private lastChunk: string = '';
   private histPos = 0;
@@ -32,7 +32,7 @@ export class Terminal {
   }
 
   render(parent: HTMLElement) {
-    this.dom
+    this.fragment
       .$('.terminal')
       .addEventListener('click', () =>
         setTimeout(() => !userHasSelectedText() && this.$input.focus(), 80),
@@ -40,7 +40,7 @@ export class Terminal {
 
     this.$input.addEventListener('keydown', this.onKeyDown);
     this.$input.addEventListener('keyup', this.onKeyUp);
-    parent.appendChild(this.dom);
+    parent.appendChild(this.fragment);
   }
 
   write(data: string) {

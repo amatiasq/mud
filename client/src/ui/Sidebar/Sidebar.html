@@ -1,14 +1,18 @@
 <aside class="sidebar">
-  <h1>Workflows</h1>
-  <ul class="workflow-list"></ul>
+  <div class="workflows">
+    <h1 class="title">Workflows</h1>
+    <ul class="workflow-list"></ul>
+  </div>
 </aside>
 
 <template class="workflow-template">
   <li class="workflow">
     <header>
-      <i class="expand">V</i>
+      <i class="expand"><!--V--></i>
       <h3 class="name"></h3>
-      <button class="runner"></button>
+
+      <button class="action run"><i class="fas fa-play"></i></button>
+      <button class="action stop"><i class="fas fa-stop"></i></button>
     </header>
 
     <ul class="triggers"></ul>

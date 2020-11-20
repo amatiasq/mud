@@ -40,7 +40,7 @@ export class RemoteTelnet {
 
   private async onMessage(event: MessageEvent<Blob>) {
     const reader = new FileReader();
-    reader.onloadend = x => this.processor(reader.result as string);
+    reader.onloadend = () => this.processor(reader.result as string);
     reader.readAsText(event.data, 'ISO-8859-1');
 
     // .replace(/z<Ex>/g, '')

@@ -154,6 +154,7 @@ const metadata: Partial<Record<SpellName, SpellMetadata>> = {
 
   'fuerza vampirica': {
     success: 'La fuerza de los vampiros fluye por tus venas...',
+    end: 'Tu musculos vuelven lentamente a su estado normal...',
     effect: effectProp('fuerza'),
   },
 

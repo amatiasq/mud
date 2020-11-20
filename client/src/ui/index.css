@@ -1,6 +1,7 @@
 body {
   --background-color: #1c1c1c;
   --border-color: #484848;
+  --control-color: white;
   --color: white;
   background-color: black;
   color: white;
@@ -15,8 +16,16 @@ body {
 }
 
 .container.show-controls {
-  grid-template-rows: 50px auto;
   grid-template-columns: 9fr 3fr;
+}
+
+.container.show-controls:not(.top) {
+  grid-template-areas:
+    'terminal sidebar'
+    'controls sidebar';
+}
+
+.container.show-controls.top {
   grid-template-areas:
     'controls sidebar'
     'terminal sidebar';
@@ -35,6 +44,13 @@ body {
 .controls {
   grid-area: controls;
   background-color: var(--background-color);
+}
+
+.show-controls:not(.top) .controls {
+  /*border-top: 1px solid var(--border-color);*/
+}
+
+.show-controls.top .controls {
   border-bottom: 1px solid var(--border-color);
 }
 

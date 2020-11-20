@@ -22,23 +22,20 @@ export class Sidebar {
     this.workflows.innerHTML = '';
 
     for (const workflow of workflows) {
+      const name = `${workflow.name} ${
+        isRunning(workflow) ? `(${workflow.instancesRunning})` : ''
+      }`;
+
       const fragment = render(this.workflowTpl, {
-        '.name': x => (x.textContent = workflow.name),
+        '.name': x => (x.textContent = name),
         '.workflow': x => x.classList.toggle('running', isRunning(workflow)),
         '.triggers': x => (x.textContent = 'To be implemented...'),
+        '.action.run': x => x.addEventListener('click', () => run(workflow)),
+        '.action.stop': x => x.addEventListener('click', () => stop(workflow)),
         '.expand': x => {
           x.addEventListener('click', () =>
             fragment.$('.workflow').classList.toggle('expanded'),
           );
-        },
-        '.runner': x => {
-          if (isRunning(workflow)) {
-            x.textContent = `stop (${workflow.instancesRunning})`;
-            x.addEventListener('click', () => stop(workflow));
-          } else {
-            x.textContent = 'run';
-            x.addEventListener('click', () => run(workflow));
-          }
         },
       });
 

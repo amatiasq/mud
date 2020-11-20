@@ -1,16 +1,27 @@
 .controls {
   display: flex;
   align-items: stretch;
+  height: 30px;
 }
 
-.controls .meter {
-  width: 100px;
-  margin: 8px;
-  margin-right: 0;
-  border: 1px solid var(--border-color);
+.meters {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  flex: 1;
+}
+
+.meters .meter {
+  flex: 1;
   --color: white;
   --value: 100%;
 }
+
+/*
+.meter + .meter {
+  border-top: 1px solid var(--border-color);
+}
+*/
 
 .controls .meter .bar {
   height: 100%;

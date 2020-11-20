@@ -66,7 +66,7 @@ async function initializeMud(telnet: RemoteTelnet) {
 
   mud.registerHandler('#', command => {
     const [trigger, action, permanent] = command.split(/#/).map(x => x.trim());
-    const name = `#${trigger}#`;
+    const name = `#${trigger}${permanent}`;
     const run = () => onUserInput(action);
 
     if (permanent != null) {
@@ -95,13 +95,13 @@ async function initializeMud(telnet: RemoteTelnet) {
 
   async function connectStats() {
     const hp = emitter<number>();
-    controls.addMeter('red', hp.subscribe);
+    controls.addMeter('#550000', hp.subscribe);
 
     const mana = emitter<number>();
-    controls.addMeter('blue', mana.subscribe);
+    controls.addMeter('#000055', mana.subscribe);
 
     const mv = emitter<number>();
-    controls.addMeter('green', mv.subscribe);
+    controls.addMeter('#005500', mv.subscribe);
 
     mud.getPlugin('prompt').onUpdate(x => {
       hp(x.hp.percent);
@@ -111,11 +111,11 @@ async function initializeMud(telnet: RemoteTelnet) {
   }
 
   function connectButtons() {
-    controls.addButton('Entrenar', () => mud.run('train'));
+    // controls.addButton('Entrenar', () => mud.run('train'));
 
     mud.onWorkflowsChange(workflows => {
       sidebar.setWorkflows(
-        workflows,
+        workflows.sort((a, b) => (a.name < b.name ? -1 : 1)),
         x => mud.isRunning(x.name),
         x => mud.run(x.name),
         async x => mud.stop(x.name),
@@ -142,7 +142,7 @@ function getSocketUri() {
 
 function getParams() {
   const { user, server } = getQueryParams();
-  const [host, port] = server.split(':');
+  const [host, port] = (server || 'mud.balzhur.org:5400').split(':');
   const pass = getPassword(user);
   return { host, port: parseInt(port, 10), user, pass };
 }

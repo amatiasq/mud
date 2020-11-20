@@ -6,6 +6,7 @@
   scrollbar-width: none; /* Firefox */
   display: flex;
   flex-direction: column-reverse;
+  padding: 0.5em;
 }
 
 .terminal::-webkit-scrollbar {
