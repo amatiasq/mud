@@ -220,6 +220,7 @@ const metadata: Partial<Record<SpellName, SpellMetadata>> = {
   'vista distancia': {
     success: 'Tienes una vision reveladora...',
     target: /Los ojos de (?<target>[^\n]+) parecen estar mirando un lugar lejano\.\.\./,
+    end: 'Tu clarividencia te abandona...',
     effect: effectDuration,
   },
 

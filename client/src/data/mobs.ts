@@ -107,7 +107,7 @@ const MOB_GENERIC = {
     'Un asqueroso arquero uruk-hai tensa su arco al verte.',
     'Un superior uruk-hai esta aqui vigilando.',
   ],
-  troll: null,
+  troll: 'Un troll de mas de 3 metros de alto esta destrozando el mobiliario.',
   zombie: 'Un zombie se acerca hacia ti con los brazos extendidos.',
 };
 

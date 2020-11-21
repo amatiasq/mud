@@ -1,5 +1,6 @@
 - Google "Cloudflare websocket disconnects"
 - No aceptar input hasta login ready
+- Crear promise
 
 - ~~Research scroll to bottom~~
 - ~~1 Socket => 1 Telnet~~

@@ -81,7 +81,7 @@ async function initializeMud(telnet: RemoteTelnet) {
   await mud.login(user, pass);
   connectButtons();
 
-  if (name === 'may') {
+  if (user === 'may') {
     registerWorkflows(mud);
     await connectStats();
   }
