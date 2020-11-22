@@ -62,7 +62,7 @@ export async function dope({
     }
   });
 
-  register('dope', async (_: Context, target?: string) => {
+  register('dope', async ({ run }: Context, target?: string) => {
     const list = spells
       .filter(spell => spell.effect && (target ? spell.target : true))
       .map(spell => getSpellGroup(spell.name));
@@ -70,7 +70,7 @@ export async function dope({
     const clean = uniq(list.map(x => x.join('|'))).map(x => x.split('|'));
 
     for (const spell of clean) {
-      await repeatUntilCasted(spell, target);
+      await run('cast', [spell, target]);
     }
   });
 

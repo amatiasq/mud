@@ -1,3 +1,4 @@
+import { Context } from './Context';
 export interface InvokeOptions {
-  logs?: boolean;
+  context?: Context;
 }

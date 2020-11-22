@@ -1,3 +1,4 @@
+import { emitter } from '@amatiasq/emitter';
 import { Pattern } from './triggers/Pattern';
 import { PatternMatchSubscription } from './triggers/PatternMatchSubscription';
 import { PatternOptions } from './triggers/PatternOptions';
@@ -11,7 +12,14 @@ import { WriteOptions } from './WriteOptions';
 export class PluginContext {
   protected readonly subscriptions: PatternMatchSubscription[] = [];
   protected isPrintingLogs = false;
-  private isAborted = false;
+  private _isAborted = false;
+
+  private readonly emitAbort = emitter<void>();
+  readonly onAbort = this.emitAbort.subscribe;
+
+  get isAborted() {
+    return this._isAborted;
+  }
 
   get printLogs() {
     this.isPrintingLogs = true;
@@ -84,11 +92,11 @@ export class PluginContext {
   }
 
   abort() {
-    this.isAborted = true;
+    this._isAborted = true;
+    this.emitAbort();
   }
 
   dispose() {
-    this.log('DISPOSE');
     this.subscriptions.forEach(x => x.unsubscribe());
   }
 

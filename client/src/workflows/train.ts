@@ -64,7 +64,7 @@ export async function train(
       const recover = run('recover');
       await Promise.any([
         recover,
-        when(MOB_ARRIVES).then(() => recover.abort()),
+        when(MOB_ARRIVES).then(() => recover.cancel()),
       ]);
 
       log('READY_TO_FIGHT!!!');

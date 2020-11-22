@@ -1,5 +1,5 @@
+import { CancellablePromise } from './util/CancellablePromise';
 import { emitter } from '@amatiasq/emitter';
-import { ContextReplacementPlugin } from 'webpack';
 
 import { initializePlugins, PluginMap } from '../plugins/index';
 import { login } from '../plugins/login';
@@ -14,13 +14,8 @@ import { WriteOptions } from './WriteOptions';
 
 export class Mud {
   private readonly triggers = new TriggerCollection();
-  private readonly workflows: Record<string, Workflow> = {};
-
-  private readonly runnning = new Set<{
-    workflow: Workflow;
-    context: Context;
-    promise: Promise<any> & { abort(): void };
-  }>();
+  private readonly workflows = new Map<string, Workflow>();
+  private readonly runnning = new Set<CancellablePromise<any>>();
 
   private readonly handlers: {
     id: string;
@@ -92,14 +87,13 @@ export class Mud {
       return context.runForever();
     });
 
-    const execution = this.executeWorkflow(workflow, params, options);
-    return execution.promise;
+    return this.executeWorkflow(workflow, params, options);
   }
 
   workflow<Args extends any[]>(name: string, run: WorkflowFn<Args>) {
     const workflow = new Workflow(name, run);
-    this.workflows[workflow.name] = workflow as Workflow<any>;
-    this.emitWorkflowsChange(Object.values(this.workflows));
+    this.workflows.set(workflow.name, workflow as Workflow);
+    this.workflowsUpdated();
     return workflow;
   }
 
@@ -108,67 +102,61 @@ export class Mud {
   }
 
   run(name: string, params?: any[], options?: InvokeOptions) {
-    if (!(name in this.workflows)) {
-      throw new Error(`Workflow "${name}" is not registered.`);
-    }
-
-    const workflow = this.workflows[name];
+    const workflow = this.getWorkflow(name);
     const execution = this.executeWorkflow(workflow, params, options);
 
     this.runnning.add(execution);
 
-    execution.promise.finally(() => {
+    execution.finally(() => {
       this.runnning.delete(execution);
-      this.emitWorkflowsChange(Object.values(this.workflows));
+      this.workflowsUpdated();
     });
 
-    this.emitWorkflowsChange(Object.values(this.workflows));
-    return execution.promise;
+    this.workflowsUpdated();
+    return execution;
   }
 
   stop(name: string) {
-    const target = [...this.runnning].filter(x => x.workflow.name === name);
-    target.forEach(x => x.promise.abort());
-    this.emitWorkflowsChange(Object.values(this.workflows));
+    const workflow = this.getWorkflow(name);
+    [...this.runnning].filter(x => workflow.owns(x)).forEach(x => x.cancel());
+    this.workflowsUpdated();
   }
 
   isRunning(name: string) {
-    return [...this.runnning].some(x => x.workflow.name === name);
+    const workflow = this.getWorkflow(name);
+    return [...this.runnning].some(x => workflow.owns(x));
+  }
+
+  private getWorkflow(name: string) {
+    if (!this.workflows.has(name)) {
+      throw new Error(`Workflow "${name}" is not registered.`);
+    }
+
+    return this.workflows.get(name)!;
+  }
+
+  private workflowsUpdated() {
+    this.emitWorkflowsChange([...this.workflows.values()]);
   }
 
   private executeWorkflow(
     workflow: Workflow,
     params: any[] = [],
-    { logs }: InvokeOptions = {},
+    { context = this.createRootContext(workflow.name) }: InvokeOptions = {},
   ) {
-    const context = this.createWorkflowContext(workflow.name);
-    if (logs) context.printLogs;
-
-    const promise = workflow.execute(context, ...params).then(result => {
-      context.dispose();
-      return result;
-    });
-
-    let abort!: () => void;
-    const contexAbort = context.abort;
-
-    const workflowPromise = new Promise((resolve, reject) => {
-      promise.then(resolve, reject);
-      abort = () => {
-        contexAbort.call(context);
-        reject();
-      };
-    });
-
-    return {
-      workflow,
-      promise: Object.assign(workflowPromise, { abort }),
-      context: Object.assign(context, { abort }),
-    };
+    return workflow
+      .execute(context, ...params)
+      .finally(() => context.dispose());
   }
 
-  private createWorkflowContext(name: string): Context {
-    return new Context(name, this.username, this.triggers, this.plugins, this);
+  private createRootContext(name: string): Context {
+    return Context.createRoot(
+      name,
+      this.username,
+      () => this.triggers,
+      this.plugins,
+      this,
+    );
   }
 }
 
