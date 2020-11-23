@@ -117,9 +117,7 @@ async function initializeMud(telnet: RemoteTelnet) {
     mud.onWorkflowsChange(workflows => {
       sidebar.setWorkflows(
         workflows.sort((a, b) => (a.name < b.name ? -1 : 1)),
-        x => mud.isRunning(x.name),
-        x => mud.run(x.name),
-        async x => mud.stop(x.name),
+        mud,
       );
     });
   }

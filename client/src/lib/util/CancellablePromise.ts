@@ -92,6 +92,7 @@ export class CancellablePromise<T> extends Promise<T> {
       Result1 | Result2
     >;
     result.onCancel(() => this.cancel());
+    this.onCancel(() => result.cancel());
     return result;
   }
 

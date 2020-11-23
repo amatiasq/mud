@@ -1,4 +1,3 @@
-import { emitter } from '@amatiasq/emitter';
 import { PluginMap } from '../../plugins/index';
 import { Mud } from '../Mud';
 import { PluginContext } from '../PluginContext';
@@ -61,10 +60,10 @@ export class Context extends PluginContext {
     username: string,
     send: Mud['send'],
     private readonly triggersCreator: () => TriggerCollection,
-    private readonly pluginsCreator: (log: Function) => PluginMap,
+    private readonly pluginsCreator: (context: Context) => PluginMap,
   ) {
     super(name, username, triggersCreator(), send);
-    this.plugins = pluginsCreator(this.log.bind(this));
+    this.plugins = pluginsCreator(this);
     bindAll(this, Context as any);
   }
 
@@ -122,15 +121,16 @@ export class Context extends PluginContext {
 }
 
 function pluginsGetterCreator(source: PluginMap) {
-  return (log: Function) => {
+  return (context: Context) => {
     return new Proxy(source, {
       get(target, key: string) {
         if (!(key in target)) {
-          log(`Failed to get plugin ${key}`);
+          context.log(`Failed to get plugin ${key}`);
           throw new Error(`Plugin ${key} is not registered.`);
         }
 
-        log(`Requires plugin ${key}`);
+        context.log(`Requires plugin ${key}`);
+        // TODO: bind plugin to context
         return target[key as keyof typeof target];
       },
     });

@@ -131,6 +131,9 @@ body {
 .sidebar .workflow.running {
   color: gray;
 }
+.sidebar .workflow.disabled .workflow-content {
+  opacity: 0.5;
+}
 
 .sidebar .workflow header {
   display: flex;
@@ -167,6 +170,8 @@ body {
   opacity: 0.5;
 }
 
+.sidebar .action.enable-control:hover i:first-child,
+.sidebar .action.enable-control:not(:hover) i:last-child,
 .sidebar .workflow.running .run,
 .sidebar .workflow:not(.running) .stop,
 .sidebar .workflow:not(.expanded) .triggers {

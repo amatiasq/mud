@@ -15,7 +15,6 @@ import { WriteOptions } from './WriteOptions';
 export class Mud {
   private readonly triggers = new TriggerCollection();
   private readonly workflows = new Map<string, Workflow>();
-  private readonly runnning = new Set<CancellablePromise<any>>();
 
   private readonly handlers: {
     id: string;
@@ -90,10 +89,10 @@ export class Mud {
     return this.executeWorkflow(workflow, params, options);
   }
 
-  workflow<Args extends any[]>(name: string, run: WorkflowFn<Args>) {
+  workflow(name: string, run: WorkflowFn<any[]>) {
     const workflow = new Workflow(name, run);
-    this.workflows.set(workflow.name, workflow as Workflow);
-    this.workflowsUpdated();
+    this.workflows.set(workflow.name, workflow);
+    this.emitWorkflowsChange([...this.workflows.values()]);
     return workflow;
   }
 
@@ -101,30 +100,26 @@ export class Mud {
     return this.executeWorkflow(new Workflow(name, run));
   }
 
-  run(name: string, params?: any[], options?: InvokeOptions) {
-    const workflow = this.getWorkflow(name);
-    const execution = this.executeWorkflow(workflow, params, options);
+  run(
+    workflowOrName: Workflow | string,
+    params?: any[],
+    options?: InvokeOptions,
+  ) {
+    const workflow =
+      typeof workflowOrName === 'string'
+        ? this.getWorkflow(workflowOrName)
+        : workflowOrName;
 
-    this.runnning.add(execution);
-
-    execution.finally(() => {
-      this.runnning.delete(execution);
-      this.workflowsUpdated();
-    });
-
-    this.workflowsUpdated();
-    return execution;
+    return this.executeWorkflow(workflow, params, options);
   }
 
-  stop(name: string) {
-    const workflow = this.getWorkflow(name);
-    [...this.runnning].filter(x => workflow.owns(x)).forEach(x => x.cancel());
-    this.workflowsUpdated();
-  }
+  isRunning(workflowOrName: Workflow | string) {
+    const workflow =
+      typeof workflowOrName === 'string'
+        ? this.getWorkflow(workflowOrName)
+        : workflowOrName;
 
-  isRunning(name: string) {
-    const workflow = this.getWorkflow(name);
-    return [...this.runnning].some(x => workflow.owns(x));
+    return workflow.isRunning;
   }
 
   private getWorkflow(name: string) {
@@ -133,10 +128,6 @@ export class Mud {
     }
 
     return this.workflows.get(name)!;
-  }
-
-  private workflowsUpdated() {
-    this.emitWorkflowsChange([...this.workflows.values()]);
   }
 
   private executeWorkflow(

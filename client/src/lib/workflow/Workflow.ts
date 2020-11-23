@@ -1,10 +1,15 @@
+import { emitter } from '@amatiasq/emitter';
 import { CancellablePromise } from '../util/CancellablePromise';
 import { Context } from './Context';
 import { WorkflowFn } from './WorkflowFn';
 
 export class Workflow<Result = any, Args extends any[] = any[]> {
-  private executionCount = 0;
   private executions = new Set<CancellablePromise<Result>>();
+  private executionCount = 0;
+  private _isEnabled = true;
+
+  private readonly emitChange = emitter<this>();
+  readonly onChange = this.emitChange.subscribe;
 
   get isRunning() {
     return Boolean(this.executions.size);
@@ -18,6 +23,10 @@ export class Workflow<Result = any, Args extends any[] = any[]> {
     return this.executionCount;
   }
 
+  get isEnabled() {
+    return this._isEnabled;
+  }
+
   constructor(readonly name: string, private readonly run: WorkflowFn<Args>) {}
 
   owns(execution: CancellablePromise<any>) {
@@ -25,6 +34,10 @@ export class Workflow<Result = any, Args extends any[] = any[]> {
   }
 
   execute(context: Context, ...args: Args) {
+    if (!this._isEnabled) {
+      throw new Error(`Workflow "${this.name}" is disabled`);
+    }
+
     const iteration = this.executionCount++;
 
     context.log(`[Exe(${iteration})]`, ...args);
@@ -36,20 +49,40 @@ export class Workflow<Result = any, Args extends any[] = any[]> {
       },
     );
 
-    promise.then(
-      result => {
-        context.log(`[Res(${iteration})]`, result);
-        return result;
-      },
-      error => {
-        context.log(`[ERR(${iteration})]`, error);
-        throw error;
-      },
-    );
-
     this.executions.add(promise);
-    promise.finally(() => this.executions.delete(promise));
 
-    return promise;
+    const result = promise
+      .then(
+        result => {
+          context.log(`[Res(${iteration})]`, result);
+          return result;
+        },
+        error => {
+          context.log(`[ERR(${iteration})]`, error);
+          throw error;
+        },
+      )
+      .finally(() => {
+        this.executions.delete(promise);
+        this.emitChange(this);
+      });
+
+    this.emitChange(this);
+    return result;
+  }
+
+  stop() {
+    this.executions.forEach(x => x.cancel());
+    this.emitChange(this);
+  }
+
+  enable() {
+    this._isEnabled = true;
+    this.emitChange(this);
+  }
+
+  disable() {
+    this._isEnabled = false;
+    this.emitChange(this);
   }
 }
