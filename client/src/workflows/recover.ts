@@ -1,6 +1,6 @@
+import { SPELLS_BY_TYPE } from '../data/spells';
+import { Context } from '../lib';
 import { wait } from '../lib/util/wait';
-import { SPELLS_BY_TYPE } from './../data/spells';
-import { Context } from './../lib/workflow/Context';
 
 export async function recover({ run, plugins: { skills, prompt } }: Context) {
   const heal = SPELLS_BY_TYPE.heal;

@@ -1,4 +1,4 @@
-import { PluginContext } from '../lib/PluginContext';
+import { BasicContext } from '../lib/context/BasicContextCreator';
 import { concatRegexes } from '../lib/util/concatRegexes';
 import { int, toInt } from '../lib/util/int';
 
@@ -85,7 +85,7 @@ const STATE_DETECTOR = (() => {
   */
 })();
 
-export function statsPlugin({ when, write }: PluginContext) {
+export function statsPlugin({ when, write }: BasicContext) {
   let isInitiated = false;
   let name = '';
   let principal = false;

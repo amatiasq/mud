@@ -5,8 +5,8 @@ import {
   UNWEAR,
   WEAR,
 } from '../data/items';
+import { Context } from '../lib';
 import { concatRegexes } from '../lib/util/concatRegexes';
-import { Context } from '../lib/workflow/Context';
 
 export async function wear({ run, when, write }: Context, ...args: string[]) {
   const items = args.length ? args : ITEM_SUSTANTIVES;

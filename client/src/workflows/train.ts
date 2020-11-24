@@ -8,7 +8,7 @@ import {
   MOB_DIES,
   MOB_LEAVES,
 } from '../data/mobs';
-import { Context } from '../lib/workflow/Context';
+import { Context } from '../lib';
 import { KillResult } from './kill';
 
 export async function train(

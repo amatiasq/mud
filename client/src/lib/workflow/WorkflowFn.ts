@@ -1,7 +1,7 @@
+import { WorkflowContext } from '../context/WorkflowContextCreator';
 import { PatternMatchSubscription } from '../triggers/PatternMatchSubscription';
-import { Context } from './Context';
 
 export type WorkflowFn<Args extends any[]> = (
-  context: Context,
+  context: WorkflowContext,
   ...args: Args
 ) => Promise<any> | PatternMatchSubscription | void;

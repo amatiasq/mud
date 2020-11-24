@@ -32,13 +32,11 @@ export class Sidebar {
     this.refresh = () => this.setWorkflows(workflows, mud);
 
     for (const workflow of workflows) {
-      this.$workflows.appendChild(
-        this.renderWorkflow(workflow, () => mud.run(workflow)),
-      );
+      this.$workflows.appendChild(this.renderWorkflow(workflow));
     }
   }
 
-  private renderWorkflow(workflow: Workflow, run: () => void) {
+  private renderWorkflow(workflow: Workflow) {
     const { isEnabled, isRunning, instancesRunning } = workflow;
     const instances = instancesRunning > 1 ? ` (${instancesRunning})` : '';
     const name = `${workflow.name}${instances}`;
@@ -61,7 +59,7 @@ export class Sidebar {
           <header>
             ${expand}
             <h3 class="name">${name}</h3>
-            ${this.getWorkflowActions(workflow, run)}
+            ${this.getWorkflowActions(workflow)}
           </header>
 
           <!--
@@ -76,7 +74,7 @@ export class Sidebar {
     return el;
   }
 
-  private getWorkflowActions(workflow: Workflow, run: () => void) {
+  private getWorkflowActions(workflow: Workflow) {
     const { isEnabled, isRunning } = workflow;
 
     const enabler = isEnabled
@@ -91,7 +89,7 @@ export class Sidebar {
       actions.push(
         isRunning
           ? button(icon('stop'), () => workflow.stop())
-          : button(icon('play'), run),
+          : button(icon('play'), () => workflow.execute()),
       );
     }
 

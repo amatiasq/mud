@@ -1,7 +1,7 @@
 import { emitter } from '@amatiasq/emitter';
-import { Realm } from '../data/areas';
 
-import { PluginContext } from '../lib/PluginContext';
+import { Realm } from '../data/areas';
+import { BasicContext } from '../lib/context/BasicContextCreator';
 import { PatternPromise } from '../lib/triggers/PatternPromise';
 import { PROMPT_DETECTOR } from './promptPlugin';
 
@@ -26,7 +26,7 @@ const recalls = [
   /Templo de las Tinieblas\s+/,
 ];
 
-export function navigationPlugin({ log, when, write }: PluginContext) {
+export function navigationPlugin({ log, when, write }: BasicContext) {
   let isNavigating = false;
   let landingAtRecall = false;
   let isAtRecall = false;

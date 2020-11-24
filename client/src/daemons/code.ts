@@ -1,5 +1,6 @@
 import { ClientStorage } from '@amatiasq/client-storage';
-import { Context } from '../lib/workflow/Context';
+
+import { Context } from '../lib';
 
 const storage = new ClientStorage<Record<string, number>>('things-in-rooms');
 

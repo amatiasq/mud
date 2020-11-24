@@ -1,6 +1,6 @@
 import { getItemSustantive, ItemName, UNWEAR } from '../data/items';
+import { Context } from '../lib';
 import { wait } from '../lib/util/wait';
-import { Context } from '../lib/workflow/Context';
 
 export async function repair({
   when,

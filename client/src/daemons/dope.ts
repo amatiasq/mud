@@ -1,7 +1,7 @@
 import { ClientStorage } from '@amatiasq/client-storage';
 
 import { getSpells, Spell, SpellName, SPELLS_BY_TYPE } from '../data/spells';
-import { Context } from '../lib/workflow/Context';
+import { Context } from '../lib';
 import { uniq } from '../util/uniq';
 
 const memory = new ClientStorage<(string | string[])[]>('dope:casting');

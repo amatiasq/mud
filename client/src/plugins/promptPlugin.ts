@@ -1,6 +1,6 @@
 import { emitter } from '@amatiasq/emitter';
+import { BasicContext } from '../lib/context/BasicContextCreator';
 
-import { PluginContext } from '../lib/PluginContext';
 import { concatRegexes } from '../lib/util/concatRegexes';
 import { int, toInt } from '../lib/util/int';
 
@@ -45,7 +45,7 @@ class Stat {
   }
 }
 
-export async function promptPlugin({ when, write }: PluginContext) {
+export async function promptPlugin({ when, write }: BasicContext) {
   let isInvisible = false;
 
   const stats = {

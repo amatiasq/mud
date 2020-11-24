@@ -1,4 +1,4 @@
-import { Context } from './../lib/workflow/Context';
+import { Context } from '../lib';
 
 export async function rest({ when, write }: Context) {
   when(

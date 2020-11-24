@@ -1,6 +1,6 @@
 import { Casteable } from '../data/spells';
+import { Context } from '../lib';
 import { wait } from '../lib/util/wait';
-import { Context } from '../lib/workflow/Context';
 
 export async function cast(
   { plugins: { prompt, skills } }: Context,

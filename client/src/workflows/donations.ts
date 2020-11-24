@@ -1,5 +1,5 @@
 import { ITEM_SUSTANTIVES } from '../data/items';
-import { Context } from './../lib/workflow/Context';
+import { Context } from '../lib';
 
 const rooms = [
   { from: 31, to: 40, path: '4wn' },

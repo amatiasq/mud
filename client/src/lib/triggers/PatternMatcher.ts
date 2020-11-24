@@ -7,6 +7,11 @@ export class PatternMatcher {
   private readonly patterns: SinglePattern[];
   private readonly buffer;
   readonly length;
+  private _isEnabled = true;
+
+  get isEnabled() {
+    return this._isEnabled;
+  }
 
   constructor(
     pattern: Pattern,
@@ -21,15 +26,24 @@ export class PatternMatcher {
     this.buffer = buffer(this.length);
   }
 
+  enable() {
+    this._isEnabled = true;
+  }
+
+  disable() {
+    this._isEnabled = false;
+    this.buffer.clear();
+  }
+
   process(text: string) {
+    if (!this._isEnabled) return;
+
     const value = this.buffer(text);
     const matching = this.patterns.filter(pattern =>
       this.testPattern(value, pattern),
     );
 
-    if (!matching.length) {
-      return;
-    }
+    if (!matching.length) return;
 
     this.buffer.clear();
     const result = new PatternResult(matching, value);

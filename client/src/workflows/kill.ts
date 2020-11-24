@@ -1,8 +1,7 @@
-import { Casteable } from './../data/spells';
 import { ATTACK_RECEIVED, getMobIn } from '../data/mobs';
-import { SPELLS_BY_TYPE } from '../data/spells';
+import { Casteable, SPELLS_BY_TYPE } from '../data/spells';
+import { Context } from '../lib';
 import { concatRegexes } from '../lib/util/concatRegexes';
-import { Context } from '../lib/workflow/Context';
 import { wait } from '../lib/util/wait';
 
 export type KillResult = 'win' | 'flee' | 'missing';

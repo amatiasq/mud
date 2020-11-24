@@ -7,7 +7,7 @@ import {
   SPELL_FAILED,
   SPELL_NOT_POSSIBLE,
 } from '../data/spells';
-import { PluginContext } from '../lib/PluginContext';
+import { BasicContext } from '../lib/context/BasicContextCreator';
 import { concatRegexes } from '../lib/util/concatRegexes';
 import { singleExecution } from '../lib/util/singleExecution';
 
@@ -40,7 +40,7 @@ const SKILLS_DETECTOR = concatRegexes(
   /Tienes \d+ entrenamientos.\n/,
 );
 
-export function skillsPlugin({ when, write }: PluginContext) {
+export function skillsPlugin({ when, write }: BasicContext) {
   let isInitialized = false;
   let isSpellRunning = false;
   let isMeditating = false;

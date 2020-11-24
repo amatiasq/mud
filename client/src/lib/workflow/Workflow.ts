@@ -1,6 +1,6 @@
 import { emitter } from '@amatiasq/emitter';
+import { WorkflowContextCreator } from '../context/WorkflowContextCreator';
 import { CancellablePromise } from '../util/CancellablePromise';
-import { Context } from './Context';
 import { WorkflowFn } from './WorkflowFn';
 
 export class Workflow<Result = any, Args extends any[] = any[]> {
@@ -27,18 +27,23 @@ export class Workflow<Result = any, Args extends any[] = any[]> {
     return this._isEnabled;
   }
 
-  constructor(readonly name: string, private readonly run: WorkflowFn<Args>) {}
+  constructor(
+    readonly name: string,
+    private readonly run: WorkflowFn<Args>,
+    private readonly contextCreator: WorkflowContextCreator,
+  ) {}
 
   owns(execution: CancellablePromise<any>) {
     return this.executions.has(execution);
   }
 
-  execute(context: Context, ...args: Args) {
+  execute(...args: Args) {
     if (!this._isEnabled) {
       throw new Error(`Workflow "${this.name}" is disabled`);
     }
 
     const iteration = this.executionCount++;
+    const context = this.contextCreator.createInstance(this.name);
 
     context.log(`[Exe(${iteration})]`, ...args);
 
@@ -64,6 +69,7 @@ export class Workflow<Result = any, Args extends any[] = any[]> {
       )
       .finally(() => {
         this.executions.delete(promise);
+        this.contextCreator.dispose(context);
         this.emitChange(this);
       });
 

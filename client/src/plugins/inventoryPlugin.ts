@@ -1,10 +1,10 @@
+import { BasicContext } from '../lib/context/BasicContextCreator';
 import {
   concatRegexes,
   concatRegexesUnescaped,
-} from './../lib/util/concatRegexes';
-import { PluginContext } from '../lib/PluginContext';
-import { singleExecution } from '../lib/util/singleExecution';
+} from '../lib/util/concatRegexes';
 import { int, toInt } from '../lib/util/int';
+import { singleExecution } from '../lib/util/singleExecution';
 
 interface ItemData {
   amount: number;
@@ -26,7 +26,7 @@ const ITEM_MATCHER = concatRegexes(
   /$/,
 );
 
-export function inventoryPlugin({ when, write }: PluginContext) {
+export function inventoryPlugin({ when, write }: BasicContext) {
   let isInitialized = false;
   let items: ItemList = {};
 

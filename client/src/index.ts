@@ -126,10 +126,13 @@ async function initializeMud(telnet: RemoteTelnet) {
     const cmd = `"${name}" with "${args.join(' ')}"`;
     terminal.write(`-> Running ${cmd}\n`);
 
-    mud.run(name, args).then(
-      x => terminal.write(`\n<- Done ${cmd}: ${x}\n`),
-      x => terminal.write(`\n\n<! FAILED ${cmd}: ${x.message}\n\n`),
-    );
+    mud
+      .getWorkflow(name)
+      .execute(...args)
+      .then(
+        x => terminal.write(`\n<- Done ${cmd}: ${x}\n`),
+        x => terminal.write(`\n\n<! FAILED ${cmd}: ${x.message}\n\n`),
+      );
   }
 }
 

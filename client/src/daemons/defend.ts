@@ -1,6 +1,6 @@
 import { ATTACK_RECEIVED, getMobIn } from '../data/mobs';
 import { Casteable, SPELLS_BY_TYPE } from '../data/spells';
-import { Context } from '../lib/workflow/Context';
+import { Context } from '../lib';
 
 export async function defend({
   isRunning,

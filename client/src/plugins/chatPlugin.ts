@@ -1,6 +1,6 @@
 import { ClientStorage } from '@amatiasq/client-storage';
 
-import { PluginContext } from '../lib/PluginContext';
+import { BasicContext } from '../lib/context/BasicContextCreator';
 import { PatternResult } from '../lib/triggers/PatternResult';
 import { datetime, DateTime } from '../lib/util/dateTime';
 import { requestNotificationPermission } from '../lib/util/requestNotificationPermission';
@@ -28,7 +28,7 @@ const receive = (log: History) => ({
 const sent = (log: History) => ({ groups: { name, message } }: PatternResult) =>
   addMessage(log, { to: name, message });
 
-export function chatPlugin({ when, write }: PluginContext) {
+export function chatPlugin({ when, write }: BasicContext) {
   // const say = new ClientStorage<Record<string, Message[]>>('chat:say');
   const order = new ClientStorage<Message[]>('chat:order', version);
   const tell = new ClientStorage<Message[]>('chat:tell', version);

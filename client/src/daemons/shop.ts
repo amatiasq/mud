@@ -1,5 +1,5 @@
 import { Realm } from '../data/areas';
-import { Context } from './../lib/workflow/Context';
+import { Context } from '../lib';
 
 interface Location {
   path: Partial<Record<Realm, string>>;

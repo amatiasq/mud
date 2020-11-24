@@ -1,7 +1,7 @@
-import { PluginContext } from '../lib/PluginContext';
+import { BasicContext } from '../lib/context/BasicContextCreator';
 
 export async function login(
-  { when, write, log }: PluginContext,
+  { when, write, log }: BasicContext,
   username: string,
   password: string,
   initialize: () => Promise<any>,

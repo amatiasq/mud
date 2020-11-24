@@ -1,4 +1,4 @@
-import { PluginContext } from '../lib/PluginContext';
+import { BasicContext } from '../lib/context/BasicContextCreator';
 import { chatPlugin } from './chatPlugin';
 import { inventoryPlugin } from './inventoryPlugin';
 import { navigationPlugin } from './navigationPlugin';
@@ -25,7 +25,7 @@ export type PluginMap = {
 };
 
 export async function initializePlugins(
-  context: (name: string) => PluginContext,
+  context: (name: string) => BasicContext,
 ) {
   const promises = Object.entries(plugins).map(async ([name, plugin]) => [
     name,

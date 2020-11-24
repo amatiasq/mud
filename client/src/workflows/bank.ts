@@ -1,6 +1,6 @@
+import { Context } from '../lib';
 import { concatRegexes } from '../lib/util/concatRegexes';
 import { int, toInt } from '../lib/util/int';
-import { Context } from '../lib/workflow/Context';
 
 export async function bank(
   { when, write, plugins: { navigation } }: Context,

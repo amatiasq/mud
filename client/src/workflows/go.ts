@@ -1,5 +1,5 @@
 import { getAreaMetadata, Realm } from '../data/areas';
-import { Context } from '../lib/workflow/Context';
+import { Context } from '../lib';
 
 const PATH = /^r?((?:x|\d+)?[nsewudohjkl])+$/;
 const TRAVEL = 'un pergamino de viajar';
