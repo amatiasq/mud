@@ -16,7 +16,7 @@ body {
 }
 
 .container.show-controls {
-  grid-template-columns: 9fr 3fr;
+  grid-template-columns: 1fr 1fr;
 }
 
 .container.show-controls:not(.top) {
@@ -47,6 +47,7 @@ body {
 /* TERMINAL */
 
 .terminal {
+  min-width: 700px;
   grid-area: terminal;
   overflow-x: hidden;
   overflow-y: auto;
@@ -112,6 +113,7 @@ body {
   display: flex;
   flex-direction: column-reverse;
   align-items: stretch;
+  overflow-y: auto;
 }
 
 .sidebar .title {
@@ -170,12 +172,45 @@ body {
   opacity: 0.5;
 }
 
+.sidebar .workflow .triggers:not(:empty) {
+  max-height: 25vh;
+  overflow-y: auto;
+  list-style: square;
+  border-top: 1px solid var(--border-color);
+}
+
+.sidebar .workflow .trigger {
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar .workflow .pattern {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .sidebar .action.enable-control:hover i:first-child,
 .sidebar .action.enable-control:not(:hover) i:last-child,
 .sidebar .workflow.running .run,
 .sidebar .workflow:not(.running) .stop,
 .sidebar .workflow:not(.expanded) .triggers {
   display: none;
+}
+
+@keyframes highlight {
+  0% {
+    background-color: transparent;
+    color: inherit;
+  }
+  10% {
+    background-color: #aa0000;
+    color: #ffffff;
+  }
+  100% {
+    background-color: transparent;
+    color: inherit;
+  }
 }
 
 /* HAMBURGER */

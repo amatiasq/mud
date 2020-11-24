@@ -17,6 +17,12 @@ export type PromiseOnRejected<Reason, Result> =
   | undefined
   | null;
 
+export type CancellableExecutor<T> = (
+  resolve: PromiseResolver<T>,
+  reject: PromiseRejector<any>,
+  onCancel: (listener: () => void) => void,
+) => void;
+
 // Tell typescript how this works now
 export interface CancellablePromise<T> {
   // then<Result1 = T, Result2 = never>(
@@ -51,13 +57,7 @@ export class CancellablePromise<T> extends Promise<T> {
     return this.state === 'rejected';
   }
 
-  constructor(
-    executor: (
-      resolve: PromiseResolver<T>,
-      reject: PromiseRejector<any>,
-      onCancel: (listener: () => void) => void,
-    ) => void,
-  ) {
+  constructor(executor: CancellableExecutor<T>) {
     const emitCancel = emitter<void>();
     const onCancel = emitCancel.subscribe;
 

@@ -1,3 +1,4 @@
+import { PatternMatcher } from './../lib/triggers/PatternMatcher';
 import { dom } from '@amatiasq/dom';
 import { Mud } from '../lib/Mud';
 
@@ -14,10 +15,12 @@ export class Sidebar {
     </aside>
   `;
 
-  private refresh = () => {};
   private readonly subscriptions = new Set<Function>();
+  // private readonly expanded = new Set<Workflow>();
 
   render() {
+    this.renderWorkflow = this.renderWorkflow.bind(this);
+    this.renderTriggers = this.renderTriggers.bind(this);
     return this.$el;
   }
 
@@ -29,10 +32,16 @@ export class Sidebar {
 
   setWorkflows(workflows: Workflow[], mud: Mud) {
     this.clear();
-    this.refresh = () => this.setWorkflows(workflows, mud);
 
     for (const workflow of workflows) {
-      this.$workflows.appendChild(this.renderWorkflow(workflow));
+      const el = this.keepUpdated(
+        workflow,
+        'onChange',
+        workflow,
+        this.renderWorkflow,
+      );
+
+      this.$workflows.appendChild(el);
     }
   }
 
@@ -41,32 +50,40 @@ export class Sidebar {
     const instances = instancesRunning > 1 ? ` (${instancesRunning})` : '';
     const name = `${workflow.name}${instances}`;
 
-    this.subscriptions.add(workflow.onChange(this.refresh));
-
-    const expand = button(icon('caret-right'), () =>
-      el.classList.toggle('expaneded'),
-    );
+    // const expand = button(icon('caret-right'), () => {
+    //   if (this.expanded.has(workflow)) {
+    //     this.expanded.delete(workflow);
+    //     el.classList.remove('expanded');
+    //   } else {
+    //     this.expanded.add(workflow);
+    //     el.classList.add('expanded');
+    //   }
+    // });
 
     const classes = [
       'workflow',
       isRunning ? 'running' : 'idle',
       isEnabled ? 'enabled' : 'disabled',
+      'expanded',
+      // this.expanded.has(workflow) ? 'expanded' : null,
     ];
+
+    const triggers = this.keepUpdated(
+      workflow,
+      'onTriggersChange',
+      [],
+      this.renderTriggers,
+    );
 
     const el = dom`
       <li class="${classes}">
         <div class="workflow-content">
           <header>
-            ${expand}
             <h3 class="name">${name}</h3>
             ${this.getWorkflowActions(workflow)}
           </header>
 
-          <!--
-          <ul class="triggers">
-            To be implemented...
-          </ul>
-          -->
+          ${triggers}
         </div>
       </li>
     `;
@@ -94,6 +111,44 @@ export class Sidebar {
     }
 
     return actions;
+  }
+
+  private renderTriggers(triggers: PatternMatcher[]) {
+    const items = triggers.map(matcher => {
+      const patterns = matcher.patterns.map(
+        x => dom`<span class="pattern">${x.toString()}</span>`,
+      );
+
+      const result = dom`<li class="trigger">${patterns}</li>`;
+      matcher.onMatch(() => (result.style.animation = 'highlight 1s linear'));
+
+      result.addEventListener(
+        'animationend',
+        () => (result.style.animation = ''),
+      );
+
+      return result;
+    });
+    return dom`<ul class="triggers">${items}</ul>`;
+  }
+
+  private keepUpdated<T>(
+    workflow: Workflow,
+    event: 'onChange' | 'onTriggersChange',
+    initial: T,
+    renderer: (value: T) => HTMLElement,
+  ) {
+    let el = renderer(initial);
+
+    this.subscriptions.add(
+      workflow[event]((event: any) => {
+        const updated = renderer(event);
+        el.replaceWith(updated);
+        el = updated;
+      }),
+    );
+
+    return el;
   }
 }
 

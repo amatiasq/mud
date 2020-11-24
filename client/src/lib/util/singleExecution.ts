@@ -1,5 +1,5 @@
-export function singleExecution<Return>(fn: () => Promise<Return>) {
-  let running: Promise<Return> | null = null;
+export function singleExecution<Return>(fn: () => PromiseLike<Return>) {
+  let running: PromiseLike<Return> | null = null;
 
   return () => {
     if (running) {

@@ -1,77 +1,55 @@
+import { emitter } from '@amatiasq/emitter';
+import { ChildTriggerCollection } from './ChildTriggerCollection';
 import { Pattern } from './Pattern';
 import { PatternMatcher } from './PatternMatcher';
-import { PatternMatchSubscription } from './PatternMatchSubscription';
 import { PatternOptions } from './PatternOptions';
-import { PatternPromise } from './PatternPromise';
 import { PatternResult } from './PatternResult';
+import { PatternSubscription } from './PatternSubscription';
 import { TriggerCollection } from './TriggerCollection';
 
 type Handler = (result: PatternResult) => void;
 
 export class RootTriggerCollection implements TriggerCollection {
-  // private readonly children: ChildTriggerCollection[] = [];
+  private readonly children: ChildTriggerCollection[] = [];
   private readonly patterns = new Set<PatternMatcher>();
   private readonly queue: string[] = [];
   private isProcessing = false;
 
-  // createChild() {
-  //   const child = new ChildTriggerCollection(this.add.bind(this));
-  //   this.children.push(child);
-  //   return child;
-  // }
+  private readonly emitChange = emitter<PatternMatcher[]>();
+  readonly onChange = this.emitChange.subscribe;
+
+  createChild() {
+    const child = new ChildTriggerCollection(this.add);
+    this.children.push(child);
+    return child;
+  }
+
   add(
     pattern: Pattern,
     handler?: Handler | PatternOptions,
     options?: PatternOptions,
-  ): any {
-    if (arguments.length === 1) return this.once(pattern);
+  ) {
+    if (arguments.length === 2 && typeof handler !== 'function') {
+      options = handler;
+      handler = undefined;
+    }
 
-    if (arguments.length === 3)
-      return this.watch(pattern, handler as Handler, options);
+    return new PatternSubscription(match => {
+      const matcher = new PatternMatcher(pattern, options);
 
-    if (typeof handler === 'function')
-      return this.watch(pattern, handler as Handler);
+      matcher.onMatch(match);
 
-    return this.once(pattern, handler as PatternOptions);
-  }
-
-  private watch(pattern: Pattern, handler: Handler, options?: PatternOptions) {
-    const entry = new PatternMatcher(pattern, x => handler(x), options);
-
-    this.patterns.add(entry);
-
-    const unsubscribe = () => this.patterns.delete(entry);
-
-    const once = () =>
-      new PatternPromise(resolve => {
-        const original = handler;
-
-        handler = async x => {
-          unsubscribe();
-
-          if (original) {
-            if (options && options.await) {
-              await original(x);
-            } else {
-              original(x);
-            }
-          }
-
-          resolve(x);
-        };
-      });
-
-    return { unsubscribe, once } as PatternMatchSubscription;
-  }
-
-  private once(pattern: Pattern, options?: PatternOptions) {
-    return new PatternPromise(resolve => {
-      const sub = this.add(pattern, handler, options);
-
-      function handler(result: PatternResult) {
-        sub.unsubscribe();
-        resolve(result);
+      if (typeof handler === 'function') {
+        matcher.onMatch(handler);
       }
+
+      this.patterns.add(matcher);
+      this.emitChange([...this.patterns]);
+
+      return () => {
+        this.patterns.delete(matcher);
+        this.emitChange([...this.patterns]);
+      };
     });
   }
 
@@ -91,6 +69,10 @@ export class RootTriggerCollection implements TriggerCollection {
       // console.log('PROCESS', line);
       for (const pattern of this.patterns) {
         await pattern.process(line);
+      }
+
+      for (const child of this.children) {
+        await child.process(line);
       }
     }
 

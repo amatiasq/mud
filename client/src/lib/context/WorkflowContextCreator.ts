@@ -1,7 +1,7 @@
-import { TriggerCollection } from './../triggers/TriggerCollection';
-import { CancellablePromise } from './../util/CancellablePromise';
 import { PluginMap } from '../../plugins';
-import { Mud } from './../Mud';
+import { Mud } from '../Mud';
+import { TriggerCollection } from '../triggers/TriggerCollection';
+import { CancellablePromise } from '../util/CancellablePromise';
 import { BasicContext, BasicContextCreator } from './BasicContextCreator';
 
 export type WorkflowContext = ReturnType<

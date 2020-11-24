@@ -1,5 +1,6 @@
 import { emitter } from '@amatiasq/emitter';
 import { WorkflowContextCreator } from '../context/WorkflowContextCreator';
+import { PatternMatcher } from '../triggers/PatternMatcher';
 import { CancellablePromise } from '../util/CancellablePromise';
 import { WorkflowFn } from './WorkflowFn';
 
@@ -32,6 +33,10 @@ export class Workflow<Result = any, Args extends any[] = any[]> {
     private readonly run: WorkflowFn<Args>,
     private readonly contextCreator: WorkflowContextCreator,
   ) {}
+
+  onTriggersChange(listener: (list: PatternMatcher[]) => void) {
+    return this.contextCreator.onTriggersChange(listener);
+  }
 
   owns(execution: CancellablePromise<any>) {
     return this.executions.has(execution);

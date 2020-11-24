@@ -1,11 +1,12 @@
+import { emitter } from '@amatiasq/emitter';
 import { trimEnd } from '../util/trimEnd';
 import { Pattern, SinglePattern } from './Pattern';
 import { PatternOptions } from './PatternOptions';
 import { PatternResult } from './PatternResult';
 
 export class PatternMatcher {
-  private readonly patterns: SinglePattern[];
   private readonly buffer;
+  readonly patterns: SinglePattern[];
   readonly length;
   private _isEnabled = true;
 
@@ -13,11 +14,10 @@ export class PatternMatcher {
     return this._isEnabled;
   }
 
-  constructor(
-    pattern: Pattern,
-    private readonly handler: (result: PatternResult) => void,
-    private readonly options: PatternOptions = {},
-  ) {
+  private readonly emitMatch = emitter<PatternResult>();
+  readonly onMatch = this.emitMatch.subscribe;
+
+  constructor(pattern: Pattern, private readonly options: PatternOptions = {}) {
     this.patterns = Array.isArray(pattern) ? pattern : [pattern];
     this.length =
       options.captureLength ||
@@ -47,8 +47,12 @@ export class PatternMatcher {
 
     this.buffer.clear();
     const result = new PatternResult(matching, value);
-    const output = this.handler(result);
-    return this.options.await ? output : null;
+
+    this.emitMatch(result);
+
+    if (this.options.blockProcessingUntil) {
+      return this.options.blockProcessingUntil();
+    }
   }
 
   private testPattern(text: string, pattern: SinglePattern) {

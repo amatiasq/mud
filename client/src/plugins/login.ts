@@ -14,17 +14,14 @@ export async function login(
   write(password, { password: true });
   log(`Logged in as ${username}`);
 
+  when('Pulsa [ENTER]', () => write(''));
+
   await Promise.any([
-    (async () => {
-      await when('Reconectando.');
-      await initialize();
-    })(),
-    (async () => {
-      await when('Pulsa [ENTER]');
-      write('');
-      await when('Pulsa [ENTER]');
-      write('');
-      await when('Bienvenido a Balzhur...', initialize, { await: true }).once();
-    })(),
+    when('Reconectando.', {
+      blockProcessingUntil: initialize,
+    }),
+    when('Bienvenido a Balzhur...', {
+      blockProcessingUntil: initialize,
+    }),
   ]);
 }

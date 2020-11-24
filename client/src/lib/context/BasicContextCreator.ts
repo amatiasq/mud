@@ -1,13 +1,14 @@
-import { TriggerCollection } from './../triggers/TriggerCollection';
 import { emitter } from '@amatiasq/emitter';
-import { PatternMatchSubscription as Subscription } from '../triggers/PatternMatchSubscription';
-import { Mud } from './../Mud';
+
+import { Mud } from '../Mud';
+import { Pattern } from '../triggers/Pattern';
+import { PatternMatcher } from '../triggers/PatternMatcher';
+import { PatternOptions } from '../triggers/PatternOptions';
+import { PatternResult } from '../triggers/PatternResult';
+import { PatternSubscription } from '../triggers/PatternSubscription';
+import { TriggerCollection } from '../triggers/TriggerCollection';
 import { wait } from '../util/wait';
 import { WriteOptions } from '../WriteOptions';
-import { Pattern } from '../triggers/Pattern';
-import { PatternOptions } from '../triggers/PatternOptions';
-import { PatternPromise } from '../triggers/PatternPromise';
-import { PatternResult } from '../triggers/PatternResult';
 
 export type BasicContext = ReturnType<BasicContextCreator['createInstance']>;
 
@@ -28,10 +29,14 @@ export class BasicContextCreator {
     private readonly send: Mud['send'],
   ) {}
 
+  onTriggersChange(listener: (list: PatternMatcher[]) => void) {
+    return this.triggers.onChange(listener);
+  }
+
   createInstance(name: string) {
     const { checkNotAborted, send, triggers } = this;
     const dispose = emitter<void>();
-    const subscriptions: Subscription[] = [];
+    const subscriptions: PatternSubscription[] = [];
     let isPrintingLogs = false;
     let isAborted = false;
 
@@ -67,7 +72,7 @@ export class BasicContextCreator {
       },
 
       write: (command: string, options?: WriteOptions) => {
-        this.checkNotAborted(context);
+        checkNotAborted(context);
         log(`[WRITE]`, command);
         send(command, options);
       },
@@ -85,12 +90,15 @@ export class BasicContextCreator {
       }
     }
 
-    function when(pattern: Pattern, options?: PatternOptions): PatternPromise;
+    function when(
+      pattern: Pattern,
+      options?: PatternOptions,
+    ): PatternSubscription;
     function when(
       pattern: Pattern,
       handler: (result: PatternResult) => void,
       options?: PatternOptions,
-    ): Subscription;
+    ): PatternSubscription;
     function when(
       pattern: Pattern,
       handler?: ((result: PatternResult) => void) | PatternOptions,

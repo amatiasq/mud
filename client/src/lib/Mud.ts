@@ -116,8 +116,11 @@ export class Mud {
   }
 
   private createContextCreator() {
-    // const triggers = new TriggerCollection();
-    return new WorkflowContextCreator(this, this.triggers, this.plugins);
+    return new WorkflowContextCreator(
+      this,
+      this.triggers.createChild(),
+      this.plugins,
+    );
   }
 }
 

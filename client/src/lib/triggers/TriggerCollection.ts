@@ -1,22 +1,16 @@
+import { PatternMatcher } from './PatternMatcher';
 import { Pattern } from './Pattern';
-import { PatternMatchSubscription } from './PatternMatchSubscription';
 import { PatternOptions } from './PatternOptions';
-import { PatternPromise } from './PatternPromise';
 import { PatternResult } from './PatternResult';
+import { PatternSubscription } from './PatternSubscription';
 
 export interface TriggerCollection {
-  add(pattern: Pattern, options?: PatternOptions): PatternPromise;
+  onChange(listener: (list: PatternMatcher[]) => void): () => void;
+
+  add(pattern: Pattern, options?: PatternOptions): PatternSubscription;
   add(
     pattern: Pattern,
     handler: (result: PatternResult) => void,
     options?: PatternOptions,
-  ): PatternMatchSubscription;
+  ): PatternSubscription;
 }
-
-// class ChildTriggerCollection implements TriggerCollection {
-//   constructor(readonly add: TriggerCollection['add']) {}
-
-//   process(line: string) {
-
-//   }
-// }

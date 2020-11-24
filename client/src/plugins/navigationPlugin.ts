@@ -2,7 +2,6 @@ import { emitter } from '@amatiasq/emitter';
 
 import { Realm } from '../data/areas';
 import { BasicContext } from '../lib/context/BasicContextCreator';
-import { PatternPromise } from '../lib/triggers/PatternPromise';
 import { PROMPT_DETECTOR } from './promptPlugin';
 
 const CLOSED = '(cerrada)';
@@ -92,12 +91,8 @@ export function navigationPlugin({ log, when, write }: BasicContext) {
     await prompt();
   }
 
-  function waitForRecall() {
-    if (isAtRecall) {
-      return new PatternPromise(resolve => resolve());
-    }
-
-    return when(recalls);
+  function waitForRecall(): Promise<void> {
+    return isAtRecall ? Promise.resolve() : when(recalls).then();
   }
 
   function canGo(direction: string) {
