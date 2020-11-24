@@ -112,8 +112,8 @@ const MOB_GENERIC = {
 };
 
 const MOB_CHARACTERS = {
-  Kivon: 'Kivon, el líder del culto, no está nada contento con intromisiones.',
-  Nejane: 'Nejane, la líder, parece estar en trance.',
+  kivon: 'Kivon, el líder del culto, no está nada contento con intromisiones.',
+  nejane: 'Nejane, la líder, parece estar en trance.',
 } as const;
 
 const MOB_ARTICLE = /(?:(?:un|una|el|la|los|las|unos|unas) )?/;

@@ -8,13 +8,13 @@ import {
   WorkflowContextCreator,
 } from './context/WorkflowContextCreator';
 import { RemoteTelnet } from './RemoteTelnet';
-import { TriggerCollection } from './triggers/TriggerCollection';
+import { RootTriggerCollection } from './triggers/RootTriggerCollection';
 import { Workflow } from './workflow/Workflow';
 import { WorkflowFn } from './workflow/WorkflowFn';
 import { WriteOptions } from './WriteOptions';
 
 export class Mud {
-  private readonly triggers = new TriggerCollection();
+  private readonly triggers = new RootTriggerCollection();
   private readonly workflows = new Map<string, Workflow>();
   private readonly contextCreator = new BasicContextCreator(
     this.triggers,
@@ -116,6 +116,7 @@ export class Mud {
   }
 
   private createContextCreator() {
+    // const triggers = new TriggerCollection();
     return new WorkflowContextCreator(this, this.triggers, this.plugins);
   }
 }
