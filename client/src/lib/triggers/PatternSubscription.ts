@@ -32,6 +32,6 @@ export class PatternSubscription {
   }
 
   unsubscribe(): void {
-    this.stop();
+    return this.stop();
   }
 }

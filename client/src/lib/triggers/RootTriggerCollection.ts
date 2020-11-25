@@ -38,26 +38,26 @@ export class RootTriggerCollection implements TriggerCollection {
       handler = undefined;
     }
 
-    return new PatternSubscription(match => {
+    return new PatternSubscription(resolve => {
       const matcher = new PatternMatcher(pattern, options);
-      const subs = [matcher.onMatch(match)];
       let isAlive = true;
 
       const unsubscribe = () => {
-        if (!isAlive) return;
+        if (!isAlive) return false;
         isAlive = false;
-        subs.forEach(x => x());
-        subs.length = 0;
+        clean();
         matcher.dispose();
         this.patterns.delete(matcher);
         this.emitChange(this.list);
+        return true;
       };
 
-      if (typeof handler === 'function') {
-        subs.push(matcher.onMatch(handler));
-      } else {
-        matcher.onMatch(() => setImmediate(unsubscribe));
-      }
+      const action = typeof handler === 'function' ? handler : unsubscribe;
+
+      const clean = matcher.onMatch(result => {
+        resolve(result);
+        action(result);
+      });
 
       this.patterns.add(matcher);
       this.emitChange(this.list);

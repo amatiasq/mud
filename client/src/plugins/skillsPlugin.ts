@@ -126,7 +126,7 @@ export const skillsPlugin = createPlugin(
           when(
             'Te pasas varios minutos en profunda concentracion, pero fallas en el intento de recolectar mana.',
           ).then(() => FAILED),
-        ]).finally();
+        ]);
       }
     }
 

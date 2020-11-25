@@ -31,15 +31,15 @@ export async function recover({ run, plugins: { skills, prompt } }: Context) {
       await run('cast', [invisible]);
     }
 
-    while (canHeal && needsHeal() && hasEnoughMana()) {
+    if (canHeal && needsHeal() && hasEnoughMana()) {
       await run('cast', [heal]);
     }
 
-    while (canRefresh && needsRefresh() && hasEnoughMana()) {
+    if (canRefresh && needsRefresh() && hasEnoughMana()) {
       await run('cast', [refresh]);
     }
 
-    while (canMeditate && needsToMeditate()) {
+    if (canMeditate && needsToMeditate()) {
       const result = await skills.meditate();
 
       if (result === skills.BUSY) {

@@ -66,7 +66,6 @@ export class PatternMatcher {
     this.buffer.clear();
     Object.assign(this, {
       buffer: null,
-      patterns: null,
       emitMatch: null,
       onMatch: null,
       options: null,

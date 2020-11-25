@@ -120,19 +120,16 @@ export class Sidebar {
       );
 
       this.subscriptions.add(
-        matcher.onMatch(({ patterns }) =>
+        matcher.onMatch(({ patterns }) => {
           patterns
-            .map(x => {
-              if (matcher.patterns === null) debugger;
-              return matcher.patterns.indexOf(x);
-            })
-            .forEach(i => blink(rows[i])),
-        ),
+            .map(x => matcher.patterns.indexOf(x))
+            .forEach(i => blink(rows[i]));
+        }),
       );
 
-      const result = dom`<li class="trigger">${rows}</li>`;
-      return result;
+      return dom`<li class="trigger">${rows}</li>`;
     });
+
     return dom`<ul class="triggers">${items}</ul>`;
   }
 
@@ -143,12 +140,18 @@ export class Sidebar {
     renderer: (value: T) => HTMLElement,
   ) {
     let el = renderer(initial);
+    let timer: any = null;
+
+    function rerender(event: any) {
+      const updated = renderer(event);
+      el.replaceWith(updated);
+      el = updated;
+    }
 
     this.subscriptions.add(
       workflow[event]((event: any) => {
-        const updated = renderer(event);
-        el.replaceWith(updated);
-        el = updated;
+        clearTimeout(timer);
+        timer = setTimeout(() => rerender(event), 80);
       }),
     );
 
