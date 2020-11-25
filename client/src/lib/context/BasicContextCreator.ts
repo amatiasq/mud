@@ -24,6 +24,10 @@ export class BasicContextCreator {
   private readonly emitInstanceDisposed = emitter<BasicContext>();
   readonly onInstanceDisposed = this.emitInstanceDisposed.subscribe;
 
+  get triggerList() {
+    return this.triggers.list;
+  }
+
   constructor(
     private readonly triggers: TriggerCollection,
     private readonly send: Mud['send'],
@@ -107,34 +111,34 @@ export class BasicContextCreator {
       checkNotAborted(context);
       log('[WATCH]', pattern, options);
 
-      const onResult = isPrintingLogs
-        ? ({ patterns, ...rest }: PatternResult) =>
-            log('[TRIGGERED]', ...patterns, rest)
-        : null;
+      if (typeof handler !== 'function' && arguments.length > 1) {
+        options = handler;
+        handler = undefined;
+      }
 
-      if (typeof handler === 'function') {
-        if (onResult) {
-          const original = handler;
-          handler = result => {
-            onResult(result);
-            original(result);
-          };
+      if (isPrintingLogs) {
+        if (options && (options as any).logger) {
+          throw new Error('run after not supported');
         }
 
-        const subscription = triggers.add(pattern, handler, options);
-        subscriptions.push(subscription);
-        return subscription;
+        options = Object.assign(
+          {
+            logger: [
+              ({ patterns, ...rest }: PatternResult) =>
+                log('[TRIG GERED]', ...patterns, rest),
+            ],
+          },
+          options,
+        );
       }
 
-      options = handler;
-      const promise = triggers.add(pattern, options);
+      const subscription =
+        typeof handler === 'function'
+          ? triggers.add(pattern, handler, options)
+          : triggers.add(pattern, options);
 
-      if (onResult) {
-        promise.then(onResult);
-      }
-
-      subscriptions.push(promise);
-      return promise;
+      subscriptions.push(subscription);
+      return subscription;
     }
   }
 
@@ -154,5 +158,10 @@ export class BasicContextCreator {
     if (context.isAborted) {
       throw new Error(`[${context.name}] Workflow aborted.`);
     }
+  }
+}
+
+function deepMerge(target: {}, ...sources: ({} | null | undefined)[]) {
+  for (const source of sources.filter(Boolean)) {
   }
 }

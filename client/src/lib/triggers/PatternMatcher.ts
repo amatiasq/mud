@@ -48,11 +48,29 @@ export class PatternMatcher {
     this.buffer.clear();
     const result = new PatternResult(matching, value);
 
+    const { logger } = this.options as any;
+    const { blockProcessingUntil } = this.options;
+
+    if (logger) {
+      logger();
+    }
+
     this.emitMatch(result);
 
-    if (this.options.blockProcessingUntil) {
-      return this.options.blockProcessingUntil();
+    if (blockProcessingUntil) {
+      return blockProcessingUntil();
     }
+  }
+
+  dispose() {
+    this.buffer.clear();
+    Object.assign(this, {
+      buffer: null,
+      patterns: null,
+      emitMatch: null,
+      onMatch: null,
+      options: null,
+    });
   }
 
   private testPattern(text: string, pattern: SinglePattern) {

@@ -18,6 +18,10 @@ export class RootTriggerCollection implements TriggerCollection {
   private readonly emitChange = emitter<PatternMatcher[]>();
   readonly onChange = this.emitChange.subscribe;
 
+  get list() {
+    return Array.from(this.patterns);
+  }
+
   createChild() {
     const child = new ChildTriggerCollection(this.add);
     this.children.push(child);
@@ -29,27 +33,36 @@ export class RootTriggerCollection implements TriggerCollection {
     handler?: Handler | PatternOptions,
     options?: PatternOptions,
   ) {
-    if (arguments.length === 2 && typeof handler !== 'function') {
+    if (typeof handler !== 'function' && arguments.length === 2) {
       options = handler;
       handler = undefined;
     }
 
     return new PatternSubscription(match => {
       const matcher = new PatternMatcher(pattern, options);
+      const subs = [matcher.onMatch(match)];
+      let isAlive = true;
 
-      matcher.onMatch(match);
+      const unsubscribe = () => {
+        if (!isAlive) return;
+        isAlive = false;
+        subs.forEach(x => x());
+        subs.length = 0;
+        matcher.dispose();
+        this.patterns.delete(matcher);
+        this.emitChange(this.list);
+      };
 
       if (typeof handler === 'function') {
-        matcher.onMatch(handler);
+        subs.push(matcher.onMatch(handler));
+      } else {
+        matcher.onMatch(() => setImmediate(unsubscribe));
       }
 
       this.patterns.add(matcher);
-      this.emitChange([...this.patterns]);
+      this.emitChange(this.list);
 
-      return () => {
-        this.patterns.delete(matcher);
-        this.emitChange([...this.patterns]);
-      };
+      return unsubscribe;
     });
   }
 
@@ -67,12 +80,22 @@ export class RootTriggerCollection implements TriggerCollection {
 
     for (const line of lines) {
       // console.log('PROCESS', line);
-      for (const pattern of this.patterns) {
-        await pattern.process(line);
-      }
 
-      for (const child of this.children) {
-        await child.process(line);
+      try {
+        for (const pattern of this.patterns) {
+          await pattern.process(line);
+        }
+
+        for (const child of this.children) {
+          await child.process(line);
+        }
+      } catch (error) {
+        console.error(
+          `Line "${line}" produced error: ${
+            error && error.message ? error.message : error
+          }`,
+        );
+        throw error;
       }
     }
 

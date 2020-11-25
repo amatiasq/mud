@@ -28,6 +28,10 @@ export class Workflow<Result = any, Args extends any[] = any[]> {
     return this._isEnabled;
   }
 
+  get triggers() {
+    return this.contextCreator.triggerList;
+  }
+
   constructor(
     readonly name: string,
     private readonly run: WorkflowFn<Args>,

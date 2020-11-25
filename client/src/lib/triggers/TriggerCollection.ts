@@ -5,6 +5,8 @@ import { PatternResult } from './PatternResult';
 import { PatternSubscription } from './PatternSubscription';
 
 export interface TriggerCollection {
+  readonly list: PatternMatcher[];
+
   onChange(listener: (list: PatternMatcher[]) => void): () => void;
 
   add(pattern: Pattern, options?: PatternOptions): PatternSubscription;

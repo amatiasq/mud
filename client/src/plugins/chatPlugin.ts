@@ -71,6 +71,8 @@ export function chatPlugin({ when, write }: BasicContext) {
     notify(`[ARENA] w/ ${groups.name}`),
   );
 
+  return () => null;
+
   function handleAutoResponses({ name, message }: Record<string, string>) {
     const tokens = {
       re: /^porfa re(sponde(me)?)? /,

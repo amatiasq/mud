@@ -8,6 +8,10 @@ export class ChildTriggerCollection implements TriggerCollection {
   private readonly emitChange = emitter<PatternMatcher[]>();
   readonly onChange = this.emitChange.subscribe;
 
+  get list() {
+    return Array.from(this.patterns);
+  }
+
   constructor(readonly add: TriggerCollection['add']) {}
 
   async process(line: string) {

@@ -1,7 +1,7 @@
-import { PatternMatcher } from './../lib/triggers/PatternMatcher';
 import { dom } from '@amatiasq/dom';
-import { Mud } from '../lib/Mud';
 
+import { Mud } from '../lib/Mud';
+import { PatternMatcher } from '../lib/triggers/PatternMatcher';
 import { Workflow } from '../lib/workflow/Workflow';
 
 export class Sidebar {
@@ -71,7 +71,7 @@ export class Sidebar {
     const triggers = this.keepUpdated(
       workflow,
       'onTriggersChange',
-      [],
+      workflow.triggers,
       this.renderTriggers,
     );
 
@@ -115,18 +115,22 @@ export class Sidebar {
 
   private renderTriggers(triggers: PatternMatcher[]) {
     const items = triggers.map(matcher => {
-      const patterns = matcher.patterns.map(
+      const rows = matcher.patterns.map(
         x => dom`<span class="pattern">${x.toString()}</span>`,
       );
 
-      const result = dom`<li class="trigger">${patterns}</li>`;
-      matcher.onMatch(() => (result.style.animation = 'highlight 1s linear'));
-
-      result.addEventListener(
-        'animationend',
-        () => (result.style.animation = ''),
+      this.subscriptions.add(
+        matcher.onMatch(({ patterns }) =>
+          patterns
+            .map(x => {
+              if (matcher.patterns === null) debugger;
+              return matcher.patterns.indexOf(x);
+            })
+            .forEach(i => blink(rows[i])),
+        ),
       );
 
+      const result = dom`<li class="trigger">${rows}</li>`;
       return result;
     });
     return dom`<ul class="triggers">${items}</ul>`;
@@ -163,4 +167,14 @@ function button(
 
 function icon(name: string) {
   return dom`<i class="fas fa-${name}"></i>`;
+}
+
+function blink(el: HTMLElement) {
+  el.style.animation = 'highlight 1s linear';
+  el.addEventListener('animationend', clear);
+
+  function clear() {
+    el.style.animation = '';
+    el.removeEventListener('animationend', clear);
+  }
 }
