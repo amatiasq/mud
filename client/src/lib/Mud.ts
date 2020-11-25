@@ -1,6 +1,10 @@
 import { emitter } from '@amatiasq/emitter';
 
-import { initializePlugins, PluginMap } from '../plugins/index';
+import {
+  BindedPluginMap,
+  initializePlugins,
+  PluginMap,
+} from '../plugins/index';
 import { login } from '../plugins/login';
 import { BasicContextCreator } from './context/BasicContextCreator';
 import {
@@ -77,8 +81,10 @@ export class Mud {
 
   // Plugins
 
-  getPlugin<Name extends keyof PluginMap>(name: Name): PluginMap[Name] {
-    return this.plugins[name];
+  getPlugin<Name extends keyof BindedPluginMap>(name: Name) {
+    const creator = this.plugins[name];
+    const context = this.contextCreator.createInstance(name);
+    return creator(context) as BindedPluginMap[Name];
   }
 
   // Daemons

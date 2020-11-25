@@ -1,6 +1,6 @@
 import { emitter } from '@amatiasq/emitter';
-import { BasicContext } from '../lib/context/BasicContextCreator';
 
+import { createPlugin } from '../lib/createPlugin';
 import { concatRegexes } from '../lib/util/concatRegexes';
 import { int, toInt } from '../lib/util/int';
 
@@ -45,110 +45,117 @@ class Stat {
   }
 }
 
-export async function promptPlugin({ when, write }: BasicContext) {
-  let isInvisible = false;
+const stats = {
+  hp: new Stat(),
+  mana: new Stat(),
+  mv: new Stat(),
+  exp: 0,
+  gold: 0,
+  enemy: null as number | null,
 
-  const stats = {
-    hp: new Stat(),
-    mana: new Stat(),
-    mv: new Stat(),
-    exp: 0,
-    gold: 0,
-    enemy: null as number | null,
+  get isFighting() {
+    return stats.enemy !== null;
+  },
+};
 
-    get isFighting() {
-      return stats.enemy !== null;
-    },
-  };
+type Stats = typeof stats;
 
-  type Stats = typeof stats;
+export const promptPlugin = createPlugin(
+  ({ when, write }) => {
+    let isInvisible = false;
+    const update = emitter<typeof stats>();
 
-  const update = emitter<typeof stats>();
-
-  when(PROMPT_DETECTOR)
-    .timeout(1)
-    .catch(setPrompt)
-    .finally(() => {
-      when(PROMPT_DETECTOR, ({ groups: g }) => {
-        stats.hp.current = toInt(g.hpCurr);
-        stats.hp.total = toInt(g.hpTotal);
-        stats.mana.current = toInt(g.mCurr);
-        stats.mana.total = toInt(g.mTotal);
-        stats.mv.current = toInt(g.mvCurr);
-        stats.mv.total = toInt(g.mvTotal);
-        stats.exp = toInt(g.exp);
-        stats.gold = toInt(g.gold);
-        stats.enemy = g.enemy ? toInt(g.enemy) : null;
-        isInvisible = Boolean(g.invis);
-        update(stats);
+    when(PROMPT_DETECTOR)
+      .timeout(1)
+      .catch(setPrompt)
+      .finally(() => {
+        when(PROMPT_DETECTOR, ({ groups: g }) => {
+          stats.hp.current = toInt(g.hpCurr);
+          stats.hp.total = toInt(g.hpTotal);
+          stats.mana.current = toInt(g.mCurr);
+          stats.mana.total = toInt(g.mTotal);
+          stats.mv.current = toInt(g.mvCurr);
+          stats.mv.total = toInt(g.mvTotal);
+          stats.exp = toInt(g.exp);
+          stats.gold = toInt(g.gold);
+          stats.enemy = g.enemy ? toInt(g.enemy) : null;
+          isInvisible = Boolean(g.invis);
+          update(stats);
+        });
       });
-    });
 
-  return {
-    getPercent,
-    getValue,
-    until,
-    whenFresh,
-    onUpdate: update.subscribe,
+    return {
+      getIsInvisible: () => isInvisible,
+      onUpdate: update.subscribe,
+    };
 
-    get isFighting() {
-      return stats.isFighting;
-    },
+    function setPrompt() {
+      write(`prompt ${PROMPT}`);
+      write(`fprompt ${FPROMPT}`);
+    }
+  },
+  ({ getIsInvisible, onUpdate }) => ({ when }) => {
+    return {
+      getPercent,
+      getValue,
+      until,
+      whenFresh,
+      onUpdate,
 
-    get isInvisible() {
-      return isInvisible;
-    },
-  };
+      get isFighting() {
+        return stats.isFighting;
+      },
 
-  function whenFresh() {
-    return until(stats => {
-      console.log(
-        stats.hp.percent,
-        stats.mana.percent,
-        stats.mv.percent,
-        stats.hp.percent === 1 &&
+      get isInvisible() {
+        return getIsInvisible();
+      },
+    };
+
+    function whenFresh() {
+      return until(stats => {
+        console.log(
+          stats.hp.percent,
+          stats.mana.percent,
+          stats.mv.percent,
+          stats.hp.percent === 1 &&
+            stats.mana.percent === 1 &&
+            stats.mv.percent === 1,
+        );
+        return (
+          stats.hp.percent === 1 &&
           stats.mana.percent === 1 &&
-          stats.mv.percent === 1,
-      );
-      return (
-        stats.hp.percent === 1 &&
-        stats.mana.percent === 1 &&
-        stats.mv.percent === 1
-      );
-    });
-  }
-
-  function setPrompt() {
-    write(`prompt ${PROMPT}`);
-    write(`fprompt ${FPROMPT}`);
-  }
-
-  function getPercent(stat: 'hp' | 'mana' | 'mv') {
-    return stats[stat].percent;
-  }
-
-  function getValue(stat: 'gold' | 'exp'): number;
-  function getValue(stat: 'enemy'): number | null;
-  function getValue(stat: 'gold' | 'exp' | 'enemy') {
-    return stats[stat];
-  }
-
-  function until(predicate?: (stats: Stats) => boolean) {
-    if (!predicate) {
-      return when(PROMPT_DETECTOR);
-    }
-
-    if (predicate(stats)) {
-      return true;
-    }
-
-    return new Promise(resolve => {
-      const unsubscribe = update.subscribe((stats: Stats) => {
-        if (predicate(stats)) {
-          unsubscribe();
-          resolve(stats);
-        }
+          stats.mv.percent === 1
+        );
       });
-    });
-  }
-}
+    }
+
+    function getPercent(stat: 'hp' | 'mana' | 'mv') {
+      return stats[stat].percent;
+    }
+
+    function getValue(stat: 'gold' | 'exp'): number;
+    function getValue(stat: 'enemy'): number | null;
+    function getValue(stat: 'gold' | 'exp' | 'enemy') {
+      return stats[stat];
+    }
+
+    function until(predicate?: (stats: Stats) => boolean) {
+      if (!predicate) {
+        return when(PROMPT_DETECTOR);
+      }
+
+      if (predicate(stats)) {
+        return true;
+      }
+
+      return new Promise(resolve => {
+        const unsubscribe = onUpdate((stats: Stats) => {
+          if (predicate(stats)) {
+            unsubscribe();
+            resolve(stats);
+          }
+        });
+      });
+    }
+  },
+);

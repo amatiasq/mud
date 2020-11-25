@@ -1,4 +1,5 @@
 import { BasicContext } from '../lib/context/BasicContextCreator';
+import { createPlugin } from '../lib/createPlugin';
 import { concatRegexes } from '../lib/util/concatRegexes';
 import { int, toInt } from '../lib/util/int';
 
@@ -85,63 +86,66 @@ const STATE_DETECTOR = (() => {
   */
 })();
 
-export function statsPlugin({ when, write }: BasicContext) {
-  let isInitiated = false;
-  let name = '';
-  let principal = false;
+export const statsPlugin = createPlugin(
+  ({ when, write }) => {
+    let isInitiated = false;
+    let name = '';
+    let principal = false;
 
-  const stats = {
-    fue: 0,
-    fueBase: 0,
-    des: 0,
-    desBase: 0,
-    vida: 0,
-    vidaBase: 0,
-    vidaRegen: 0,
-    int: 0,
-    intBase: 0,
-    sab: 0,
-    sabBase: 0,
-    mana: 0,
-    manaBase: 0,
-    manaRegen: 0,
-    con: 0,
-    conBase: 0,
-    car: 0,
-    carBase: 0,
-    mov: 0,
-    movBase: 0,
-    movRegen: 0,
-    sue: 0,
-    sueBase: 0,
-    level: 0,
-  };
+    const stats = {
+      fue: 0,
+      fueBase: 0,
+      des: 0,
+      desBase: 0,
+      vida: 0,
+      vidaBase: 0,
+      vidaRegen: 0,
+      int: 0,
+      intBase: 0,
+      sab: 0,
+      sabBase: 0,
+      mana: 0,
+      manaBase: 0,
+      manaRegen: 0,
+      con: 0,
+      conBase: 0,
+      car: 0,
+      carBase: 0,
+      mov: 0,
+      movBase: 0,
+      movRegen: 0,
+      sue: 0,
+      sueBase: 0,
+      level: 0,
+    };
 
-  when(
-    STATE_DETECTOR,
-    ({ groups }) => {
-      for (const key of Object.keys(stats) as (keyof typeof stats)[]) {
-        stats[key] = toInt(groups[key]) as any;
+    when(
+      STATE_DETECTOR,
+      ({ groups }) => {
+        for (const key of Object.keys(stats) as (keyof typeof stats)[]) {
+          stats[key] = toInt(groups[key]) as any;
+        }
+
+        name = groups.name;
+        principal = Boolean(groups.principal);
+        isInitiated = true;
+      },
+      { captureLength: SIZE },
+    );
+
+    return {
+      async getLevel() {
+        await ensureInitiated();
+        return stats.level;
+      },
+    };
+
+    async function ensureInitiated() {
+      if (!isInitiated) {
+        write('estado');
+        await when(STATE_DETECTOR, { captureLength: SIZE });
       }
-
-      name = groups.name;
-      principal = Boolean(groups.principal);
-      isInitiated = true;
-    },
-    { captureLength: SIZE },
-  );
-
-  return {
-    async getLevel() {
-      await ensureInitiated();
-      return stats.level;
-    },
-  };
-
-  async function ensureInitiated() {
-    if (!isInitiated) {
-      write('estado');
-      await when(STATE_DETECTOR, { captureLength: SIZE });
     }
-  }
-}
+  },
+  plugin => () => plugin,
+);

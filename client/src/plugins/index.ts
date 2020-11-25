@@ -13,15 +13,19 @@ const plugins = {
   prompt: promptPlugin,
   skills: skillsPlugin,
   stats: statsPlugin,
-};
+} as const;
 
 // -- Dirty implementation
 
 type plugins = typeof plugins;
-type UnPromisify<T> = T extends Promise<infer U> ? U : T;
+type UnPromisify<T> = T extends PromiseLike<infer U> ? U : T;
 
 export type PluginMap = {
   [name in keyof plugins]: UnPromisify<ReturnType<plugins[name]>>;
+};
+
+export type BindedPluginMap = {
+  [name in keyof PluginMap]: UnPromisify<ReturnType<PluginMap[name]>>;
 };
 
 export async function initializePlugins(

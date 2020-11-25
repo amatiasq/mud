@@ -1,4 +1,4 @@
-import { BasicContext } from '../lib/context/BasicContextCreator';
+import { createPlugin } from '../lib/createPlugin';
 import {
   concatRegexes,
   concatRegexesUnescaped,
@@ -26,99 +26,109 @@ const ITEM_MATCHER = concatRegexes(
   /$/,
 );
 
-export function inventoryPlugin({ when, write }: BasicContext) {
-  let isInitialized = false;
-  let items: ItemList = {};
+export const inventoryPlugin = createPlugin(
+  ({ when, write }) => {
+    let isInitialized = false;
+    let items: ItemList = {};
 
-  const refresh = singleExecution(async () => {
-    write('inventario');
-    await when(INVENTORY_DETECTOR);
-  });
+    const refresh = singleExecution(async () => {
+      write('inventario');
+      await when(INVENTORY_DETECTOR);
+    });
 
-  when('No tienes ese objeto.', refresh);
+    when('No tienes ese objeto.', refresh);
 
-  when(
-    INVENTORY_DETECTOR,
-    ({ groups }) => {
-      isInitialized = true;
-      items = parseItems(groups.content);
-    },
-    { captureLength: 1000 },
-  );
+    when(
+      INVENTORY_DETECTOR,
+      ({ groups }) => {
+        isInitialized = true;
+        items = parseItems(groups.content);
+      },
+      { captureLength: 1000 },
+    );
 
-  return { refresh, has, hasIn, hasInBackpack: hasIn.bind(null, 'mochila') };
+    return {
+      refresh,
+      parseItems,
+      ensureInitialized: () => isInitialized || refresh(),
+      getItems: () => items,
+    };
 
-  async function has(search: ItemSearch) {
-    if (!isInitialized) {
-      await refresh();
-    }
+    function parseItems(captured: string) {
+      const list = captured
+        .split('\n')
+        .map(x => x.trim())
+        .filter(Boolean);
 
-    return searchInList(items, search);
-  }
+      const result: ItemList = {};
 
-  async function hasIn(container: string, search: ItemSearch) {
-    write(`examinar ${container}`);
+      for (const item of list) {
+        if (item === 'Nada.') {
+          return {};
+        }
 
-    const match = await Promise.any([
-      when('No ves eso aqui.').then(() => null),
-      when(concatRegexes(/Cuando miras dentro ves:\n.+ contiene:/, CONTENT), {
-        captureLength: 1000,
-      }),
-    ]);
+        const match = item.match(ITEM_MATCHER);
 
-    if (!match) {
-      return false;
-    }
+        if (!match) {
+          console.error(`Can't match item "${item}"`);
+          continue;
+        }
 
-    const items = parseItems(match.groups.content);
-    console.log('IN', container, items);
-    return searchInList(items, search);
-  }
+        const { effects, name, amount } = match.groups!;
 
-  function parseItems(captured: string) {
-    const list = captured
-      .split('\n')
-      .map(x => x.trim())
-      .filter(Boolean);
-
-    const result: ItemList = {};
-
-    for (const item of list) {
-      if (item === 'Nada.') {
-        return {};
+        result[name] = {
+          amount: amount ? toInt(amount) : 1,
+          effects: effects
+            .replace(/^\s*\(|\)\s*$/g, '')
+            .split(') (')
+            .filter(Boolean),
+        };
       }
 
-      const match = item.match(ITEM_MATCHER);
+      return result;
+    }
+  },
+  ({ refresh, parseItems, ensureInitialized, getItems }) => ({
+    when,
+    write,
+  }) => {
+    return { refresh, has, hasIn, hasInBackpack: hasIn.bind(null, 'mochila') };
+
+    async function has(search: ItemSearch) {
+      await ensureInitialized();
+      return searchInList(getItems(), search);
+    }
+
+    async function hasIn(container: string, search: ItemSearch) {
+      write(`examinar ${container}`);
+
+      const match = await Promise.any([
+        when('No ves eso aqui.').then(() => null),
+        when(concatRegexes(/Cuando miras dentro ves:\n.+ contiene:/, CONTENT), {
+          captureLength: 1000,
+        }),
+      ]);
 
       if (!match) {
-        console.error(`Can't match item "${item}"`);
-        continue;
+        return false;
       }
 
-      const { effects, name, amount } = match.groups!;
-
-      result[name] = {
-        amount: amount ? toInt(amount) : 1,
-        effects: effects
-          .replace(/^\s*\(|\)\s*$/g, '')
-          .split(') (')
-          .filter(Boolean),
-      };
+      const items = parseItems(match.groups.content);
+      console.log('IN', container, items);
+      return searchInList(items, search);
     }
 
-    return result;
-  }
+    function searchInList(items: ItemList, search: ItemSearch) {
+      if (typeof search === 'string') {
+        return items[search] ? search : null;
+      }
 
-  function searchInList(items: ItemList, search: ItemSearch) {
-    if (typeof search === 'string') {
-      return items[search] ? search : null;
+      if (Array.isArray(search)) {
+        return search.find(x => items[x]) || null;
+      }
+
+      const key = Object.keys(search).find(x => items[x]);
+      return key ? search[key] : null;
     }
-
-    if (Array.isArray(search)) {
-      return search.find(x => items[x]) || null;
-    }
-
-    const key = Object.keys(search).find(x => items[x]);
-    return key ? search[key] : null;
-  }
-}
+  },
+);

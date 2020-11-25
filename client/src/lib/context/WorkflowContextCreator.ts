@@ -1,4 +1,4 @@
-import { PluginMap } from '../../plugins';
+import { BindedPluginMap, PluginMap } from '../../plugins';
 import { Mud } from '../Mud';
 import { TriggerCollection } from '../triggers/TriggerCollection';
 import { CancellablePromise } from '../util/CancellablePromise';
@@ -88,9 +88,12 @@ export class WorkflowContextCreator extends BasicContextCreator {
   }
 }
 
-function pluginsGetter(source: PluginMap, context: BasicContext) {
-  return new Proxy(source, {
-    get(target, key: string) {
+function pluginsGetter(
+  source: PluginMap,
+  context: BasicContext,
+): BindedPluginMap {
+  return new Proxy(source as any, {
+    get(target: PluginMap, key: string) {
       if (!(key in target)) {
         context.log(`Failed to get plugin ${key}`);
         throw new Error(`Plugin ${key} is not registered.`);
@@ -98,7 +101,7 @@ function pluginsGetter(source: PluginMap, context: BasicContext) {
 
       context.log(`Requires plugin ${key}`);
       // TODO: bind plugin to context
-      return target[key as keyof typeof target];
+      return target[key as keyof typeof target](context);
     },
   });
 }

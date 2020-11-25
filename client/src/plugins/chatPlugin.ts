@@ -1,6 +1,6 @@
 import { ClientStorage } from '@amatiasq/client-storage';
 
-import { BasicContext } from '../lib/context/BasicContextCreator';
+import { createPlugin } from '../lib/createPlugin';
 import { PatternResult } from '../lib/triggers/PatternResult';
 import { datetime, DateTime } from '../lib/util/dateTime';
 import { requestNotificationPermission } from '../lib/util/requestNotificationPermission';
@@ -28,65 +28,67 @@ const receive = (log: History) => ({
 const sent = (log: History) => ({ groups: { name, message } }: PatternResult) =>
   addMessage(log, { to: name, message });
 
-export function chatPlugin({ when, write }: BasicContext) {
-  // const say = new ClientStorage<Record<string, Message[]>>('chat:say');
-  const order = new ClientStorage<Message[]>('chat:order', version);
-  const tell = new ClientStorage<Message[]>('chat:tell', version);
-  const whisper = new ClientStorage<Message[]>('chat:whisper', version);
+export const chatPlugin = createPlugin(
+  ({ when, write }) => {
+    // const say = new ClientStorage<Record<string, Message[]>>('chat:say');
+    const order = new ClientStorage<Message[]>('chat:order', version);
+    const tell = new ClientStorage<Message[]>('chat:tell', version);
+    const whisper = new ClientStorage<Message[]>('chat:whisper', version);
 
-  (window as any).chat = () => ({
-    tell: tell.get(),
-    order: order.get(),
-    whisper: whisper.get(),
-  });
+    (window as any).chat = () => ({
+      tell: tell.get(),
+      order: order.get(),
+      whisper: whisper.get(),
+    });
 
-  when(/(?<name>\[Orden: [^\]]+\]): '(?<message>[^']+)'/, receive(order));
-  when(/(?<name>\[Orden\]): '(?<message>[^']+)'/, sent(order));
+    when(/(?<name>\[Orden: [^\]]+\]): '(?<message>[^']+)'/, receive(order));
+    when(/(?<name>\[Orden\]): '(?<message>[^']+)'/, sent(order));
 
-  when(/(?<name>.+) te susurra '(?<message>[^']+)'/, receive(whisper));
-  when(/Susurras a (?<name>.+) '(?<message>[^']+)'/, sent(whisper));
+    when(/(?<name>.+) te susurra '(?<message>[^']+)'/, receive(whisper));
+    when(/Susurras a (?<name>.+) '(?<message>[^']+)'/, sent(whisper));
 
-  const receiveTell = receive(tell);
+    const receiveTell = receive(tell);
 
-  when(
-    [
-      /(?<name>.+) te cuenta '(?<message>[^']+)'/,
-      /(?<name>.+) te responde '(?<message>[^']+)'/,
-    ],
-    result => {
-      receiveTell(result);
-      handleAutoResponses(result.groups);
-    },
-  );
+    when(
+      [
+        /(?<name>.+) te cuenta '(?<message>[^']+)'/,
+        /(?<name>.+) te responde '(?<message>[^']+)'/,
+      ],
+      result => {
+        receiveTell(result);
+        handleAutoResponses(result.groups);
+      },
+    );
 
-  when(
-    [
-      /Cuentas a (?<name>.+) '(?<message>[^']+)'/,
-      /Respondes a (?<name>.+) '(?<message>[^']+)'/,
-    ],
-    sent(tell),
-  );
+    when(
+      [
+        /Cuentas a (?<name>.+) '(?<message>[^']+)'/,
+        /Respondes a (?<name>.+) '(?<message>[^']+)'/,
+      ],
+      sent(tell),
+    );
 
-  when(/(?<name>\w+) te ha desafiado a un combate en la arena!/, ({ groups }) =>
-    notify(`[ARENA] w/ ${groups.name}`),
-  );
+    when(
+      /(?<name>\w+) te ha desafiado a un combate en la arena!/,
+      ({ groups }) => notify(`[ARENA] w/ ${groups.name}`),
+    );
 
-  return () => null;
+    function handleAutoResponses({ name, message }: Record<string, string>) {
+      const tokens = {
+        re: /^porfa re(sponde(me)?)? /,
+        [`tell ${name}`]: /^porfa di(me)? /,
+        [`susurrar ${name}`]: /^porfa susurra(me)? /,
+      };
 
-  function handleAutoResponses({ name, message }: Record<string, string>) {
-    const tokens = {
-      re: /^porfa re(sponde(me)?)? /,
-      [`tell ${name}`]: /^porfa di(me)? /,
-      [`susurrar ${name}`]: /^porfa susurra(me)? /,
-    };
-
-    for (const [response, token] of Object.entries(tokens)) {
-      if (token.test(message)) {
-        write(`${response} ${message.replace(token, '')}`);
+      for (const [response, token] of Object.entries(tokens)) {
+        if (token.test(message)) {
+          write(`${response} ${message.replace(token, '')}`);
+        }
       }
     }
-  }
-}
+  },
+  () => () => ({}),
+);
 
 type msg = { message: string };
 
