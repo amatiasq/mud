@@ -1,183 +1,146 @@
-import { dom } from '@amatiasq/dom';
-
-import { Mud } from '../lib/Mud';
+import { SinglePattern } from '../lib/triggers/Pattern';
 import { PatternMatcher } from '../lib/triggers/PatternMatcher';
 import { Workflow } from '../lib/workflow/Workflow';
+import { html } from './render';
 
-export class Sidebar {
-  private readonly $workflows = dom`<ul class="workflow-list"></ul>`;
-  private readonly $el = dom`
+export type SidebarProps = {
+  workflows: Workflow[];
+};
+
+export function Sidebar(props: SidebarProps) {
+  return html`
     <aside class="sidebar">
       <div class="workflows">
         <h1 class="title">Workflows</h1>
-        ${this.$workflows}
+        <ul class="workflow-list">
+          ${props.workflows.map(
+            x => html`<${WorkflowComponent} workflow=${x} />`,
+          )}
+        </ul>
       </div>
     </aside>
   `;
+}
 
-  private readonly subscriptions = new Set<Function>();
-  // private readonly expanded = new Set<Workflow>();
+type WorkflowProp = { workflow: Workflow };
 
-  render() {
-    this.renderWorkflow = this.renderWorkflow.bind(this);
-    this.renderTriggers = this.renderTriggers.bind(this);
-    return this.$el;
-  }
+function WorkflowComponent({ workflow }: WorkflowProp) {
+  const { isEnabled, isRunning, instancesRunning } = workflow;
+  const instances = instancesRunning > 1 ? ` (${instancesRunning})` : '';
+  const name = `${workflow.name}${instances}`;
 
-  clear() {
-    this.$workflows.innerHTML = '';
-    this.subscriptions.forEach(x => x());
-    this.subscriptions.clear();
-  }
+  const classes = [
+    'workflow',
+    isRunning ? 'running' : 'idle',
+    isEnabled ? 'enabled' : 'disabled',
+    'expanded',
+    // this.expanded.has(workflow) ? 'expanded' : null,
+  ];
 
-  setWorkflows(workflows: Workflow[], mud: Mud) {
-    this.clear();
+  return html`
+    <li class="${classes.join(' ')}">
+      <div class="workflow-content">
+        <header>
+          <h3 class="name">${name}</h3>
+          <${WorkflowActions} workflow=${workflow} />
+        </header>
 
-    for (const workflow of workflows) {
-      const el = this.keepUpdated(
-        workflow,
-        'onChange',
-        workflow,
-        this.renderWorkflow,
-      );
+        <${WorkflowTriggers} workflow=${workflow} />
+      </div>
+    </li>
+  `;
+}
 
-      this.$workflows.appendChild(el);
-    }
-  }
+function WorkflowActions({ workflow }: WorkflowProp) {
+  const { isEnabled, isRunning } = workflow;
 
-  private renderWorkflow(workflow: Workflow) {
-    const { isEnabled, isRunning, instancesRunning } = workflow;
-    const instances = instancesRunning > 1 ? ` (${instancesRunning})` : '';
-    const name = `${workflow.name}${instances}`;
+  const actions = [
+    isEnabled
+      ? html`
+        <${Action} className="enable-control" onClick=${() =>
+          workflow.disable()}>
+          <${Icon} name="check" />
+          <${Icon} name="times" />
+        </Button>
+      `
+      : html`
+        <${Action} className="enable-control" onClick=${() =>
+          workflow.enable()}>
+          <${Icon} name="times" />
+          <${Icon} name="check" />
+        </Button>
+      `,
+  ];
 
-    // const expand = button(icon('caret-right'), () => {
-    //   if (this.expanded.has(workflow)) {
-    //     this.expanded.delete(workflow);
-    //     el.classList.remove('expanded');
-    //   } else {
-    //     this.expanded.add(workflow);
-    //     el.classList.add('expanded');
-    //   }
-    // });
-
-    const classes = [
-      'workflow',
-      isRunning ? 'running' : 'idle',
-      isEnabled ? 'enabled' : 'disabled',
-      'expanded',
-      // this.expanded.has(workflow) ? 'expanded' : null,
-    ];
-
-    const triggers = this.keepUpdated(
-      workflow,
-      'onTriggersChange',
-      workflow.triggers,
-      this.renderTriggers,
+  if (isEnabled) {
+    actions.push(
+      isRunning
+        ? html`
+          <${Action} onClick=${() => workflow.stop()}>
+            <${Icon} name="stop" />
+          </Button>
+        `
+        : html`
+          <${Action} onClick=${() => workflow.execute()}>
+            <${Icon} name="play" />
+          </Button>
+        `,
     );
-
-    const el = dom`
-      <li class="${classes}">
-        <div class="workflow-content">
-          <header>
-            <h3 class="name">${name}</h3>
-            ${this.getWorkflowActions(workflow)}
-          </header>
-
-          ${triggers}
-        </div>
-      </li>
-    `;
-
-    return el;
   }
 
-  private getWorkflowActions(workflow: Workflow) {
-    const { isEnabled, isRunning } = workflow;
+  return actions;
+}
 
-    const enabler = isEnabled
-      ? button([icon('check'), icon('times')], () => workflow.disable())
-      : button([icon('times'), icon('check')], () => workflow.enable());
+const listening = new WeakMap<PatternMatcher, true>();
 
-    enabler.classList.add('enable-control');
-
-    const actions = [enabler];
-
-    if (isEnabled) {
-      actions.push(
-        isRunning
-          ? button(icon('stop'), () => workflow.stop())
-          : button(icon('play'), () => workflow.execute()),
-      );
-    }
-
-    return actions;
-  }
-
-  private renderTriggers(triggers: PatternMatcher[]) {
-    const items = triggers.map(matcher => {
-      const rows = matcher.patterns.map(
-        x => dom`<span class="pattern">${x.toString()}</span>`,
-      );
-
-      this.subscriptions.add(
-        matcher.onMatch(({ patterns }) => {
-          patterns
-            .map(x => matcher.patterns.indexOf(x))
-            .forEach(i => blink(rows[i]));
-        }),
-      );
-
-      return dom`<li class="trigger">${rows}</li>`;
+function WorkflowTriggers({ workflow: { triggers } }: WorkflowProp) {
+  const items = triggers.map(matcher => {
+    const rows = matcher.patterns.map(x => {
+      const blink = blinking.has(x) ? 'blink' : '';
+      return html`<span class="pattern ${blink}">${x}</span>`;
     });
 
-    return dom`<ul class="triggers">${items}</ul>`;
-  }
-
-  private keepUpdated<T>(
-    workflow: Workflow,
-    event: 'onChange' | 'onTriggersChange',
-    initial: T,
-    renderer: (value: T) => HTMLElement,
-  ) {
-    let el = renderer(initial);
-    let timer: any = null;
-
-    function rerender(event: any) {
-      const updated = renderer(event);
-      el.replaceWith(updated);
-      el = updated;
+    if (!listening.has(matcher)) {
+      matcher.onMatch(({ patterns }) => patterns.forEach(blink));
+      listening.set(matcher, true);
     }
 
-    this.subscriptions.add(
-      workflow[event]((event: any) => {
-        clearTimeout(timer);
-        timer = setTimeout(() => rerender(event), 80);
-      }),
-    );
+    return html`<li class="trigger">${rows}</li>`;
+  });
 
-    return el;
+  return html`<ul class="triggers">
+    ${items}
+  </ul>`;
+}
+
+type ButtonProps = {
+  className?: string;
+  children: any;
+  onClick: (event: MouseEvent) => void;
+};
+
+function Action({ children, className, onClick }: ButtonProps) {
+  return html`
+    <button class="action ${className}" onClick="${onClick}">
+      ${children}
+    </button>
+  `;
+}
+
+function Icon({ name }: { name: string }) {
+  console.log(name);
+  return html`<i class="fas fa-${name}"></i>`;
+}
+
+const blinking = new Map<SinglePattern, any>();
+
+function blink(pattern: SinglePattern) {
+  if (blinking.has(pattern)) {
+    clearTimeout(blinking.get(pattern));
   }
-}
 
-function button(
-  content: HTMLElement[] | HTMLElement | string,
-  onClick: (event: MouseEvent) => void,
-) {
-  const el = dom`<button class="action">${content}</button>`;
-  el.addEventListener('click', onClick);
-  return el;
-}
-
-function icon(name: string) {
-  return dom`<i class="fas fa-${name}"></i>`;
-}
-
-function blink(el: HTMLElement) {
-  el.style.animation = 'highlight 1s linear';
-  el.addEventListener('animationend', clear);
-
-  function clear() {
-    el.style.animation = '';
-    el.removeEventListener('animationend', clear);
-  }
+  blinking.set(
+    pattern,
+    setTimeout(() => blinking.delete(pattern)),
+  );
 }

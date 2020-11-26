@@ -7,13 +7,14 @@ import { renderUserInterface } from './ui';
 import { getPassword } from './util/getPassword';
 import { getQueryParams } from './util/getQueryParams';
 import { DEFAULT_PORT } from '../../config.json';
+import { bindViewTo } from './state';
 
 let FORCE_PROD_SERVER = false;
 // FORCE_PROD_SERVER = true;
 
 const serverUri = getSocketUri();
 const { host, port, user, pass } = getParams();
-const { terminal, controls, sidebar } = renderUserInterface(document.body);
+const terminal = renderUserInterface(document.body);
 
 openSocket();
 
@@ -79,11 +80,11 @@ async function initializeMud(telnet: RemoteTelnet) {
   });
 
   await mud.login(user, pass);
-  connectButtons();
+
+  bindViewTo(mud);
 
   if (user === 'may') {
     registerWorkflows(mud);
-    await connectStats();
   }
 
   Object.assign(window, { mud });
@@ -94,32 +95,6 @@ async function initializeMud(telnet: RemoteTelnet) {
     if (mud.userInput(command)) {
       telnet.send(command);
     }
-  }
-
-  async function connectStats() {
-    const hp = emitter<number>();
-    controls.addMeter('#550000', hp.subscribe);
-
-    const mana = emitter<number>();
-    controls.addMeter('#000055', mana.subscribe);
-
-    const mv = emitter<number>();
-    controls.addMeter('#005500', mv.subscribe);
-
-    mud.getPlugin('prompt').onUpdate(x => {
-      hp(x.hp.percent);
-      mana(x.mana.percent);
-      mv(x.mv.percent);
-    });
-  }
-
-  function connectButtons() {
-    mud.onWorkflowsChange(workflows => {
-      sidebar.setWorkflows(
-        workflows.sort((a, b) => (a.name < b.name ? -1 : 1)),
-        mud,
-      );
-    });
   }
 
   function runWorkflow(name: string, args: string[]) {

@@ -3,8 +3,10 @@ import './index.css';
 import { ClientStorage } from '@amatiasq/client-storage';
 import { dom } from '@amatiasq/dom';
 
+import { getControlsProps, getSidebarProps, onStateChange } from '../state';
 import { Controls } from './Controls';
 import { Hamburger } from './Hamburger';
+import { html, render } from './render';
 import { Sidebar } from './Sidebar';
 import { Terminal } from './Terminal';
 
@@ -12,8 +14,6 @@ export function renderUserInterface(parent: HTMLElement) {
   const state = initState();
   const data = state.get()!;
 
-  const sidebar = new Sidebar();
-  const controls = new Controls();
   const terminal = new Terminal();
 
   const hamburger = new Hamburger(data.showControls);
@@ -21,18 +21,29 @@ export function renderUserInterface(parent: HTMLElement) {
 
   const main = dom`
     <div class="container">
-      ${sidebar.render()}
-      ${controls.render()}
       ${terminal.render()}
     </div>
   `;
+
+  onStateChange(renderComponents);
+  renderComponents();
+
+  function renderComponents() {
+    render(
+      html`
+        <${Controls} ...${getControlsProps()} />
+        <${Sidebar} ...${getSidebarProps()} />
+      `,
+      main,
+    );
+  }
 
   parent.appendChild(main);
   parent.appendChild(hamburger.render());
 
   onControlsToggle(data.showControls);
 
-  return { controls, sidebar, terminal };
+  return terminal;
 
   function onControlsToggle(value: boolean) {
     if (value) {

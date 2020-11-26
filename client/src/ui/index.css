@@ -94,14 +94,10 @@ body {
 
 .controls .meters .meter {
   flex: 1;
-  --color: white;
-  --value: 100%;
 }
 
 .controls .meter .bar {
   height: 100%;
-  width: var(--value);
-  background-color: var(--color);
 }
 
 /* SIDEBAR */
@@ -188,6 +184,10 @@ body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.sidebar .workflow .pattern.blink {
+  animation: highlight 0.3s linear;
 }
 
 .sidebar .action.enable-control:hover i:first-child,
