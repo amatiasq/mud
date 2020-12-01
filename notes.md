@@ -1,7 +1,8 @@
 - Google "Cloudflare websocket disconnects"
 - No aceptar input hasta login ready
-- Crear promise
+- Add plugins checkbox
 
+- ~~Crear promise~~
 - ~~Research scroll to bottom~~
 - ~~1 Socket => 1 Telnet~~
 - ~~Use new `spells.ts` for spells info~~
@@ -11,6 +12,9 @@
 - ~~sacrificar cuerpo~~
 - ~~luchar con causar graves~~
 - ~~no conjurar cuando aturdido~~
+
+From tini:
+`!go r3s6elen`
 
 ### Workflow for skills
 - `skill('cast', 'volar', 'armadillo')`

@@ -10,9 +10,7 @@ const MIN_INPUT_SIZE = 3;
 
 export class Terminal {
   private readonly $log = dom`<span class="log"></span>`;
-  private readonly $input = dom<
-    HTMLInputElement
-  >`<input type="text" size="${MIN_INPUT_SIZE}" autofocus>`;
+  private readonly $input = dom<HTMLInputElement>`<input type="text" size="${MIN_INPUT_SIZE}" autofocus>`;
   private readonly $el = dom`
     <main class="terminal">
       <div class="scroll-bottom">
@@ -58,6 +56,16 @@ export class Terminal {
     }
 
     this.$log.innerHTML = asciiToHtml(this.lastChunk);
+    this.clearLog();
+  }
+
+  private clearLog() {
+    const area = this.$log.parentElement!;
+    const removeCount = area.children.length - 2000;
+
+    for (let i = 0; i < removeCount; i++) {
+      area.removeChild(area.firstChild!);
+    }
   }
 
   private onKeyDown(event: KeyboardEvent) {

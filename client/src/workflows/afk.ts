@@ -1,12 +1,10 @@
 import { Context } from '../lib';
 
 export async function afk(
-  { abort, run, when, plugins: { navigation, prompt } }: Context,
+  { abort, log, run, when, plugins: { navigation, prompt } }: Context,
   ...areas: string[]
 ) {
   const initialExp = prompt.getValue('exp');
-  let isAborted = false;
-
   console.log({ initialExp });
 
   when('.. Todo empieza a volverse negro.\n', async () => {
@@ -15,19 +13,19 @@ export async function afk(
     const exp = prompt.getValue('exp');
 
     if (exp > initialExp) {
-      isAborted = true;
       abort();
     }
   });
 
-  while (!isAborted) {
+  while (true) {
     await action();
+    log('AFK Completed. Restarting...');
   }
 
   async function action(): Promise<void> {
     try {
       await run('recover');
-      await run('repair');
+      // await run('repair');
       await run('dope');
       await run('recover');
     } catch (error) {
@@ -40,13 +38,13 @@ export async function afk(
       console.log('Train error', error);
     }
 
-    try {
-      if (navigation.isAtRecall) {
-        await run('bank');
-      }
-    } catch (error) {
-      console.log('Bank error', error);
-    }
+    // try {
+    //   if (navigation.isAtRecall) {
+    //     await run('bank');
+    //   }
+    // } catch (error) {
+    //   console.log('Bank error', error);
+    // }
   }
 }
 

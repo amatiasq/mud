@@ -58,7 +58,11 @@ export class Workflow<Result = any, Args extends any[] = any[]> {
 
     const promise = new CancellablePromise<Result>(
       (resolve, reject, onCancel) => {
-        onCancel(() => context.abort());
+        onCancel(() => {
+          context.abort();
+          reject();
+        });
+
         Promise.resolve(this.run(context, ...args)).then(resolve, reject);
       },
     );

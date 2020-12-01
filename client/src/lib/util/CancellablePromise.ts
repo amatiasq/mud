@@ -32,7 +32,7 @@ export interface CancellablePromise<T> {
   catch<Result = T>(
     onrejected?: PromiseOnRejected<any, Result>,
   ): CancellablePromise<Result>;
-  // finally(onfinally?: (() => void) | undefined | null): CancellablePromise<T>;
+  finally(onfinally?: (() => void) | undefined | null): CancellablePromise<T>;
 }
 
 export class CancellablePromise<T> extends Promise<T> {
@@ -64,13 +64,13 @@ export class CancellablePromise<T> extends Promise<T> {
     super((resolve, reject) => {
       executor(
         value => {
-          if (this.isPending) {
+          if (this.isPending || this.isCancelled) {
             this.state = 'resolved';
             resolve(value);
           }
         },
         reason => {
-          if (this.isPending) {
+          if (this.isPending || this.isCancelled) {
             this.state = 'rejected';
             reject(reason);
           }
@@ -96,14 +96,14 @@ export class CancellablePromise<T> extends Promise<T> {
     return result;
   }
 
-  finally(onfinally?: (() => void) | undefined | null) {
-    if (onfinally) {
-      this.onCancel(onfinally);
-    }
+  // finally(onfinally?: (() => void) | undefined | null) {
+  //   if (onfinally) {
+  //     this.onCancel(onfinally);
+  //   }
 
-    super.finally(onfinally);
-    return this;
-  }
+  //   super.finally(onfinally);
+  //   return this;
+  // }
 
   cancel() {
     if (this.isPending) {

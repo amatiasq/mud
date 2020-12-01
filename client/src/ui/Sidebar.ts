@@ -1,3 +1,5 @@
+import { ComponentChildren } from 'preact';
+
 import { SinglePattern } from '../lib/triggers/Pattern';
 import { PatternMatcher } from '../lib/triggers/PatternMatcher';
 import { Workflow } from '../lib/workflow/Workflow';
@@ -115,7 +117,7 @@ function WorkflowTriggers({ workflow: { triggers } }: WorkflowProp) {
 
 type ButtonProps = {
   className?: string;
-  children: any;
+  children: ComponentChildren;
   onClick: (event: MouseEvent) => void;
 };
 
@@ -128,7 +130,6 @@ function Action({ children, className, onClick }: ButtonProps) {
 }
 
 function Icon({ name }: { name: string }) {
-  console.log(name);
   return html`<i class="fas fa-${name}"></i>`;
 }
 

@@ -10,10 +10,15 @@ const MOB_GENERIC = {
     'Una enorme aguila esta aqui profundamente dormido.',
     'Una gigantesca aguila vuela a tu alrededor.',
   ],
+  bicho: 'Un asqueroso bicho se fija en ti nada mas verte.',
   buitre: 'Un buitre carronyero esta aqui.',
   calamar: 'Un calamar gigante esta aqui nadando.',
   caracol: 'Un pequenyo caracol esta aqui haciendo trompos.',
   ciervo: null,
+  ciudadano:
+    'El pobre ciudadano esta tan absorto en su pena que no te advierte.',
+  cliente:
+    'Un cliente muy serio se sienta silenciosamente en una de las grandes mesas.',
   conejo: null,
   criatura: [
     'Una poderosa criatura del pantano esta aqui profundamente dormido.',
@@ -50,7 +55,12 @@ const MOB_GENERIC = {
     'Un habitante del bosque merodea por aqui, protegiendo su montanya.',
     'Un macizo chaman goblin esta aqui rugiendo a sus lacayos.',
   ],
-  guardia: 'Un Guardia Real está aquí velando por la seguridad del estadio',
+  atontada: 'Una granjera atontada mira hacia ningun lugar.',
+  atontado: 'Un granjero atontado tropieza por aqui.',
+  guardia: [
+    'Un Guardia Real está aquí velando por la seguridad del estadio',
+    'Un guardia del pueblo vaga a ciegas.',
+  ],
   guerrero: 'Un guerrero asqueroso grunye al verte.',
   jefe: [
     'Un jefe esta aqui descansando.',
@@ -58,7 +68,9 @@ const MOB_GENERIC = {
     'Un macizo chaman goblin esta aqui rugiendo a sus lacayos.',
   ],
   ladron: [
+    'Una extraña figura se mueve furtivamente.',
     'Un ladron esta aqui profundamente dormido.',
+    'Un ladron te mira desconfiado.',
     /Tu ataque causa .* a un ladron!/,
   ],
   lobo: [
@@ -66,7 +78,10 @@ const MOB_GENERIC = {
     'Un lobo feroz esta aqui y grunye muy enojado.',
     'Un lobo hambriento te esta mirando',
   ],
-  mago: 'Un mago viejo esta aqui profundamente dormido.',
+  mago: [
+    'Un mago viejo esta aqui profundamente dormido.',
+    'Un anciano con ropajes de mago, pregona sus mercancias.',
+  ],
   merodeador: null,
   murcielago: null,
   ogro: [
@@ -95,6 +110,8 @@ const MOB_GENERIC = {
     'Un voluminoso cocinero orco sopesa un cuchillo de carnicero manchado de sangre.',
     /El orco espadachin esta aqui profundamente dormido\./i,
   ],
+  oso:
+    'Un oso pardo se mueve pesadamente detras de la mesa, hay sangre en su piel.',
   pantera: null,
   piranya: [
     'Una piranya te mira con su enorme boca.',
@@ -102,18 +119,26 @@ const MOB_GENERIC = {
   ],
   rata: 'Una rata gigante esta aqui profundamente dormido.',
   sapo: 'un sapo gigante esta aqui profundamente dormido.',
+  sacerdotisa:
+    'Una voluptuosa mujer desnuda se postra ante su dios lujuriosamente.',
   serpiente: 'Una serpiente que parece venenosa te mira fijamente.',
   'uruk-hai': [
     'Un asqueroso arquero uruk-hai tensa su arco al verte.',
     'Un superior uruk-hai esta aqui vigilando.',
   ],
   troll: 'Un troll de mas de 3 metros de alto esta destrozando el mobiliario.',
+  viejo: 'Un harapiento y despeinado viejo llora sentado en el suelo.',
   zombie: 'Un zombie se acerca hacia ti con los brazos extendidos.',
 };
 
 const MOB_CHARACTERS = {
+  clegg:
+    'El carnicero demente saca espuma por la boca mientras parte la carne.',
   kivon: 'Kivon, el líder del culto, no está nada contento con intromisiones.',
+  mariah: 'Una joven esta aqui sentada y canta suavemente para si.',
   nejane: 'Nejane, la líder, parece estar en trance.',
+  silus:
+    'Un delgado elfo, el propietario del establecimiento, te mira fijamente.',
 } as const;
 
 const MOB_ARTICLE = /(?:(?:un|una|el|la|los|las|unos|unas) )?/;

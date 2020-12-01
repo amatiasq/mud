@@ -62,9 +62,9 @@ export class WorkflowContextCreator extends BasicContextCreator {
       abort(fromExecution?: boolean) {
         if (context.isAborted) return;
 
-        abort();
-
         children.forEach(x => x.cancel());
+
+        abort();
 
         if (finish) {
           finish(

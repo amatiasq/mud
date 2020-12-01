@@ -1,3 +1,4 @@
+import { SinglePattern } from './../lib/triggers/Pattern';
 import { getAreaMetadata, getAreasForLevel } from '../data/areas';
 import {
   getMobFromPresence,
@@ -10,6 +11,10 @@ import {
 } from '../data/mobs';
 import { Context } from '../lib';
 import { KillResult } from './kill';
+
+const AVOID: SinglePattern[] = [
+  // 'Una voluptuosa mujer desnuda se postra ante su dios lujuriosamente.',
+];
 
 export async function train(
   {
@@ -30,12 +35,18 @@ export async function train(
   const arena = await getArena(area);
   const theif = getMobIn('ladron');
   const enemies: Mob[] = [];
+  let avoidRoom = false;
 
-  when(getMobsPresence(), ({ patterns, fullMatch, captured }) =>
-    enemySpotted(
+  when(getMobsPresence(), ({ patterns, fullMatch, captured }) => {
+    if (patterns.some(x => AVOID.includes(x))) {
+      avoidRoom = true;
+      return;
+    }
+
+    return enemySpotted(
       getMobFromPresence(patterns) || getMobIn(fullMatch || captured[0]),
-    ),
-  );
+    );
+  });
 
   when(MOB_ARRIVES, ({ groups }) => enemySpotted(getMobIn(groups.mob)));
   when(
@@ -53,6 +64,11 @@ export async function train(
   return nav.recall();
 
   async function enterRoom() {
+    if (avoidRoom) {
+      avoidRoom = false;
+      return true;
+    }
+
     log('ENTER_ROOM');
     await prompt.until(({ mv: { current: mv } }) => mv > 50);
 

@@ -146,6 +146,11 @@ const metadata: Partial<Record<SpellName, SpellMetadata>> = {
     effect: effectDuration,
   },
 
+  'escudo hielo': {
+    success: 'Un torbellino de granizo te envuelve protectivamente.',
+    effect: effectDuration,
+  },
+
   flotar: {
     success: 'Empiezas a flotar a unos centimetros del suelo...',
     target: /\n(?<target>[^\n]+) empieza a flotar a unos centimetros del suelo\.\.\./,
@@ -206,6 +211,10 @@ const metadata: Partial<Record<SpellName, SpellMetadata>> = {
     target: /Los pulmones de (?<target>[^\n]+) ahora son capaces de respirar bajo agua\.\.\./,
     end: 'Tus pulmones vuelven a su estado original.',
     effect: effectDuration,
+  },
+
+  'retirar maldicion': {
+    success: 'Te sientes liberado de la maldicion.',
   },
 
   terremoto: {

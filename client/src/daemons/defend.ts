@@ -70,6 +70,7 @@ export async function defend({
   when('Estas maldito y no puedes usar el regresar!', async () => {
     if (await skills.can('retirar maldicion')) {
       await run('cast', ['retirar maldicion']);
+      await navigation.recall();
     }
   });
 

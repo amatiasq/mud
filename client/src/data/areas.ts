@@ -48,6 +48,14 @@ const ARENAS: Partial<Record<AreaName, Arena>> = {
     '4w4e',
     '2unu', // Kivon & Nejane
   ],
+  'Los Usurpadores de Hochenyana': [
+    'n3w', // esquina noroeste
+    'ensen2sne', // calle mayor
+    'en2snense', // esquina noreste
+    'wse2we2sn', // esquina surestes
+    'wn2sn2wn2sn2w', // esquina suroeste
+    'ene2we2sn2e',
+  ],
   'La tumba de Damara': [
     'nnwes', // despensa
     'esn', // la prision
