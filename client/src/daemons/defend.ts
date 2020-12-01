@@ -13,6 +13,16 @@ export async function defend({
     navigation.recall(),
   );
 
+  when(
+    [
+      'Sientes escalofrios a la vez que tiemblas.',
+      'No te encuentras nada bien.',
+    ],
+    () => run('cast', ['curar veneno']),
+  );
+
+  when(' te DESARMA!', () => write('vestir todo'));
+
   when(ATTACK_RECEIVED, async ({ groups }) => {
     if (isRunning('kill')) {
       return;
@@ -43,6 +53,8 @@ export async function defend({
 
     const sus = when(RECUPERED, () => bodies++);
 
+    await prompt.until();
+    await write('despertar');
     await write('suplicar cuerpo');
     await when(RECUPERED).timeout(5);
 

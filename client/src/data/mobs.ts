@@ -10,6 +10,9 @@ const MOB_GENERIC = {
     'Una enorme aguila esta aqui profundamente dormido.',
     'Una gigantesca aguila vuela a tu alrededor.',
   ],
+  anciano: 'Un marchito anciano deambula por los pasillos vigilando.',
+  atontada: 'Una granjera atontada mira hacia ningun lugar.',
+  atontado: 'Un granjero atontado tropieza por aqui.',
   bicho: 'Un asqueroso bicho se fija en ti nada mas verte.',
   buitre: 'Un buitre carronyero esta aqui.',
   calamar: 'Un calamar gigante esta aqui nadando.',
@@ -38,7 +41,10 @@ const MOB_GENERIC = {
     'Un esqueleto huesudo esta aqui profundamente dormido.',
     'Un esqueleto polvoriento esta aqui.',
   ],
-  fanatico: "Un humano poseído por el fanatismo busca 'herejes'.",
+  fanatico: [
+    "Un humano poseído por el fanatismo busca 'herejes'.",
+    'Una figura humanoide resplandece detras de un brillante campo de fuerza.',
+  ],
   gusano: [
     'Un gusano de roca esta aqui profundamente dormido.',
     /Un monstruoso gusano de hielo excava a traves del hielo y la nieve aqui\. Se yergue y\s+ataca!/,
@@ -51,12 +57,12 @@ const MOB_GENERIC = {
   ],
   gnoll: 'un gnoll feo esta aqui profundamente dormido.',
   goblin: [
+    'Un alegre goblin cacarea maniaticamente.',
     'un goblin negrero esta aqui profundamente dormido.',
     'Un habitante del bosque merodea por aqui, protegiendo su montanya.',
     'Un macizo chaman goblin esta aqui rugiendo a sus lacayos.',
+    'Un pequenyo, pero fuerte goblin se arrastra por las cabanyas.',
   ],
-  atontada: 'Una granjera atontada mira hacia ningun lugar.',
-  atontado: 'Un granjero atontado tropieza por aqui.',
   guardia: [
     'Un Guardia Real está aquí velando por la seguridad del estadio',
     'Un guardia del pueblo vaga a ciegas.',
@@ -68,9 +74,10 @@ const MOB_GENERIC = {
     'Un macizo chaman goblin esta aqui rugiendo a sus lacayos.',
   ],
   ladron: [
-    'Una extraña figura se mueve furtivamente.',
+    'Un cauteloso ladron busca algo valioso por la ciudad.',
     'Un ladron esta aqui profundamente dormido.',
     'Un ladron te mira desconfiado.',
+    'Una extraña figura se mueve furtivamente.',
     /Tu ataque causa .* a un ladron!/,
   ],
   lobo: [
@@ -102,9 +109,10 @@ const MOB_GENERIC = {
     'Un ogro centinela esta de guardia delante de la puerta norte.',
     'un orco centinela esta aqui profundamente dormido.',
     'Un orco esta de pie al lado de la ballesta.',
-    'Un orco fuera de servicio esta sentado aqui jugando a las cartas.',
-    'Un orco fuera de servicio esta sentado aqui jugando a los dados.',
+    'Un orco fuera de servicio esta sentado aqui jugando a ',
     'un orco minero esta aqui profundamente dormido.',
+    'Un orco que se ve fiero, grune y oscila su arma hacia tu cabeza',
+    'Un orco salvaje gruñe y prepara sus armas.',
     'Un pequenyo orco se sienta en una de las sillas roncando.',
     'Un sargento orco mantiene vigilada la chusma a la que comanda.',
     'Un voluminoso cocinero orco sopesa un cuchillo de carnicero manchado de sangre.',
@@ -113,10 +121,12 @@ const MOB_GENERIC = {
   oso:
     'Un oso pardo se mueve pesadamente detras de la mesa, hay sangre en su piel.',
   pantera: null,
+  picara: 'Una picara sale de las sombras y te ataca!',
   piranya: [
     'Una piranya te mira con su enorme boca.',
     /Una piranya esta aqui profundamente dormido\./i,
   ],
+  rana: 'Una rana enorme croa furiosamente.',
   rata: 'Una rata gigante esta aqui profundamente dormido.',
   sapo: 'un sapo gigante esta aqui profundamente dormido.',
   sacerdotisa:
@@ -134,6 +144,8 @@ const MOB_GENERIC = {
 const MOB_CHARACTERS = {
   clegg:
     'El carnicero demente saca espuma por la boca mientras parte la carne.',
+  edmund: 'Un hombre pequenyo y rechoncho yace aturdido en el suelo.',
+  devrel: 'Un hombre desnudo yace sobre sus propios excrementos.',
   kivon: 'Kivon, el líder del culto, no está nada contento con intromisiones.',
   mariah: 'Una joven esta aqui sentada y canta suavemente para si.',
   nejane: 'Nejane, la líder, parece estar en trance.',

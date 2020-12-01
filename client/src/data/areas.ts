@@ -52,9 +52,13 @@ const ARENAS: Partial<Record<AreaName, Arena>> = {
     'n3w', // esquina noroeste
     'ensen2sne', // calle mayor
     'en2snense', // esquina noreste
-    'wse2we2sn', // esquina surestes
+    `ws${sides}e2sn`, // esquina surestes
     'wn2sn2wn2sn2w', // esquina suroeste
-    'ene2we2sn2e',
+    `en${sides}e2sn2e`, // centro sur
+    '2sws2wu', // oficinal del alcalde
+    '2en2es2e4snwe3n2wnw', //uudd',
+    '4s', // `4senenswn${sides}n3sw`, // Biblioteca de Hochenyana
+    `2s${'' && sides}s2e4w2es`, // s
   ],
   'La tumba de Damara': [
     'nnwes', // despensa

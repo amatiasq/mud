@@ -20,7 +20,7 @@ export async function recover({ run, plugins: { skills, prompt } }: Context) {
   const needsToMeditate = () => mana() < 0.8;
   const needsRefresh = () => mv() < 1;
 
-  const hasEnoughMana = () => (canMeditate ? mana() > 0.5 : mana() > 0.1);
+  const hasEnoughMana = () => (canMeditate ? mana() > 0.3 : mana() > 0.1);
   const isDone = () =>
     (canHeal ? !needsHeal() : true) &&
     (canMeditate ? !needsToMeditate() : true) &&

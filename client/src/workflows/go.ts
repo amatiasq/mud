@@ -42,7 +42,7 @@ export async function go(
   }
 
   if (await skills.can('viajar')) {
-    if (await run('cast', ['viajar', area.realm])) {
+    if (await run('cast', ['viajar', recall])) {
       return navigation.execute(area.path);
     }
   }

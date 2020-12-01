@@ -5,9 +5,13 @@ export async function afk(
   ...areas: string[]
 ) {
   const initialExp = prompt.getValue('exp');
+  let died = false;
+
   console.log({ initialExp });
 
   when('.. Todo empieza a volverse negro.\n', async () => {
+    died = true;
+
     await prompt.until();
 
     const exp = prompt.getValue('exp');
@@ -18,6 +22,11 @@ export async function afk(
   });
 
   while (true) {
+    if (died) {
+      await when('El cadaver de May pasa a convertirse en polvo');
+      died = false;
+    }
+
     await action();
     log('AFK Completed. Restarting...');
   }
@@ -25,7 +34,7 @@ export async function afk(
   async function action(): Promise<void> {
     try {
       await run('recover');
-      // await run('repair');
+      await run('repair');
       await run('dope');
       await run('recover');
     } catch (error) {
@@ -38,13 +47,15 @@ export async function afk(
       console.log('Train error', error);
     }
 
-    // try {
-    //   if (navigation.isAtRecall) {
-    //     await run('bank');
-    //   }
-    // } catch (error) {
-    //   console.log('Bank error', error);
-    // }
+    try {
+      const realm = await navigation.getRealm();
+
+      if (realm === 'Calimhar' && navigation.isAtRecall) {
+        await run('bank');
+      }
+    } catch (error) {
+      console.log('Bank error', error);
+    }
   }
 }
 

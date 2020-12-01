@@ -146,6 +146,10 @@ const metadata: Partial<Record<SpellName, SpellMetadata>> = {
     effect: effectDuration,
   },
 
+  'encantar arma': {
+    success: ' resplandece con destellos de energia azul.',
+  },
+
   'escudo hielo': {
     success: 'Un torbellino de granizo te envuelve protectivamente.',
     effect: effectDuration,
@@ -217,6 +221,11 @@ const metadata: Partial<Record<SpellName, SpellMetadata>> = {
     success: 'Te sientes liberado de la maldicion.',
   },
 
+  santuario: {
+    success: 'Una aura luminosa se forma lentamente a tu alrededor.',
+    effect: effectDuration,
+  },
+
   terremoto: {
     success: 'La tierra tiembla bajo tus pies!',
     target: 'La tierra tiembla bajo tus pies!',
@@ -224,6 +233,10 @@ const metadata: Partial<Record<SpellName, SpellMetadata>> = {
 
   veneno: {
     target: /\n(?<target>[^\n]+)cobra un aspecto enfermizo cuando tu veneno se esparce por su cuerpo./,
+  },
+
+  viajar: {
+    target: 'Salidas: ',
   },
 
   'vista distancia': {

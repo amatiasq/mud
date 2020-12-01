@@ -13,7 +13,8 @@ import { Context } from '../lib';
 import { KillResult } from './kill';
 
 const AVOID: SinglePattern[] = [
-  // 'Una voluptuosa mujer desnuda se postra ante su dios lujuriosamente.',
+  'Un hombre desnudo yace sobre sus propios excrementos.',
+  'Una figura humanoide resplandece detras de un brillante campo de fuerza.',
 ];
 
 export async function train(

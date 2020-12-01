@@ -1,18 +1,35 @@
+import { Realm } from '../data/areas';
 import { getItemSustantive, ItemName, UNWEAR } from '../data/items';
 import { Context } from '../lib';
 import { wait } from '../lib/util/wait';
+
+const REPAIR_SHOP: Record<Realm, string | null> = {
+  Calimhar: 'r2ses',
+  Earand: null,
+  Valmorag: 'r4swd2n',
+  Niruk: null,
+};
+
+const REPAIR_MAN = ['El herrero', 'Grimloz'];
 
 export async function repair({
   when,
   write,
   register,
-  plugins: { navigation, prompt },
+  plugins: { inventory, navigation, prompt },
 }: Context) {
   register('repair', async () => {
     const broken = await getBrokenEquipment();
 
     if (broken) {
-      await navigation.execute('r2ses');
+      const realm = await navigation.getRealm();
+      const shop = REPAIR_SHOP[realm];
+
+      if (!shop) {
+        throw new Error(`No repair shop known in ${realm}`);
+      }
+
+      await navigation.execute(shop);
       return repairEquipment(broken);
     }
   });
@@ -39,7 +56,11 @@ export async function repair({
   }
 
   async function getBrokenEquipment() {
-    const broken: ItemName[] = [];
+    const inInventory = await inventory.getByEffect('ROTO');
+
+    const broken: ItemName[] = [
+      ...inInventory.map(x => getItemSustantive(x.name)!).filter(Boolean),
+    ];
     write('equipo');
 
     const sus = when(/>\s+\[\+*[^+]+\] (?<item>.*)/, ({ groups }) => {
@@ -58,8 +79,8 @@ export async function repair({
     write('reparar todo');
 
     await Promise.any([
-      when('El herrero te cobra').then(() => true),
-      when('El herrero te cuenta').then(() => false),
+      when(REPAIR_MAN.map(x => `${x} te cobra`)).then(() => true),
+      when(REPAIR_MAN.map(x => `${x} te cuenta`)).then(() => false),
       wait(5).then(() => null),
     ]);
 

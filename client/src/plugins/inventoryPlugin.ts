@@ -7,6 +7,7 @@ import { int, toInt } from '../lib/util/int';
 import { singleExecution } from '../lib/util/singleExecution';
 
 interface ItemData {
+  name: string;
   amount: number;
   effects: string[];
 }
@@ -77,6 +78,7 @@ export const inventoryPlugin = createPlugin(
         const { effects, name, amount } = match.groups!;
 
         result[name] = {
+          name,
           amount: amount ? toInt(amount) : 1,
           effects: effects
             .replace(/^\s*\(|\)\s*$/g, '')
@@ -92,11 +94,22 @@ export const inventoryPlugin = createPlugin(
     when,
     write,
   }) => {
-    return { refresh, has, hasIn, hasInBackpack: hasIn.bind(null, 'mochila') };
+    return {
+      refresh,
+      has,
+      hasIn,
+      hasInBackpack: hasIn.bind(null, 'mochila'),
+      getByEffect,
+    };
 
     async function has(search: ItemSearch) {
       await ensureInitialized();
       return searchInList(getItems(), search);
+    }
+
+    async function getByEffect(effect: string) {
+      await ensureInitialized();
+      return Object.values(getItems()).filter(x => x.effects.includes(effect));
     }
 
     async function hasIn(container: string, search: ItemSearch) {
