@@ -223,6 +223,7 @@ const metadata: Partial<Record<SpellName, SpellMetadata>> = {
 
   santuario: {
     success: 'Una aura luminosa se forma lentamente a tu alrededor.',
+    end: 'El aura luminosa alrededor tuyo se desvanece.',
     effect: effectDuration,
   },
 
