@@ -69,7 +69,7 @@ export async function kill(
 
   async function handleBody(items: string[]) {
     write('sacrificar cuerpo');
-    await when('te da una moneda de oro por tu sacrificio.');
+    // await when('te da una moneda de oro por tu sacrificio.');
   }
 
   async function repeatUntilCasted(

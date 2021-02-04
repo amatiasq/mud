@@ -197,6 +197,11 @@ const metadata: Partial<Record<SpellName, SpellMetadata>> = {
       'Rayos de luz iridiscente colisionan para formar una bola de luz eterna...',
   },
 
+  'piel petrea': {
+    success: 'Tu piel se vuelve dura como la piedra, aunque flexible.',
+    effect: effectProp('armor class'),
+  },
+
   'piel robliza': {
     success: 'Tu piel se oscurece a la vez que adquiere la dureza del roble.',
     end: 'Tu piel vuelve a su estado normal...',

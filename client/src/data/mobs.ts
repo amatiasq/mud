@@ -55,6 +55,7 @@ const MOB_GENERIC = {
     'Un macizo hobgoblin esta de guardia cerca del hueco de la escalera.',
     'Un guardian de la montaña esta aquí, echando espuma por la boca.',
   ],
+  hombre: 'Un salvaje hombre, medio desnudo, te mira con ansiedad.',
   gnoll: 'un gnoll feo esta aqui profundamente dormido.',
   goblin: [
     'Un alegre goblin cacarea maniaticamente.',
@@ -82,6 +83,7 @@ const MOB_GENERIC = {
   ],
   lobo: [
     'Un gran lobo negro, te muestra los colmillos hambriento.',
+    'Un lobo blanco como la nieve del tamanyo de una vaca grunye amenzadoramente.',
     'Un lobo feroz esta aqui y grunye muy enojado.',
     'Un lobo hambriento te esta mirando',
   ],
