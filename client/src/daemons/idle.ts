@@ -6,6 +6,10 @@ export async function idle({
   run,
   plugins: { navigation, skills },
 }: Context) {
+  when('Escribe MIRAR CARTEL para empezar el aprendizaje', () =>
+    run('tutorial'),
+  );
+
   when('Desapareces en la nada.', async () => {
     console.log('IDLE');
 

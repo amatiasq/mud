@@ -4,6 +4,7 @@ export const SKILL_LEARN_ORDER: (SkillName | SkillName[])[] = [
   'estilo evasivo',
   'armas impacto',
 
+  // Basicos
   ['crear manantial', 'crear agua'],
   ['crear baya', 'crear comida', 'saciar hambre'],
   'luz eterna',

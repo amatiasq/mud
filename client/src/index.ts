@@ -86,9 +86,9 @@ async function initializeMud(telnet: RemoteTelnet) {
 
   bindViewTo(mud);
 
-  if (user === 'may') {
-    registerWorkflows(mud);
-  }
+  // if (user === 'may') {
+  registerWorkflows(mud);
+  // }
 
   Object.assign(window, { mud });
 

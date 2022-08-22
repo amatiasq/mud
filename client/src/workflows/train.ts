@@ -61,6 +61,8 @@ export async function train(
   write('visible');
   write('huida');
 
+  console.log({ route });
+
   await nav.execute(route, enterRoom);
   return nav.recall();
 

@@ -18,6 +18,7 @@ import { kill } from './workflows/kill';
 import { learn } from './workflows/learn';
 import { recover } from './workflows/recover';
 import { train } from './workflows/train';
+import { tutorial } from './workflows/tutorial';
 import { wear } from './workflows/wear';
 
 export function registerWorkflows(mud: Mud) {
@@ -41,5 +42,6 @@ export function registerWorkflows(mud: Mud) {
   mud.workflow('learn', learn);
   mud.workflow('recover', recover);
   mud.workflow('train', train);
+  mud.workflow('tutorial', tutorial);
   mud.workflow('wear', wear);
 }
