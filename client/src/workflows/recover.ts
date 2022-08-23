@@ -27,24 +27,34 @@ export async function recover({ run, plugins: { skills, prompt } }: Context) {
     (canRefresh ? !needsRefresh() : true);
 
   while (!isDone()) {
+    let acted = false;
+
     if (canInvisible && !prompt.isInvisible) {
+      acted = true;
       await run('cast', [invisible]);
     }
 
     if (canHeal && needsHeal() && hasEnoughMana()) {
+      acted = true;
       await run('cast', [heal]);
     }
 
     if (canRefresh && needsRefresh() && hasEnoughMana()) {
+      acted = true;
       await run('cast', [refresh]);
     }
 
     if (canMeditate && needsToMeditate()) {
+      acted = true;
       const result = await skills.meditate();
 
       if (result === skills.BUSY) {
         await wait(2);
       }
+    }
+
+    if (!acted) {
+      await wait(1);
     }
   }
 }
