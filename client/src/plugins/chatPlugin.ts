@@ -13,41 +13,65 @@ const beepAudio = new Audio(
 );
 
 const version = { version: 2 };
+const date = () =>
+  new Date()
+    .toISOString()
+    .replace('T', ' ')
+    .replace(/\.\d\d\dZ/, '');
 
-const receive = (log: History) => ({
-  groups: { name, message },
-}: PatternResult) => {
-  console.log(`MESSAGE => ${name} =>`, message);
-  addMessage(log, { from: name, message });
+const receive =
+  (log: History, type: string) =>
+  ({ groups: { name, message } }: PatternResult) => {
+    console.log(`MESSAGE [${type}] ${date()} => ${name} =>`, message);
+    addMessage(log, { from: name, message });
 
-  if (!name.startsWith('[Orden')) {
-    notify(`${name}: ${message}`);
-  }
-};
+    if (!name.startsWith('[Orden')) {
+      notify(`${name}: ${message}`);
+    }
+  };
 
-const sent = (log: History) => ({ groups: { name, message } }: PatternResult) =>
-  addMessage(log, { to: name, message });
+const sent =
+  (log: History, type: string) =>
+  ({ groups: { name, message } }: PatternResult) => {
+    console.log(`SENT [${type}] ${date()} => ${name} =>`, message);
+
+    addMessage(log, { to: name, message });
+  };
 
 export const chatPlugin = createPlugin(
   ({ when, write }) => {
     // const say = new ClientStorage<Record<string, Message[]>>('chat:say');
+    const chat = new ClientStorage<Message[]>('chat:global', version);
     const order = new ClientStorage<Message[]>('chat:order', version);
     const tell = new ClientStorage<Message[]>('chat:tell', version);
     const whisper = new ClientStorage<Message[]>('chat:whisper', version);
 
     (window as any).chat = () => ({
+      global: chat.get(),
       tell: tell.get(),
       order: order.get(),
       whisper: whisper.get(),
     });
 
-    when(/(?<name>\[Orden: [^\]]+\]): '(?<message>[^']+)'/, receive(order));
-    when(/(?<name>\[Orden\]): '(?<message>[^']+)'/, sent(order));
+    when(/(?<name>\w+) charla '(?<message>[^']+)'/, receive(chat, 'General'));
+    when(/Charlas '(?<message>[^']+)'/, sent(chat, 'General'));
 
-    when(/(?<name>.+) te susurra '(?<message>[^']+)'/, receive(whisper));
-    when(/Susurras a (?<name>.+) '(?<message>[^']+)'/, sent(whisper));
+    when(
+      /(?<name>\[Orden: [^\]]+\]): '(?<message>[^']+)'/,
+      receive(order, 'Order'),
+    );
+    when(/(?<name>\[Orden\]): '(?<message>[^']+)'/, sent(order, 'Order'));
 
-    const receiveTell = receive(tell);
+    when(
+      /(?<name>.+) te susurra '(?<message>[^']+)'/,
+      receive(whisper, 'Whisper'),
+    );
+    when(
+      /Susurras a (?<name>.+) '(?<message>[^']+)'/,
+      sent(whisper, 'Whisper'),
+    );
+
+    const receiveTell = receive(tell, 'Tell');
 
     when(
       [
@@ -65,7 +89,7 @@ export const chatPlugin = createPlugin(
         /Cuentas a (?<name>.+) '(?<message>[^']+)'/,
         /Respondes a (?<name>.+) '(?<message>[^']+)'/,
       ],
-      sent(tell),
+      sent(tell, 'Tell'),
     );
 
     when(

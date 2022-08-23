@@ -8,7 +8,10 @@ import {
 import { Context } from '../lib';
 import { concatRegexes } from '../lib/util/concatRegexes';
 
-export async function wear({ run, when, write }: Context, ...args: string[]) {
+export async function wear(
+  { run, when, write, plugins: { skills } }: Context,
+  ...args: string[]
+) {
   const items = args.length ? args : ITEM_SUSTANTIVES;
 
   for (const item of items) {
@@ -32,22 +35,29 @@ export async function wear({ run, when, write }: Context, ...args: string[]) {
     ]);
 
     if (!pickedUp) {
-      throw new Error(`Couldn't pick up "${item}"`);
+      console.warn(`Couldn't pick up "${item}"`);
+      return true;
     }
 
-    let isMetallic = false;
+    if (await skills.can('identificar')) {
+      let isMetallic = false;
+      const sus = when(
+        ' es un(a) armadura_metalica,',
+        () => (isMetallic = true),
+      );
+      const identified = await run('cast', ['identificar', item]);
+      sus.unsubscribe();
 
-    const sus = when(' es un(a) armadura_metalica,', () => (isMetallic = true));
-    const identified = await run('cast', ['identificar', item]);
-    sus.unsubscribe();
+      if (!identified) {
+        console.warn(`Couldn't identifiy "${item}"`);
+        await tirar(item);
+        return false;
+      }
 
-    if (!identified) {
-      throw new Error(`Couldn't identifiy "${item}"`);
-    }
-
-    if (isMetallic) {
-      await tirar(item);
-      return false;
+      if (isMetallic) {
+        await tirar(item);
+        return false;
+      }
     }
 
     write(`vestir "${item}"`);
@@ -58,6 +68,7 @@ export async function wear({ run, when, write }: Context, ...args: string[]) {
       when([
         /Debes ser nivel \w+ para usar este objeto./,
         'No puedes vestir eso, necesita repararse.',
+        'Te esta prohibido usar ese objeto.',
       ]).then(() => false),
     ]);
 

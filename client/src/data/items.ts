@@ -9,6 +9,7 @@ export const WEAR = [
   'Te pones ',
   'Metes las piernas ',
   'Vistes ',
+  'Usas ',
 ];
 export const UNWEAR = concatRegexes(
   /Dejas de usar/,
