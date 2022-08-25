@@ -23,17 +23,18 @@ export async function recover({
 
   const wantedHp = () => (canMeditate ? 1 : Math.max(mana(), 0.5));
 
-  const needsHeal = () => hp() < wantedHp();
-  const needsToMeditate = () => mana() < 0.8;
-  const needsRefresh = () => mv() < 1;
+  const isInjured = () => hp() < wantedHp();
+  const needsMana = () => mana() < 0.8;
+  const needsRest = () => mv() < 1;
 
   const hasEnoughMana = () => (canMeditate ? mana() > 0.3 : mana() > 0.1);
-  const isDone = () =>
-    (canHeal ? !needsHeal() : true) &&
-    (canMeditate ? !needsToMeditate() : true) &&
-    (canRefresh ? !needsRefresh() : true);
+  const isRefreshed = () => !isInjured() && !needsMana() && !needsRest();
+  const isDoneCasting = () =>
+    (canHeal ? !isInjured() : true) &&
+    (canMeditate ? !needsMana() : true) &&
+    (canRefresh ? !needsRest() : true);
 
-  while (!isDone()) {
+  while (!isDoneCasting()) {
     let acted = false;
 
     if (canInvisible && !prompt.isInvisible) {
@@ -41,17 +42,17 @@ export async function recover({
       await run('cast', [invisible]);
     }
 
-    if (canHeal && needsHeal() && hasEnoughMana()) {
+    if (canHeal && isInjured() && hasEnoughMana()) {
       acted = true;
       await run('cast', [heal]);
     }
 
-    if (canRefresh && needsRefresh() && hasEnoughMana()) {
+    if (canRefresh && needsRest() && hasEnoughMana()) {
       acted = true;
       await run('cast', [refresh]);
     }
 
-    if (canMeditate && needsToMeditate()) {
+    if (canMeditate && needsMana()) {
       acted = true;
       const result = await skills.meditate();
 
@@ -61,16 +62,34 @@ export async function recover({
     }
 
     if (!acted) {
-      write('dormir');
-      await when([
-        'Cierras los ojos y caes en un profundo suenyo.',
-        'Ya estas durmiendo.',
-      ]);
-
-      await Promise.any([
-        sleep(30).then(() => write('despertar')),
-        when('Te despiertas y te pones de pie.'),
-      ]);
+      break;
     }
   }
+
+  // if (!isRefreshed()) {
+  //   let isAwake = false;
+  //   write('dormir');
+
+  //   await when([
+  //     'Cierras los ojos y caes en un profundo suenyo.',
+  //     'Ya estas durmiendo.',
+  //   ]);
+
+  //   when('Te despiertas y te pones de pie.').then(() => (isAwake = true));
+
+  while (!isRefreshed()) {
+    await sleep(10);
+
+    // if (isAwake) {
+    //   break;
+    // }
+
+    console.log('Continue sleeping...');
+  }
+
+  //   if (!isAwake) {
+  //     write('despertar');
+  //     await when('Te despiertas y te pones de pie.');
+  //   }
+  // }
 }

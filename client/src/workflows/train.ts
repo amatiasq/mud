@@ -1,4 +1,3 @@
-import { SinglePattern } from './../lib/triggers/Pattern';
 import { getAreaMetadata, getAreasForLevel } from '../data/areas';
 import {
   getMobFromPresence,
@@ -10,6 +9,7 @@ import {
   MOB_LEAVES,
 } from '../data/mobs';
 import { Context } from '../lib';
+import { SinglePattern } from './../lib/triggers/Pattern';
 import { KillResult } from './kill';
 
 const AVOID: SinglePattern[] = [
@@ -81,7 +81,10 @@ export async function train(
       const recover = run('recover');
       await Promise.any([
         recover,
-        when(MOB_ARRIVES).then(() => recover.cancel()),
+        when(MOB_ARRIVES).then(() => {
+          recover.cancel();
+          write('despertar');
+        }),
       ]);
 
       log('READY_TO_FIGHT!!!');
