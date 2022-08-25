@@ -9,7 +9,7 @@ import { Context } from '../lib';
 import { concatRegexes } from '../lib/util/concatRegexes';
 
 export async function wear(
-  { run, when, write, plugins: { skills } }: Context,
+  { run, sleep, when, write, plugins: { skills } }: Context,
   ...args: string[]
 ) {
   const items = args.length ? args : ITEM_SUSTANTIVES;
@@ -46,6 +46,8 @@ export async function wear(
         () => (isMetallic = true),
       );
       const identified = await run('cast', 'identificar', item);
+
+      await sleep(1);
       sus.unsubscribe();
 
       if (!identified) {
@@ -66,9 +68,11 @@ export async function wear(
       when(WEAR).then(() => true),
       when(UNWEAR).then(({ groups }) => groups.item),
       when([
+        'No tienes ese objeto.',
         /Debes ser nivel \w+ para usar este objeto./,
         'No puedes vestir eso, necesita repararse.',
         'Te esta prohibido usar ese objeto.',
+        'No puedes vestir un objeto que no te pertenece.',
       ]).then(() => false),
     ]);
 
@@ -83,7 +87,7 @@ export async function wear(
       if (other) {
         await run('cast', 'identificar', other);
         write(`poner ${other} mochila`);
-        await when('Pones ');
+        await when(' en una mochila ');
       }
     }
 

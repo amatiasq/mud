@@ -56,7 +56,8 @@ const effectProp = (prop: string | RegExp) => (name: SpellName) =>
 const metadata: Partial<Record<SpellName, SpellMetadata>> = {
   armadura: {
     success: 'Tu armadura brilla suavemente al ser mejorada por un conjuro.',
-    target: /La armadura de (?<target>(?:\w+ )+)brilla suavemente al ser mejorada por un conjuro\./,
+    target:
+      /La armadura de (?<target>(?:\w+ )+)brilla suavemente al ser mejorada por un conjuro\./,
     end: 'Tu armadura vuelve a su valor normal.',
     effect: effectProp('armor class'),
   },
@@ -157,7 +158,8 @@ const metadata: Partial<Record<SpellName, SpellMetadata>> = {
 
   flotar: {
     success: 'Empiezas a flotar a unos centimetros del suelo...',
-    target: /\n(?<target>[^\n]+) empieza a flotar a unos centimetros del suelo\.\.\./,
+    target:
+      /\n(?<target>[^\n]+) empieza a flotar a unos centimetros del suelo\.\.\./,
     end: 'Tus pies aterrizan suavemente en el suelo.',
   },
 
@@ -172,7 +174,8 @@ const metadata: Partial<Record<SpellName, SpellMetadata>> = {
   },
 
   identificar: {
-    target: /El objeto '(?<name>[^']+)' es un\(a\) (?<type>\w+), propiedades especiales: (?<properties>[^\n]+)\n/,
+    target:
+      /El objeto '(?<name>[^']+)' es un\(a\) (?<type>\w+), propiedades especiales: (?<properties>[^\n]+)\n/,
   },
 
   invisibilidad: {
@@ -209,7 +212,8 @@ const metadata: Partial<Record<SpellName, SpellMetadata>> = {
   },
 
   polimorfar: {
-    success: /Tu cuerpo empieza a cambiar... hasta transformarte en (?<result>[^!]+)!/,
+    success:
+      /Tu cuerpo empieza a cambiar... hasta transformarte en (?<result>[^!]+)!/,
     end: 'Recuperas tu forma natural.',
   },
 
@@ -217,7 +221,8 @@ const metadata: Partial<Record<SpellName, SpellMetadata>> = {
 
   'respiracion acuatica': {
     success: 'Tus pulmones ahora son capaces de respirar bajo agua...',
-    target: /Los pulmones de (?<target>[^\n]+) ahora son capaces de respirar bajo agua\.\.\./,
+    target:
+      /Los pulmones de (?<target>[^\n]+) ahora son capaces de respirar bajo agua\.\.\./,
     end: 'Tus pulmones vuelven a su estado original.',
     effect: effectDuration,
   },
@@ -238,7 +243,8 @@ const metadata: Partial<Record<SpellName, SpellMetadata>> = {
   },
 
   veneno: {
-    target: /\n(?<target>[^\n]+)cobra un aspecto enfermizo cuando tu veneno se esparce por su cuerpo./,
+    target:
+      /\n(?<target>[^\n]+)cobra un aspecto enfermizo cuando tu veneno se esparce por su cuerpo./,
   },
 
   viajar: {
@@ -247,7 +253,8 @@ const metadata: Partial<Record<SpellName, SpellMetadata>> = {
 
   'vista distancia': {
     success: 'Tienes una vision reveladora...',
-    target: /Los ojos de (?<target>[^\n]+) parecen estar mirando un lugar lejano\.\.\./,
+    target:
+      /Los ojos de (?<target>[^\n]+) parecen estar mirando un lugar lejano\.\.\./,
     end: 'Tu clarividencia te abandona...',
     effect: effectDuration,
   },
@@ -301,6 +308,7 @@ export const SPELL_NOT_POSSIBLE = [
   'No has tenido suficiente tiempo en este asalto para completar el conjuro.',
   'Estas demasiado malherido para hacer eso.',
   'Estas demasiado aturdido para hacer eso.',
+  'Tu armadura metalica no te permite concentrarte para hacer magia.',
 ];
 
 export const SPELLS_BY_TYPE = {

@@ -12,6 +12,7 @@ const REPAIR_SHOP: Record<Realm, string | null> = {
 const REPAIR_MAN = ['El herrero', 'Grimloz'];
 
 export async function repair({
+  isRunning,
   sleep,
   when,
   write,
@@ -35,6 +36,10 @@ export async function repair({
   });
 
   when('No puedes vestir eso, necesita repararse.', async () => {
+    if (isRunning('donations')) {
+      return;
+    }
+
     await navigation.execute('r2ses');
     await repairAll();
 

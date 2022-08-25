@@ -22,8 +22,9 @@ export async function dope({
   const shouldHeal = defineShould(0.2);
   const shouldRefresh = defineShould(0.1, 0.8);
 
-  const casting = new Set(memory.get());
+  const castingQueue = new Set(memory.get());
   const spells = getSpells();
+  let currentlyCasting: Promise<any> | null = null;
 
   spells.filter(x => x.end).forEach(watchDope);
 
@@ -82,16 +83,20 @@ export async function dope({
 
   async function watchDope(spell: Spell) {
     const invoke = getSpellGroup(spell.name);
+    const cast = () => run('cast', invoke).catch(() => null);
 
     when(spell.end!, async () => {
-      casting.add(invoke);
-      memory.set([...casting]);
+      castingQueue.add(invoke);
+      memory.set([...castingQueue]);
 
-      const success = await run('cast', invoke).catch(() => null);
+      // Add new cast to the queue
+      const previousCast = currentlyCasting || Promise.resolve();
+      currentlyCasting = previousCast.then(cast);
+      const success = await currentlyCasting;
 
       if (success) {
-        casting.delete(invoke);
-        memory.set([...casting]);
+        castingQueue.delete(invoke);
+        memory.set([...castingQueue]);
       }
     });
   }

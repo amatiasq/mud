@@ -81,6 +81,13 @@ export const chatPlugin = createPlugin(
     );
 
     channel(
+      'Faccion',
+      order,
+      /(?<name>\[Faccion: [^\]]+\]): '(?<message>[^']+)'/,
+      /(?<name>\[Faccion\]): '(?<message>[^']+)'/,
+    );
+
+    channel(
       'Whisper',
       whisper,
       /(?<name>.+) te susurra '(?<message>[^']+)'/,
