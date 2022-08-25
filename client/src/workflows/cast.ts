@@ -1,16 +1,30 @@
 import { Casteable } from '../data/spells';
 import { Context } from '../lib';
-import { wait } from '../lib/util/wait';
 
 export async function cast(
-  { plugins: { prompt, skills } }: Context,
+  { sleep, when, write, plugins: { prompt, skills } }: Context,
   spell: Casteable,
   ...args: string[]
 ) {
+  let wasSleeping = false;
+
+  when('Tienes un bonito sueño donde eres el mejor mago del mundo.', () => {
+    wasSleeping = true;
+    write('despertar');
+  });
+
   const result = await repeatUntilCasted();
 
   if (result === false) {
     console.warn(`Unable to cast "${spell}"`);
+  }
+
+  if (wasSleeping) {
+    write('dormir');
+    await when([
+      'Cierras los ojos y caes en un profundo suenyo.',
+      'Ya estas durmiendo.',
+    ]);
   }
 
   return result;
@@ -27,7 +41,7 @@ export async function cast(
       case skills.NOT_AVAILABLE:
         return false;
       case skills.BUSY:
-        await wait(3);
+        await sleep(3);
       case skills.FAILED:
         return repeatUntilCasted();
     }

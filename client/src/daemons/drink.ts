@@ -8,6 +8,7 @@ export async function drink({
 }: Context) {
   let isFontAvailable = false;
   let isBottleFull = false;
+  let isThirsty = true;
 
   navigation.onRoomChange(() => (isFontAvailable = false));
 
@@ -18,7 +19,7 @@ export async function drink({
       'Trazas un circulo delante tuyo del cual emerge un manantial de agua cristalina.',
     ],
     async () => {
-      isFontAvailable = true;
+      setTimeout(() => (isFontAvailable = true), 100);
 
       if (!isBottleFull) {
         const bottle = await getWaterBottle();
@@ -27,6 +28,11 @@ export async function drink({
           write(`llenar ${bottle}`);
           isBottleFull = true;
         }
+      }
+
+      if (isThirsty) {
+        write('beber');
+        isThirsty = false;
       }
     },
   );
@@ -50,11 +56,18 @@ export async function drink({
 
       if (!bottle) {
         console.log('No hay fuente de agua');
+        isThirsty = true;
         return;
       }
 
       write(`beber ${bottle}`);
-      await skills.castSpell('crear agua', bottle);
+      isBottleFull = false;
+
+      if (await skills.can('crear agua')) {
+        if ((await skills.castSpell('crear agua', bottle)) === skills.CASTED) {
+          isBottleFull = true;
+        }
+      }
     },
   );
 

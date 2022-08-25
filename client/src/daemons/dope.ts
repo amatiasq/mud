@@ -1,6 +1,12 @@
 import { ClientStorage } from '@amatiasq/client-storage';
 
-import { getSpells, Spell, SpellName, SPELLS_BY_TYPE } from '../data/spells';
+import {
+  Casteable,
+  getSpells,
+  Spell,
+  SpellName,
+  SPELLS_BY_TYPE,
+} from '../data/spells';
 import { Context } from '../lib';
 import { uniq } from '../util/uniq';
 
@@ -56,8 +62,8 @@ export async function dope({
     },
   );
 
-  when('No puedes mantener un pensamiento fijo.', () => {
-    if (skills.can('curar veneno')) {
+  when('No puedes mantener un pensamiento fijo.', async () => {
+    if (await skills.can('curar veneno')) {
       // cast curar veneno
     }
   });
@@ -67,10 +73,14 @@ export async function dope({
       .filter(spell => spell.effect && (target ? spell.target : true))
       .map(spell => getSpellGroup(spell.name));
 
-    const clean = uniq(list.map(x => x.join('|'))).map(x => x.split('|'));
+    const clean = uniq(list.map(x => x.join('|'))).map(
+      x => x.split('|') as Casteable,
+    );
 
     for (const spell of clean) {
-      await run('cast', [spell, target]);
+      if (await skills.can(spell)) {
+        await run('cast', [spell, target]);
+      }
     }
   });
 

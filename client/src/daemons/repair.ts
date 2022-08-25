@@ -1,7 +1,6 @@
 import { Realm } from '../data/areas';
 import { getItemSustantive, ItemName, UNWEAR } from '../data/items';
 import { Context } from '../lib';
-import { wait } from '../lib/util/wait';
 
 const REPAIR_SHOP: Record<Realm, string | null> = {
   Calimhar: 'r2ses',
@@ -13,6 +12,7 @@ const REPAIR_SHOP: Record<Realm, string | null> = {
 const REPAIR_MAN = ['El herrero', 'Grimloz'];
 
 export async function repair({
+  sleep,
   when,
   write,
   register,
@@ -81,7 +81,7 @@ export async function repair({
     await Promise.any([
       when(REPAIR_MAN.map(x => `${x} te cobra`)).then(() => true),
       when(REPAIR_MAN.map(x => `${x} te cuenta`)).then(() => false),
-      wait(5).then(() => null),
+      sleep(5).then(() => null),
     ]);
 
     write('vestir todo');

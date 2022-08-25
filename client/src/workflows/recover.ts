@@ -1,9 +1,10 @@
 import { SPELLS_BY_TYPE } from '../data/spells';
 import { Context } from '../lib';
-import { wait } from '../lib/util/wait';
 
 export async function recover({
   run,
+  sleep,
+  when,
   write,
   plugins: { skills, prompt },
 }: Context) {
@@ -20,7 +21,9 @@ export async function recover({
   const mana = () => prompt.getPercent('mana');
   const mv = () => prompt.getPercent('mv');
 
-  const needsHeal = () => hp() < 1;
+  const wantedHp = () => (canMeditate ? 1 : Math.max(mana(), 0.5));
+
+  const needsHeal = () => hp() < wantedHp();
   const needsToMeditate = () => mana() < 0.8;
   const needsRefresh = () => mv() < 1;
 
@@ -53,14 +56,21 @@ export async function recover({
       const result = await skills.meditate();
 
       if (result === skills.BUSY) {
-        await wait(2);
+        await sleep(2);
       }
     }
 
     if (!acted) {
-      write('descansar');
-      await wait(30);
-      write('despertar');
+      write('dormir');
+      await when([
+        'Cierras los ojos y caes en un profundo suenyo.',
+        'Ya estas durmiendo.',
+      ]);
+
+      await Promise.any([
+        sleep(30).then(() => write('despertar')),
+        when('Te despiertas y te pones de pie.'),
+      ]);
     }
   }
 }

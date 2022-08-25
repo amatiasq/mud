@@ -2,12 +2,11 @@ import { ATTACK_RECEIVED, getMobIn } from '../data/mobs';
 import { Casteable, SPELLS_BY_TYPE } from '../data/spells';
 import { Context } from '../lib';
 import { concatRegexes } from '../lib/util/concatRegexes';
-import { wait } from '../lib/util/wait';
 
 export type KillResult = 'win' | 'flee' | 'missing';
 
 export async function kill(
-  { when, write, plugins: { prompt, navigation, skills } }: Context,
+  { sleep, when, write, plugins: { prompt, navigation, skills } }: Context,
   target: string,
 ): Promise<KillResult> {
   const { dedope } = SPELLS_BY_TYPE;
@@ -28,6 +27,10 @@ export async function kill(
   });
 
   when(ATTACK_RECEIVED, async ({ groups }) => {
+    if (prompt.getPercent('mana') < 0.2) {
+      return;
+    }
+
     const fullName = groups.mob;
     const mob = getMobIn(fullName);
     const name = mob ? mob.name : fullName || target;
@@ -40,23 +43,23 @@ export async function kill(
 
   let bodyContent: string[] = [];
 
-  const result = await Promise.any<Promise<KillResult>>([
-    navigation.waitForRecall().then(() => 'flee' as const),
+  const result = await Promise.any([
+    navigation.waitForRecall().then(() => 'flee' as KillResult),
 
     when([
       concatRegexes(target, /(?:\w|�| )* (ha)|(cae al suelo) MUERTO!!/i),
       'monedas de oro de el cadaver de un ladron',
-    ]).then(() => 'win' as const),
+    ]).then(() => 'win' as KillResult),
 
     when('No esta aqui.')
       .timeout(3)
-      .then(() => 'missing' as const),
+      .then(() => 'missing' as KillResult),
 
     when([
       'Huyes como un cobarde del combate.',
       'Estas demasiado malherido para hacer eso.',
       'Estas demasiado aturdido para hacer eso.',
-    ]).then(() => 'flee' as const),
+    ]).then(() => 'flee' as KillResult),
   ]);
 
   if (result === 'win') {
@@ -76,6 +79,10 @@ export async function kill(
     spell: Casteable,
     target: string,
   ): Promise<boolean> {
+    if (prompt.getPercent('mana') < 0.1) {
+      return false;
+    }
+
     switch (await skills.castSpell(spell, target)) {
       case skills.CASTED:
       case skills.ALREADY_APPLIED:
@@ -83,7 +90,7 @@ export async function kill(
       case skills.NOT_AVAILABLE:
         return false;
       case skills.BUSY:
-        await wait(3);
+        await sleep(3);
       case skills.FAILED:
         return repeatUntilCasted(spell, target);
     }

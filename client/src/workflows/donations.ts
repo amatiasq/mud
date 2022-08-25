@@ -20,7 +20,7 @@ export async function donations({
 }: Context) {
   write('estado');
   const level = await stats.getLevel();
-  const room = rooms.find(x => x.from <= level && x.to <= level);
+  const room = rooms.find(x => x.from <= level && x.to >= level);
 
   if (!room) {
     throw new Error(`No room for level "${level}"`);

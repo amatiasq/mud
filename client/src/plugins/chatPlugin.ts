@@ -43,6 +43,7 @@ export const chatPlugin = createPlugin(
     // const say = new ClientStorage<Record<string, Message[]>>('chat:say');
     const chat = new ClientStorage<Message[]>('chat:global', version);
     const order = new ClientStorage<Message[]>('chat:order', version);
+    const novice = new ClientStorage<Message[]>('chat:novice', version);
     const tell = new ClientStorage<Message[]>('chat:tell', version);
     const whisper = new ClientStorage<Message[]>('chat:whisper', version);
 
@@ -53,22 +54,37 @@ export const chatPlugin = createPlugin(
       whisper: whisper.get(),
     });
 
-    when(/(?<name>\w+) charla '(?<message>[^']+)'/, receive(chat, 'General'));
-    when(/Charlas '(?<message>[^']+)'/, sent(chat, 'General'));
+    function channel(
+      name: string,
+      storage: History,
+      received: RegExp,
+      sentPattern: RegExp,
+    ) {
+      when(received, receive(storage, name));
+      when(sentPattern, sent(storage, name));
+    }
 
-    when(
+    channel(
+      'General',
+      chat,
+      /(?<name>\w+) charla '(?<message>[^']+)'/,
+      /Charlas '(?<message>[^']+)'/,
+    );
+
+    // channel('Novatos', novice, /(?<name>\w+) charla '(?<message>[^']+)'/, /Charlas '(?<message>[^']+)'/);
+
+    channel(
+      'Order',
+      order,
       /(?<name>\[Orden: [^\]]+\]): '(?<message>[^']+)'/,
-      receive(order, 'Order'),
+      /(?<name>\[Orden\]): '(?<message>[^']+)'/,
     );
-    when(/(?<name>\[Orden\]): '(?<message>[^']+)'/, sent(order, 'Order'));
 
-    when(
+    channel(
+      'Whisper',
+      whisper,
       /(?<name>.+) te susurra '(?<message>[^']+)'/,
-      receive(whisper, 'Whisper'),
-    );
-    when(
       /Susurras a (?<name>.+) '(?<message>[^']+)'/,
-      sent(whisper, 'Whisper'),
     );
 
     const receiveTell = receive(tell, 'Tell');

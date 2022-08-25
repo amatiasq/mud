@@ -1,7 +1,7 @@
 import { Context } from '../lib';
 
 export async function afk(
-  { abort, log, run, when, plugins: { navigation, prompt } }: Context,
+  { abort, log, run, when, write, plugins: { navigation, prompt } }: Context,
   ...areas: string[]
 ) {
   const initialExp = prompt.getValue('exp');

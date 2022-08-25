@@ -36,9 +36,9 @@ export async function bank(
   );
 
   const carring = toInt(groups.carring);
-  const balance = toInt(groups.balance);
+  // const balance = toInt(groups.balance);
   const total = toInt(groups.total);
-  const final = take == null ? Math.ceil(total * 0.01) : take;
+  const final = take == null ? Math.max(Math.ceil(total * 0.01), 2000) : take;
 
   if (carring < final) {
     write(`banco retirar ${final - carring}`);
