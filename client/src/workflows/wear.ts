@@ -45,7 +45,7 @@ export async function wear(
         ' es un(a) armadura_metalica,',
         () => (isMetallic = true),
       );
-      const identified = await run('cast', ['identificar', item]);
+      const identified = await run('cast', 'identificar', item);
       sus.unsubscribe();
 
       if (!identified) {
@@ -81,7 +81,7 @@ export async function wear(
       const other = getItemSustantive(result);
 
       if (other) {
-        await run('cast', ['identificar', other]);
+        await run('cast', 'identificar', other);
         write(`poner ${other} mochila`);
         await when('Pones ');
       }

@@ -42,7 +42,7 @@ export async function donations({
     const found = list.some(x => x.includes(item) && !x.includes('mallas'));
 
     if (found) {
-      await run('wear', [item]);
+      await run('wear', item);
     }
   }
 

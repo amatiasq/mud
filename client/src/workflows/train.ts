@@ -108,7 +108,7 @@ export async function train(
 
     while (enemies.length) {
       const enemy = enemies[0];
-      const result = (await run('kill', [enemy.name])) as KillResult;
+      const result = (await run('kill', enemy.name)) as KillResult;
 
       if (result === 'flee') {
         console.log('Had to run. Train over.');

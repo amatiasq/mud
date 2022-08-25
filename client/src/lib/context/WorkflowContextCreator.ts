@@ -37,7 +37,7 @@ export class WorkflowContextCreator extends BasicContextCreator {
 
       isRunning: (name: string) => getWorkflow(name).isRunning,
 
-      run(name: string, params: any[] = []) {
+      run(name: string, ...params: any[]) {
         checkNotAborted(context);
         log(`Invoke workflow "${name}" with`, ...params);
 

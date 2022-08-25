@@ -42,7 +42,7 @@ export async function afk(
     }
 
     try {
-      await run('train', [rand(areas || [])]);
+      await run('train', rand(areas || []));
     } catch (error) {
       console.log('Train error', error);
     }

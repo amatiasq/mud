@@ -21,10 +21,6 @@ export async function dope({
 }: Context) {
   const shouldHeal = defineShould(0.2);
   const shouldRefresh = defineShould(0.1, 0.8);
-  const repeatUntilCasted = (
-    name: string | string[],
-    ...args: (string | undefined)[]
-  ) => run('cast', [name, ...args]).catch(() => null);
 
   const casting = new Set(memory.get());
   const spells = getSpells();
@@ -79,7 +75,7 @@ export async function dope({
 
     for (const spell of clean) {
       if (await skills.can(spell)) {
-        await run('cast', [spell, target]);
+        await run('cast', spell, target);
       }
     }
   });
@@ -91,7 +87,7 @@ export async function dope({
       casting.add(invoke);
       memory.set([...casting]);
 
-      const success = await repeatUntilCasted(invoke);
+      const success = await run('cast', invoke).catch(() => null);
 
       if (success) {
         casting.delete(invoke);

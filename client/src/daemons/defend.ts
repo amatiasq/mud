@@ -18,7 +18,7 @@ export async function defend({
       'Sientes escalofrios a la vez que tiemblas.',
       'No te encuentras nada bien.',
     ],
-    () => run('cast', ['curar veneno']),
+    () => run('cast', 'curar veneno'),
   );
 
   when(' te DESARMA!', () => write('vestir todo'));
@@ -73,7 +73,7 @@ export async function defend({
 
   when('Esta completamente oscuro ...', async () => {
     if (await skills.can('luz eterna')) {
-      await run('cast', ['luz eterna']);
+      await run('cast', 'luz eterna');
       write('vestir luz');
       write('mirar');
     }
@@ -81,7 +81,7 @@ export async function defend({
 
   when('Estas maldito y no puedes usar el regresar!', async () => {
     if (await skills.can('retirar maldicion')) {
-      await run('cast', ['retirar maldicion']);
+      await run('cast', 'retirar maldicion');
       await navigation.recall();
     }
   });

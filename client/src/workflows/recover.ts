@@ -4,8 +4,6 @@ import { Context } from '../lib';
 export async function recover({
   run,
   sleep,
-  when,
-  write,
   plugins: { skills, prompt },
 }: Context) {
   const heal = SPELLS_BY_TYPE.heal;
@@ -39,17 +37,17 @@ export async function recover({
 
     if (canInvisible && !prompt.isInvisible) {
       acted = true;
-      await run('cast', [invisible]);
+      await run('cast', invisible);
     }
 
     if (canHeal && isInjured() && hasEnoughMana()) {
       acted = true;
-      await run('cast', [heal]);
+      await run('cast', heal);
     }
 
     if (canRefresh && needsRest() && hasEnoughMana()) {
       acted = true;
-      await run('cast', [refresh]);
+      await run('cast', refresh);
     }
 
     if (canMeditate && needsMana()) {

@@ -16,8 +16,8 @@ export async function idle({
 
     await run('train');
 
-    if (skills.can('invisibilidad')) {
-      await run('cast', ['invisibilidad']);
+    if (await skills.can('invisibilidad')) {
+      await run('cast', 'invisibilidad');
     }
   });
 }
