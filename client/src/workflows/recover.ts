@@ -66,30 +66,10 @@ export async function recover({
     }
   }
 
-  // if (!isRefreshed()) {
-  //   let isAwake = false;
-  //   write('dormir');
+  await prompt.until(() => {
+    console.log('Resting...');
+    return isRefreshed();
+  });
 
-  //   await when([
-  //     'Cierras los ojos y caes en un profundo suenyo.',
-  //     'Ya estas durmiendo.',
-  //   ]);
-
-  //   when('Te despiertas y te pones de pie.').then(() => (isAwake = true));
-
-  while (!isRefreshed()) {
-    await sleep(10);
-
-    // if (isAwake) {
-    //   break;
-    // }
-
-    console.log('Continue sleeping...');
-  }
-
-  //   if (!isAwake) {
-  //     write('despertar');
-  //     await when('Te despiertas y te pones de pie.');
-  //   }
-  // }
+  console.log('Resting done');
 }

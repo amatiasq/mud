@@ -94,68 +94,69 @@ export const promptPlugin = createPlugin(
       write(`fprompt ${FPROMPT}`);
     }
   },
-  ({ getIsInvisible, onUpdate }) => ({ when }) => {
-    return {
-      getPercent,
-      getValue,
-      until,
-      whenFresh,
-      onUpdate,
+  ({ getIsInvisible, onUpdate }) =>
+    ({ when }) => {
+      return {
+        getPercent,
+        getValue,
+        until,
+        whenFresh,
+        onUpdate,
 
-      get isFighting() {
-        return stats.isFighting;
-      },
+        get isFighting() {
+          return stats.isFighting;
+        },
 
-      get isInvisible() {
-        return getIsInvisible();
-      },
-    };
+        get isInvisible() {
+          return getIsInvisible();
+        },
+      };
 
-    function whenFresh() {
-      return until(stats => {
-        console.log(
-          stats.hp.percent,
-          stats.mana.percent,
-          stats.mv.percent,
-          stats.hp.percent === 1 &&
+      function whenFresh() {
+        return until(stats => {
+          console.log(
+            stats.hp.percent,
+            stats.mana.percent,
+            stats.mv.percent,
+            stats.hp.percent === 1 &&
+              stats.mana.percent === 1 &&
+              stats.mv.percent === 1,
+          );
+          return (
+            stats.hp.percent === 1 &&
             stats.mana.percent === 1 &&
-            stats.mv.percent === 1,
-        );
-        return (
-          stats.hp.percent === 1 &&
-          stats.mana.percent === 1 &&
-          stats.mv.percent === 1
-        );
-      });
-    }
-
-    function getPercent(stat: 'hp' | 'mana' | 'mv') {
-      return stats[stat].percent;
-    }
-
-    function getValue(stat: 'gold' | 'exp'): number;
-    function getValue(stat: 'enemy'): number | null;
-    function getValue(stat: 'gold' | 'exp' | 'enemy') {
-      return stats[stat];
-    }
-
-    function until(predicate?: (stats: Stats) => boolean) {
-      if (!predicate) {
-        return when(PROMPT_DETECTOR);
-      }
-
-      if (predicate(stats)) {
-        return true;
-      }
-
-      return new Promise(resolve => {
-        const unsubscribe = onUpdate((stats: Stats) => {
-          if (predicate(stats)) {
-            unsubscribe();
-            resolve(stats);
-          }
+            stats.mv.percent === 1
+          );
         });
-      });
-    }
-  },
+      }
+
+      function getPercent(stat: 'hp' | 'mana' | 'mv') {
+        return stats[stat].percent;
+      }
+
+      function getValue(stat: 'gold' | 'exp'): number;
+      function getValue(stat: 'enemy'): number | null;
+      function getValue(stat: 'gold' | 'exp' | 'enemy') {
+        return stats[stat];
+      }
+
+      function until(predicate?: (stats: Stats) => boolean) {
+        if (!predicate) {
+          return when(PROMPT_DETECTOR);
+        }
+
+        if (predicate(stats)) {
+          return Promise.resolve(true);
+        }
+
+        return new Promise(resolve => {
+          const unsubscribe = onUpdate((stats: Stats) => {
+            if (predicate(stats)) {
+              unsubscribe();
+              resolve(stats);
+            }
+          });
+        });
+      }
+    },
 );

@@ -1,7 +1,7 @@
 import { getAreaMetadata, Realm } from '../data/areas';
 import { Context } from '../lib';
 
-const PATH = /^r?((?:x|\d+)?[nsewudohjkl])+$/;
+const PATH = /^r?((?:x|\d+)?[nsewudohjkl])+$/i;
 const TRAVEL = 'un pergamino de viajar';
 
 const REALM_RECALLS: Record<Realm, string | null> = {
