@@ -48,7 +48,7 @@ export async function kill(
 
   let bodyContent: string[] = [];
 
-  const result = await Promise.any([
+  const result = await when.any(
     navigation.waitForRecall().then(() => 'flee' as KillResult),
 
     when([
@@ -65,7 +65,7 @@ export async function kill(
       'Estas demasiado malherido para hacer eso.',
       'Estas demasiado aturdido para hacer eso.',
     ]).then(() => 'flee' as KillResult),
-  ]);
+  );
 
   if (result === 'win') {
     // no need to await for this

@@ -36,6 +36,13 @@ export interface CancellablePromise<T> {
 }
 
 export class CancellablePromise<T> extends Promise<T> {
+  static race<T>(promises: CancellablePromise<T>[]) {
+    return new CancellablePromise<T>((resolve, reject, onCancel) => {
+      promises.forEach(promise => promise.then(resolve, reject));
+      onCancel(() => promises.forEach(promise => promise.cancel()));
+    });
+  }
+
   private readonly emitCancel;
   readonly onCancel;
 
@@ -66,7 +73,7 @@ export class CancellablePromise<T> extends Promise<T> {
         value => {
           if (this.isPending || this.isCancelled) {
             this.state = 'resolved';
-            resolve(value);
+            resolve(value!);
           }
         },
         reason => {

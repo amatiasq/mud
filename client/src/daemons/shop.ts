@@ -50,12 +50,12 @@ export async function shop({ when, write, register }: Context) {
       await navigation.execute(path);
       write(`comprar ${amount} ${name}`);
 
-      return Promise.any([
+      return when.any(
         when('Lo siento, esta cerrado, vuelve mas tarde.').then(() => false),
         when(['Compras ', 'pone todo en una bolsa y te la da']).then(
           () => true,
         ),
-      ]);
+      );
     },
   );
 }

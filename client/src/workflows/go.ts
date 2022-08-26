@@ -54,10 +54,10 @@ export async function go(
   } else if (await inventory.hasInBackpack(TRAVEL)) {
     write('coger viajar mochila');
 
-    canTravel = await Promise.any([
+    canTravel = await when.any(
       when('Coges un pergamino de viajar de').then(() => true),
       when('No hay nada parecido a eso en').then(() => false),
-    ]);
+    );
   }
 
   if (canTravel) {

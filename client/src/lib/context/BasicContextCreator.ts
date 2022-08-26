@@ -7,6 +7,7 @@ import { PatternOptions } from '../triggers/PatternOptions';
 import { PatternResult } from '../triggers/PatternResult';
 import { PatternSubscription } from '../triggers/PatternSubscription';
 import { TriggerCollection } from '../triggers/TriggerCollection';
+import { CancellablePromise } from '../util/CancellablePromise';
 import { wait } from '../util/wait';
 import { WriteOptions } from '../WriteOptions';
 
@@ -61,7 +62,7 @@ export class BasicContextCreator {
       onDispose: dispose.subscribe,
       send,
       log,
-      when,
+      when: Object.assign(when, { any: whenAny }),
 
       sleep: (seconds: number) => {
         checkNotAborted(context);
@@ -92,6 +93,16 @@ export class BasicContextCreator {
       if (isPrintingLogs) {
         console.log(`[${name}]`, ...args);
       }
+    }
+
+    async function whenAny(
+      ...watchers: (PatternSubscription | CancellablePromise<any>)[]
+    ) {
+      const result = await Promise.any(watchers);
+      watchers.forEach(x =>
+        x instanceof CancellablePromise ? x.cancel() : x.unsubscribe(),
+      );
+      return result;
     }
 
     function when(
@@ -158,10 +169,5 @@ export class BasicContextCreator {
     if (context.isAborted) {
       throw new Error(`[${context.name}] Workflow aborted.`);
     }
-  }
-}
-
-function deepMerge(target: {}, ...sources: ({} | null | undefined)[]) {
-  for (const source of sources.filter(Boolean)) {
   }
 }

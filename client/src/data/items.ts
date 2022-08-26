@@ -55,6 +55,7 @@ export const ITEM_SUSTANTIVES = [
   // 'joya',
   'lanza',
   'luz',
+  'máscara',
   'mangas',
   'manoplas',
   'martillo',

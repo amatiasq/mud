@@ -90,58 +90,61 @@ export const inventoryPlugin = createPlugin(
       return result;
     }
   },
-  ({ refresh, parseItems, ensureInitialized, getItems }) => ({
-    when,
-    write,
-  }) => {
-    return {
-      refresh,
-      has,
-      hasIn,
-      hasInBackpack: hasIn.bind(null, 'mochila'),
-      getByEffect,
-    };
+  ({ refresh, parseItems, ensureInitialized, getItems }) =>
+    ({ when, write }) => {
+      return {
+        refresh,
+        has,
+        hasIn,
+        hasInBackpack: hasIn.bind(null, 'mochila'),
+        getByEffect,
+      };
 
-    async function has(search: ItemSearch) {
-      await ensureInitialized();
-      return searchInList(getItems(), search);
-    }
-
-    async function getByEffect(effect: string) {
-      await ensureInitialized();
-      return Object.values(getItems()).filter(x => x.effects.includes(effect));
-    }
-
-    async function hasIn(container: string, search: ItemSearch) {
-      write(`examinar ${container}`);
-
-      const match = await Promise.any([
-        when('No ves eso aqui.').then(() => null),
-        when(concatRegexes(/Cuando miras dentro ves:\n.+ contiene:/, CONTENT), {
-          captureLength: 1000,
-        }),
-      ]);
-
-      if (!match) {
-        return false;
+      async function has(search: ItemSearch) {
+        await ensureInitialized();
+        return searchInList(getItems(), search);
       }
 
-      const items = parseItems(match.groups.content);
-      console.log('IN', container, items);
-      return searchInList(items, search);
-    }
-
-    function searchInList(items: ItemList, search: ItemSearch) {
-      if (typeof search === 'string') {
-        return items[search] ? search : null;
+      async function getByEffect(effect: string) {
+        await ensureInitialized();
+        return Object.values(getItems()).filter(x =>
+          x.effects.includes(effect),
+        );
       }
 
-      if (Array.isArray(search)) {
-        return search.find(x => items[x]) || null;
+      async function hasIn(container: string, search: ItemSearch) {
+        write(`examinar ${container}`);
+
+        const match = await when.any(
+          when('No ves eso aqui.').then(() => null),
+          when(
+            concatRegexes(/Cuando miras dentro ves:\n.+ contiene:/, CONTENT),
+            {
+              captureLength: 1000,
+            },
+          ),
+        );
+
+        if (!match) {
+          return false;
+        }
+
+        const items = parseItems(match.groups.content);
+        console.log('IN', container, items);
+        return searchInList(items, search);
       }
 
-      const key = Object.keys(search).find(x => items[x]);
-      return key ? search[key] : null;
-    }
-  },
+      function searchInList(items: ItemList, search: ItemSearch) {
+        if (typeof search === 'string') {
+          return items[search] ? search : null;
+        }
+
+        if (Array.isArray(search)) {
+          return search.find(x => items[x]) || null;
+        }
+
+        const key = Object.keys(search).find(x => items[x]);
+        return key ? search[key] : null;
+      }
+    },
 );

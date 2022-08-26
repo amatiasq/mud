@@ -1,8 +1,8 @@
 import { emitter } from '@amatiasq/emitter';
 
 import { Realm } from '../data/areas';
-import { BasicContext } from '../lib/context/BasicContextCreator';
 import { createPlugin } from '../lib/createPlugin';
+import { CancellablePromise } from '../lib/util/CancellablePromise';
 import { PROMPT_DETECTOR } from './promptPlugin';
 
 const CLOSED = '(cerrada)';
@@ -45,10 +45,10 @@ export const navigationPlugin = createPlugin(
         const dir = closed.replace(CLOSED, '');
         write(`abrir ${dir}`);
 
-        const result = await Promise.any([
+        const result = await when.any(
           when('Esta cerrada con llave.').then(() => false),
           when('Abres ').then(() => true),
-        ]);
+        );
 
         if (result) {
           write(dir);
@@ -75,157 +75,160 @@ export const navigationPlugin = createPlugin(
     };
   },
   ({
-    getDirections,
-    getIsAtRecall,
-    getIsNavigating,
-    onRoomChange,
-    prompt,
-    setIsNavigating,
-  }) => ({ log, when, write }) => {
-    return {
-      canGo,
-      go,
-      execute,
-      getRealm,
-      recall,
-      waitForRecall,
+      getDirections,
+      getIsAtRecall,
+      getIsNavigating,
       onRoomChange,
+      prompt,
+      setIsNavigating,
+    }) =>
+    ({ log, when, write }) => {
+      return {
+        canGo,
+        go,
+        execute,
+        getRealm,
+        recall,
+        waitForRecall,
+        onRoomChange,
 
-      get isNavigating() {
-        return getIsNavigating();
-      },
+        get isNavigating() {
+          return getIsNavigating();
+        },
 
-      get isAtRecall() {
-        return getIsAtRecall();
-      },
-    };
+        get isAtRecall() {
+          return getIsAtRecall();
+        },
+      };
 
-    async function recall() {
-      if (getIsAtRecall()) {
-        return true;
-      }
-
-      write('recall');
-      await when(recalls);
-      await prompt();
-    }
-
-    function waitForRecall(): Promise<void> {
-      return getIsAtRecall() ? Promise.resolve() : when(recalls).then();
-    }
-
-    function canGo(direction: string) {
-      return Boolean(get(direction));
-    }
-
-    function isClosed(direction: string) {
-      const dir = get(direction);
-      return dir && dir.includes(CLOSED);
-    }
-
-    async function execute(pattern: string, callback?: () => Promise<any>) {
-      if (pattern[0] === 'r') {
-        await recall();
-        pattern = pattern.substr(1);
-      }
-
-      let untilEnd = false;
-      let done = '';
-
-      for (const step of parsePath(pattern)) {
-        if (step.toUpperCase() === 'X') {
-          untilEnd = true;
-          done += '(X)';
-          continue;
+      async function recall() {
+        if (getIsAtRecall()) {
+          return true;
         }
 
-        if (untilEnd) {
-          while (canGo(step)) {
+        write('recall');
+        await when(recalls);
+        await prompt();
+      }
+
+      function waitForRecall() {
+        return getIsAtRecall()
+          ? new CancellablePromise(resolve => resolve())
+          : when(recalls).then();
+      }
+
+      function canGo(direction: string) {
+        return Boolean(get(direction));
+      }
+
+      function isClosed(direction: string) {
+        const dir = get(direction);
+        return dir && dir.includes(CLOSED);
+      }
+
+      async function execute(pattern: string, callback?: () => Promise<any>) {
+        if (pattern[0] === 'r') {
+          await recall();
+          pattern = pattern.substr(1);
+        }
+
+        let untilEnd = false;
+        let done = '';
+
+        for (const step of parsePath(pattern)) {
+          if (step.toUpperCase() === 'X') {
+            untilEnd = true;
+            done += '(X)';
+            continue;
+          }
+
+          if (untilEnd) {
+            while (canGo(step)) {
+              if (await move(step)) {
+                return false;
+              }
+            }
+
+            untilEnd = false;
+          } else {
             if (await move(step)) {
               return false;
             }
           }
+        }
 
-          untilEnd = false;
-        } else {
-          if (await move(step)) {
+        return true;
+
+        async function move(step: string) {
+          try {
+            if (!(await go(step))) {
+              return true;
+            }
+            done += step;
+          } catch (error) {
+            throw new Error(`${error.message} - on ${pattern} - ${done}`);
+          }
+
+          if (typeof callback === 'function') {
+            const result = await callback();
+            return result === false;
+          }
+        }
+      }
+
+      async function go(direction: string) {
+        if (getIsNavigating()) {
+          throw new Error('WTF DUDE');
+        }
+
+        const dir = get(direction);
+
+        if (!dir) {
+          throw new Error(`Unknown direction '${direction}'`);
+        }
+
+        if (isClosed(direction)) {
+          write(`abrir ${direction}`);
+
+          const success = await when.any(
+            when([/Abres la puertas?\./, /Abres la puerta \w+\./]).then(
+              () => true,
+            ),
+            when('Esta cerrada con llave.').then(() => false),
+          );
+
+          if (!success) {
+            log('Can\t open door');
             return false;
           }
         }
+
+        write(dir.replace(CLOSED, '').trim());
+        setIsNavigating(true);
+
+        await when('\nSalidas:');
+        await prompt();
+
+        setIsNavigating(false);
+        return true;
       }
 
-      return true;
+      async function getRealm() {
+        write('donde');
+        const result = await when(
+          /Jugadores cerca de ti en [^,]+, Reino de (?<realm>\w+):/,
+        );
+        return result.groups.realm as Realm;
+      }
 
-      async function move(step: string) {
-        try {
-          if (!(await go(step))) {
-            return true;
-          }
-          done += step;
-        } catch (error) {
-          throw new Error(`${error.message} - on ${pattern} - ${done}`);
+      function get(direction: string) {
+        if (direction in aliases) {
+          direction = aliases[direction as keyof typeof aliases];
         }
 
-        if (typeof callback === 'function') {
-          const result = await callback();
-          return result === false;
-        }
+        return getDirections().find(x => x.startsWith(direction));
       }
-    }
-
-    async function go(direction: string) {
-      if (getIsNavigating()) {
-        throw new Error('WTF DUDE');
-      }
-
-      const dir = get(direction);
-
-      if (!dir) {
-        throw new Error(`Unknown direction '${direction}'`);
-      }
-
-      if (isClosed(direction)) {
-        write(`abrir ${direction}`);
-
-        const success = await Promise.any([
-          when([/Abres la puertas?\./, /Abres la puerta \w+\./]).then(
-            () => true,
-          ),
-          when('Esta cerrada con llave.').then(() => false),
-        ]);
-
-        if (!success) {
-          log('Can\t open door');
-          return false;
-        }
-      }
-
-      write(dir.replace(CLOSED, '').trim());
-      setIsNavigating(true);
-
-      await when('\nSalidas:');
-      await prompt();
-
-      setIsNavigating(false);
-      return true;
-    }
-
-    async function getRealm() {
-      write('donde');
-      const result = await when(
-        /Jugadores cerca de ti en [^,]+, Reino de (?<realm>\w+):/,
-      );
-      return result.groups.realm as Realm;
-    }
-
-    function get(direction: string) {
-      if (direction in aliases) {
-        direction = aliases[direction as keyof typeof aliases];
-      }
-
-      return getDirections().find(x => x.startsWith(direction));
-    }
-  },
+    },
 );
 
 function parsePath(path: string) {

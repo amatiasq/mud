@@ -58,12 +58,12 @@ export async function eat({
 
     write(`comprar ${EXPECTED_FOOD} ${DEFAULT_FOOD_NAME}`);
 
-    await Promise.any([
+    await when.any(
       when('Compras una chuleta de cordero.'),
       when('El carnicero pone todo en una bolsa y te la da.').then(
         getFoodFromBag,
       ),
-    ]);
+    );
 
     await nav.execute('sw2n');
   }

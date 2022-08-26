@@ -25,14 +25,14 @@ export async function wear(
   async function wearItem(item: string) {
     write(`coger "${item}"`);
 
-    const pickedUp = await Promise.any([
+    const pickedUp = await when.any(
       when(`No hay ningun ${item} aqui.`)
         .wait(8)
         .then(() => false),
       when(
         concatRegexes(/Coges/, ITEM_ARTICLE, /(?: (?:\\w|�)+)* /i, item),
       ).then(() => true),
-    ]);
+    );
 
     if (!pickedUp) {
       console.warn(`Couldn't pick up "${item}"`);
@@ -64,7 +64,7 @@ export async function wear(
 
     write(`vestir "${item}"`);
 
-    const result = await Promise.any([
+    const result = await when.any(
       when(WEAR).then(() => true),
       when(UNWEAR).then(({ groups }) => groups.item),
       when([
@@ -74,7 +74,7 @@ export async function wear(
         'Te esta prohibido usar ese objeto.',
         'No puedes vestir un objeto que no te pertenece.',
       ]).then(() => false),
-    ]);
+    );
 
     if (result === false) {
       await tirar(item);

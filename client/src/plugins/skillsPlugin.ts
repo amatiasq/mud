@@ -8,6 +8,7 @@ import {
   SPELL_NOT_POSSIBLE,
 } from '../data/spells';
 import { createPlugin } from '../lib/createPlugin';
+import { CancellablePromise } from '../lib/util/CancellablePromise';
 import { concatRegexes } from '../lib/util/concatRegexes';
 import { singleExecution } from '../lib/util/singleExecution';
 
@@ -120,14 +121,14 @@ export const skillsPlugin = createPlugin(
         return waitResponse().finally(() => (isMeditating = false));
 
         function waitResponse() {
-          return Promise.any([
+          return when.any(
             when(
               'Meditas con total paz interior, recolectando mana del cosmos.',
             ).then(() => CASTED),
             when(
               'Te pasas varios minutos en profunda concentracion, pero fallas en el intento de recolectar mana.',
             ).then(() => FAILED),
-          ]);
+          );
         }
       }
 
@@ -156,7 +157,7 @@ export const skillsPlugin = createPlugin(
         isSpellRunning = true;
         write(`conjurar "${spell.name}" ${args}`);
 
-        const promises: Promise<CastSpellResult>[] = [
+        const promises: CancellablePromise<CastSpellResult>[] = [
           when(success).then(() => CASTED),
           // when('Falta algo...').then(() => )
           when(SPELL_NOT_POSSIBLE).then(() => NOT_AVAILABLE),
@@ -170,7 +171,7 @@ export const skillsPlugin = createPlugin(
           promises.push(when(spell.target).then(() => CASTED));
         }
 
-        const result = await Promise.any(promises);
+        const result = await when.any(...promises);
         isSpellRunning = false;
         return result;
       }

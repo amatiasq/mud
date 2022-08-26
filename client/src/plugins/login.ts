@@ -16,12 +16,12 @@ export async function login(
 
   when('Pulsa [ENTER]', () => write(''));
 
-  await Promise.any([
+  await when.any(
     when('Reconectando.', {
       blockProcessingUntil: initialize,
     }),
     when('Bienvenido a Balzhur...', {
       blockProcessingUntil: initialize,
     }),
-  ]);
+  );
 }

@@ -83,11 +83,11 @@ export async function repair({
   async function repairAll() {
     write('reparar todo');
 
-    await Promise.any([
+    await when.any(
       when(REPAIR_MAN.map(x => `${x} te cobra`)).then(() => true),
       when(REPAIR_MAN.map(x => `${x} te cuenta`)).then(() => false),
       sleep(5).then(() => null),
-    ]);
+    );
 
     write('vestir todo');
   }
