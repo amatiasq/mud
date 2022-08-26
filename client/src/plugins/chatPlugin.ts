@@ -63,7 +63,12 @@ export const chatPlugin = createPlugin(
       /Charlas '(?<message>[^']+)'/,
     );
 
-    // channel('Novatos', novice, /(?<name>\w+) charla '(?<message>[^']+)'/, /Charlas '(?<message>[^']+)'/);
+    channel(
+      'Novatos',
+      novice,
+      /(?<name>\[Novatos: [^\]]+\]): '(?<message>[^']+)'/,
+      /(?<name>\[Novatos\]): '(?<message>[^']+)'/,
+    );
 
     channel(
       'Order',

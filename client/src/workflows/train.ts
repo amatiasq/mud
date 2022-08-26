@@ -150,14 +150,11 @@ export async function train(
     const areas = getAreasForLevel(realm, level);
     const [first, ...others] = areas.filter(x => x.arena);
 
-    if (others.length) {
-      console.warn('Multiple arenas available', [
-        first.name,
-        ...others.map(x => x.name),
-      ]);
-    }
-
-    console.log('Selected', first.name);
+    console.log(
+      'Selected arena',
+      first.name,
+      others.map(x => x.name),
+    );
     return first;
   }
 }

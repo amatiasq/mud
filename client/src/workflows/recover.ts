@@ -65,9 +65,12 @@ export async function recover({
   }
 
   await prompt.until(() => {
-    console.log('Resting...');
-    return isRefreshed();
-  });
+    const ready = isRefreshed();
 
-  console.log('Resting done');
+    if (!ready) {
+      console.log('Resting...');
+    }
+
+    return ready;
+  });
 }
