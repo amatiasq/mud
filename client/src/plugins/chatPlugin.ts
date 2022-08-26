@@ -34,7 +34,6 @@ const sent =
   (log: History, type: string) =>
   ({ groups: { name, message } }: PatternResult) => {
     console.log(`SENT [${type}] ${date()} => ${name} =>`, message);
-
     addMessage(log, { to: name, message });
   };
 
@@ -42,27 +41,20 @@ export const chatPlugin = createPlugin(
   ({ when, write }) => {
     // const say = new ClientStorage<Record<string, Message[]>>('chat:say');
     const chat = new ClientStorage<Message[]>('chat:global', version);
+    const faction = new ClientStorage<Message[]>('chat:faction', version);
     const order = new ClientStorage<Message[]>('chat:order', version);
     const novice = new ClientStorage<Message[]>('chat:novice', version);
     const tell = new ClientStorage<Message[]>('chat:tell', version);
     const whisper = new ClientStorage<Message[]>('chat:whisper', version);
 
-    (window as any).chat = () => ({
-      global: chat.get(),
-      tell: tell.get(),
-      order: order.get(),
-      whisper: whisper.get(),
+    (window as any).chat = (count = 0) => ({
+      global: chat.get() ? chat.get()!.slice(count) : [],
+      faction: faction.get() ? faction.get()!.slice(count) : [],
+      order: order.get() ? order.get()!.slice(count) : [],
+      novice: novice.get() ? novice.get()!.slice(count) : [],
+      tell: tell.get() ? tell.get()!.slice(count) : [],
+      whisper: whisper.get() ? whisper.get()!.slice(count) : [],
     });
-
-    function channel(
-      name: string,
-      storage: History,
-      received: RegExp,
-      sentPattern: RegExp,
-    ) {
-      when(received, receive(storage, name));
-      when(sentPattern, sent(storage, name));
-    }
 
     channel(
       'General',
@@ -82,7 +74,7 @@ export const chatPlugin = createPlugin(
 
     channel(
       'Faccion',
-      order,
+      faction,
       /(?<name>\[Faccion: [^\]]+\]): '(?<message>[^']+)'/,
       /(?<name>\[Faccion\]): '(?<message>[^']+)'/,
     );
@@ -119,6 +111,16 @@ export const chatPlugin = createPlugin(
       /(?<name>\w+) te ha desafiado a un combate en la arena!/,
       ({ groups }) => notify(`[ARENA] w/ ${groups.name}`),
     );
+
+    function channel(
+      name: string,
+      storage: History,
+      received: RegExp,
+      sentPattern: RegExp,
+    ) {
+      when(received, receive(storage, name));
+      when(sentPattern, sent(storage, name));
+    }
 
     function handleAutoResponses({ name, message }: Record<string, string>) {
       const tokens = {

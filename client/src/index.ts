@@ -1,13 +1,11 @@
-import { emitter } from '@amatiasq/emitter';
-
+import { DEFAULT_PORT } from '../../config.json';
 import { Mud } from './lib/Mud';
 import { RemoteTelnet } from './lib/RemoteTelnet';
 import { registerWorkflows } from './registerWorkflows';
+import { bindViewTo } from './state';
 import { renderUserInterface } from './ui';
 import { getPassword } from './util/getPassword';
 import { getQueryParams } from './util/getQueryParams';
-import { DEFAULT_PORT } from '../../config.json';
-import { bindViewTo } from './state';
 
 let FORCE_PROD_SERVER = false;
 // FORCE_PROD_SERVER = true;
@@ -62,7 +60,12 @@ async function initializeMud(telnet: RemoteTelnet) {
 
   mud.registerHandler('!', command => {
     const [workflow, ...args] = command.split(/\s+/);
-    runWorkflow(workflow, args);
+
+    if (workflow === 'stop') {
+      mud.stopAll();
+    } else {
+      runWorkflow(workflow, args);
+    }
   });
 
   mud.registerHandler('#', command => {

@@ -109,6 +109,12 @@ export class Mud {
     return new Workflow(name, run, this.createContextCreator()).execute();
   }
 
+  stopAll() {
+    for (const [, workflow] of this.workflows) {
+      workflow.stop();
+    }
+  }
+
   getWorkflow(workflowOrName: Workflow | string) {
     if (workflowOrName instanceof Workflow) {
       return workflowOrName;

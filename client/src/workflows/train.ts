@@ -124,6 +124,7 @@ export async function train(
 
   async function getArena(areaName?: string) {
     const area = areaName ? getAreaMetadata(areaName) : await getBestArea();
+    console.log('Train at', area);
 
     if (!area) {
       throw new Error(`NO AREA "${areaName}"`);
@@ -150,7 +151,10 @@ export async function train(
     const [first, ...others] = areas.filter(x => x.arena);
 
     if (others.length) {
-      console.warn('Multiple arenas available');
+      console.warn('Multiple arenas available', [
+        first.name,
+        ...others.map(x => x.name),
+      ]);
     }
 
     console.log('Selected', first.name);
