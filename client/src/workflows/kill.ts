@@ -26,20 +26,25 @@ export async function kill(
     }
   });
 
-  when(ATTACK_RECEIVED, async ({ groups }) => {
-    if (prompt.getPercent('mana') < 0.2) {
-      return;
-    }
+  if (await skills.can('segundo ataque')) {
+    when(ATTACK_RECEIVED, async ({ groups }) => {
+      if (prompt.getPercent('mana') < 0.2) {
+        return;
+      }
 
-    const fullName = groups.mob;
-    const mob = getMobIn(fullName);
-    const name = mob ? mob.name : fullName || target;
-    const attack = focused
-      ? SPELLS_BY_TYPE.attack
-      : ([...SPELLS_BY_TYPE.massAttack, ...SPELLS_BY_TYPE.attack] as Casteable);
+      const fullName = groups.mob;
+      const mob = getMobIn(fullName);
+      const name = mob ? mob.name : fullName || target;
+      const attack = focused
+        ? SPELLS_BY_TYPE.attack
+        : ([
+            ...SPELLS_BY_TYPE.massAttack,
+            ...SPELLS_BY_TYPE.attack,
+          ] as Casteable);
 
-    await skills.castSpell(attack, name);
-  });
+      await skills.castSpell(attack, name);
+    });
+  }
 
   let bodyContent: string[] = [];
 
