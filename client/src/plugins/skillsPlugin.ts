@@ -10,6 +10,7 @@ import {
 import { createPlugin } from '../lib/createPlugin';
 import { CancellablePromise } from '../lib/util/CancellablePromise';
 import { concatRegexes } from '../lib/util/concatRegexes';
+import { int, toInt } from '../lib/util/int';
 import { singleExecution } from '../lib/util/singleExecution';
 
 // Skill cast results
@@ -37,13 +38,19 @@ const SKILL = /((?:\w+ )+)\s+(\d+)%/g;
 const SKILLS_DETECTOR = concatRegexes(
   /-+\[(\w+)\]-+\n/,
   /(.|\n)+/,
-  /Te quedan \d+ practicas?.\n/,
-  /Tienes \d+ entrenamientos?.\n/,
+  /Te quedan /,
+  int('practices'),
+  / practicas?.\n/,
+  /Tienes /,
+  int('trainings'),
+  / entrenamientos?.\n/,
 );
 
 export const skillsPlugin = createPlugin(
   ({ when, write }) => {
     let isInitialized = false;
+    let practices = 0;
+    let trainings = 0;
     let skills: Record<string, number> = {};
 
     const refresh = singleExecution(() => {
@@ -53,7 +60,10 @@ export const skillsPlugin = createPlugin(
 
     when(
       SKILLS_DETECTOR,
-      ({ captured: [content] }) => {
+      ({ captured: [content], groups }) => {
+        practices = toInt(groups.practices);
+        trainings = toInt(groups.trainings);
+
         for (const skill of content.matchAll(SKILL)!) {
           skills[skill[1].trim()] = parseInt(skill[2], 10);
         }
@@ -64,25 +74,38 @@ export const skillsPlugin = createPlugin(
     );
 
     return {
+      getPractices: () => practices,
+      getTrainings: () => trainings,
       getSkills: () => skills,
-      ensureInitiated,
-    };
 
-    function ensureInitiated() {
-      if (!isInitialized) {
-        return refresh();
-      }
-    }
+      refresh,
+
+      async ensureInitiated() {
+        if (!isInitialized) {
+          await refresh();
+        }
+      },
+    };
   },
-  ({ getSkills, ensureInitiated }) =>
+  ({ getPractices, getTrainings, getSkills, refresh, ensureInitiated }) =>
     ({ when, write }) => {
       let isSpellRunning = false;
       let isMeditating = false;
 
       return {
+        get practices() {
+          return ensureInitiated().then(getPractices);
+        },
+        get trainings() {
+          return ensureInitiated().then(getTrainings);
+        },
+
         can,
         canLearn,
         castSpell,
+        getPractices,
+        getTrainings,
+        refresh,
         meditate,
         polimorfar,
         NOT_AVAILABLE,

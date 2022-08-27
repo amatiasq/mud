@@ -9,7 +9,7 @@ const history = new ClientStorage<string[]>('mud:command-history');
 const MIN_INPUT_SIZE = 3;
 
 export class Terminal {
-  private readonly $log = dom`<span class="log"></span>`;
+  private readonly $log = dom`<span class="log" aria-live></span>`;
   private readonly $input = dom<HTMLInputElement>`<input type="text" size="${MIN_INPUT_SIZE}" autofocus>`;
   private readonly $el = dom`
     <main class="terminal">
