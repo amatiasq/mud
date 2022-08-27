@@ -115,8 +115,13 @@ async function initializeMud(telnet: RemoteTelnet) {
 }
 
 function getSocketUri() {
-  return location.origin === 'https://amatiasq.github.io' || FORCE_PROD_SERVER
-    ? 'wss://mudOS.amatiasq.com'
+  const prodClients = [
+    'https://amatiasq.github.io',
+    'https://mudos.amatiasq.com',
+  ];
+
+  return prodClients.includes(location.origin) || FORCE_PROD_SERVER
+    ? 'wss://mudos.amatiasq.com/connect'
     : `ws://localhost:${DEFAULT_PORT}`;
 }
 
