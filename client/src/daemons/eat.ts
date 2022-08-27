@@ -72,6 +72,7 @@ export async function eat({
     await getFoodFromBag();
 
     return await inventory.has({
+      'una seta magica': 'seta',
       'un chorizo': 'chorizo',
       'pavo cocinado': 'pavo',
       'una chuleta de cordero': 'chuleta',

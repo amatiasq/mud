@@ -1,6 +1,9 @@
 import { BasicContext } from '../lib/context/BasicContextCreator';
 import { conversation } from '../util/conversation';
 import { getEmail } from '../util/getEmail';
+import { getPassword } from '../util/getPassword';
+
+const principal = 'may';
 
 export async function login(
   { when, write, log }: BasicContext,
@@ -49,7 +52,19 @@ export async function login(
       'Estas seguro de querer escoger': 's',
       'Escoge un buen password': password,
       'Vuelve a escribir el password para confirmarlo': password,
-      'Tienes alguna otra ficha creada?': 'n',
+      'Tienes alguna otra ficha creada?': principal ? 's' : 'n',
+    });
+
+    if (principal) {
+      qa({
+        '¿Cual es tu personaje principal?': 'may',
+        'Escribe el password de tu personaje principal': await getPassword(
+          'may',
+        ),
+      });
+    }
+
+    qa({
       'Quieres calcular tus caracteristicas al azar o repartir manualmente':
         'a',
     });
@@ -69,10 +84,12 @@ export async function login(
     write(`${bestRoll.roll}`);
     rollTableSuscription.unsubscribe();
 
-    await qa({
-      '¿Qué cuenta de correo quieres asociar a tu personaje?':
-        getEmail(username),
-      '¿Es correcto? (S/N)': 's',
-    });
+    if (!principal) {
+      await qa({
+        '¿Qué cuenta de correo quieres asociar a tu personaje?':
+          getEmail(username),
+        '¿Es correcto? (S/N)': 's',
+      });
+    }
   }
 }

@@ -52,7 +52,13 @@ export async function learn(
 
   async function practice(skill: SkillName) {
     write(`practicar ${skill}`);
-    await when('Ahora deberas practicarlo por tu cuenta...');
+    await when.any(
+      when('Ahora deberas practicarlo por tu cuenta...').then(() => true),
+      when([
+        'Tienes que conseguir mas sesiones de practicas.',
+        'Ya te he enseñado cuanto podia sobre',
+      ]).then(() => false),
+    );
   }
 
   async function getNextSkills() {

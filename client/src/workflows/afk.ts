@@ -35,6 +35,7 @@ export async function afk(
     try {
       await run('recover');
       await run('repair');
+      await run('learn');
       await run('dope');
       await run('recover');
     } catch (error) {
