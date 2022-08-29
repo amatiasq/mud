@@ -1,5 +1,5 @@
 import events from 'events';
-import { Socket, createConnection } from 'net';
+import { createConnection, Socket } from 'net';
 
 enum State {
   INIT,
@@ -18,7 +18,7 @@ export class Telnet extends events.EventEmitter {
     socketConnectOptions = {},
     timeout = 500,
   }) {
-    return new Promise((resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
       this.socket = createConnection(
         {
           port,
@@ -72,14 +72,14 @@ export class Telnet extends events.EventEmitter {
   }
 
   end() {
-    return new Promise(resolve => {
+    return new Promise<void>(resolve => {
       this.socket.end();
       resolve();
     });
   }
 
   destroy() {
-    return new Promise(resolve => {
+    return new Promise<void>(resolve => {
       this.socket.destroy();
       resolve();
     });

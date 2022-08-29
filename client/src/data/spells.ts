@@ -316,7 +316,7 @@ export const SPELLS_BY_TYPE = {
   water: ['crear manantial', 'crear agua'] as Casteable,
   movement: ['volar', 'flotar'] as Casteable,
   heal: ['curar criticas', 'curar graves', 'curar leves'] as Casteable,
-  invisibility: ['invisibilidad grupo', 'invisibilidad'] as Casteable,
+  invisibility: ['invisibilidad', 'invisibilidad grupo'] as Casteable,
   massAttack: ['terremoto'] as Casteable,
   attack: ['causar critica', 'causar grave', 'causar leve'] as Casteable,
 

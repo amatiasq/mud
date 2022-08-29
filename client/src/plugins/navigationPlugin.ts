@@ -41,18 +41,27 @@ export const navigationPlugin = createPlugin(
     when([/Puerta \w+ esta cerrada./, /Puertas? esta cerrada\./], async () => {
       const closed = directions.find(x => x.includes(CLOSED));
 
-      if (closed) {
-        const dir = closed.replace(CLOSED, '');
+      if (!closed) return;
+
+      const dir = closed.replace(CLOSED, '');
+
+      write(`abrir ${dir}`);
+
+      const sus = when('Esta cerrada con llave.', async () => {
+        write(`llaveabrir ${dir}`);
+        await when('*Click*').timeout(3);
         write(`abrir ${dir}`);
+      });
 
-        const result = await when.any(
-          when('Esta cerrada con llave.').then(() => false),
-          when('Abres ').then(() => true),
-        );
+      const result = await when.any(
+        when('Abres ').then(() => true),
+        when('Te falta la llave.').then(() => false),
+      );
 
-        if (result) {
-          write(dir);
-        }
+      sus.unsubscribe();
+
+      if (result) {
+        write(dir);
       }
     });
 

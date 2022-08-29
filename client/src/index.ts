@@ -70,13 +70,13 @@ async function initializeMud(telnet: RemoteTelnet) {
 
   mud.registerHandler('#', command => {
     const [trigger, action, permanent] = command.split(/#/).map(x => x.trim());
-    const name = `#${trigger}${permanent}`;
+    const name = `#${trigger}${permanent || ''}`;
     const run = () => onUserInput(action);
 
     if (permanent != null) {
-      mud.daemon(name, ({ when, printLogs }) => when(trigger, run));
+      mud.daemon(name, ({ when }) => when(trigger, run));
     } else {
-      mud.runOnce(name, ({ when, printLogs }) => when(trigger).then(run));
+      mud.runOnce(name, ({ when }) => when(trigger).then(run));
     }
 
     terminal.write(`WHEN: ${trigger}\nRUN: ${action}\n`);

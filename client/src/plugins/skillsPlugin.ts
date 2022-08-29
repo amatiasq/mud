@@ -58,6 +58,8 @@ export const skillsPlugin = createPlugin(
       return when(SKILLS_DETECTOR);
     });
 
+    when(/HAS SUBIDO A NIVEL \d+!!!!!! :)/, () => (isInitialized = false));
+
     when(
       SKILLS_DETECTOR,
       ({ captured: [content], groups }) => {
